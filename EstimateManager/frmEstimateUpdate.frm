@@ -64,6 +64,10 @@ Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As 
     GetCalendarDate Me.txtTaxInvoiceDate
 End Sub
 
+Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then Unload Me
+End Sub
+
 
 '버튼 마우스오버 처리
 '유저폼에 추가한 버튼에 개수만큼 아래 명령문을 유저폼에 추가한 뒤, btnClose 를 버튼 이름으로 변경합니다.
@@ -91,6 +95,7 @@ End Sub
 Private Sub btnEstimateClose_Enter()
 OnHover_Css Me.btnEstimateClose
 End Sub
+
 
 '아래 코드를 유저폼에 추가한 뒤, "btnXXX, btnYYY"를 버튼이름을 쉼표로 구분한 값으로 변경합니다.
 Private Sub UserForm_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)

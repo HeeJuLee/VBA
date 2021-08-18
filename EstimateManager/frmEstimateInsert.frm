@@ -31,6 +31,10 @@ Private Sub txtEstimateName_AfterUpdate()
     Me.lblInputFieldError.Visible = False
 End Sub
 
+Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then Unload Me
+End Sub
+
 Private Sub UserForm_Initialize()
 
     '거래처, 담당자 콤보박스 세팅
@@ -39,6 +43,7 @@ Private Sub UserForm_Initialize()
     
     '견적명 입력창에 포커스
     Me.txtEstimateName.SetFocus
+    
 End Sub
 
 Private Sub cboCustomer_Change()
