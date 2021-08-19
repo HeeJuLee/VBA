@@ -56,23 +56,18 @@ Private Sub txtAmount_AfterUpdate()
     Me.lblAmountError.Visible = False
     Me.lblInputFieldError.Visible = False
     
-    '수량값이 공백이면 견적금액은 견적단가
-    If Me.txtAmount.Value = "" Then
-        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value
-        Exit Sub
+    If Me.txtAmount.Value <> "" Then
+         '수량값이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtAmount.Value) Then
+            Me.txtAmount.Value = ""
+            Me.lblAmountError.Visible = True
+        End If
     End If
     
-    '수량값이 숫자가 아닐 경우 오류메시지 출력
-    If Not IsNumeric(Me.txtAmount.Value) Then
-        Me.txtAmount.Value = ""
-        Me.lblAmountError.Visible = True
-        Exit Sub
-    End If
+    '수량 1,000자리 컴마 처리
+    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
     
-    '견적단가와 수량을 곱한 값을 견적금액으로 세팅함
-    If Me.txtUnitPrice.Value <> "" And IsNumeric(Me.txtUnitPrice.Value) Then
-        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value * Me.txtAmount.Value
-    End If
+    CalculateEstimateInsertCost
 End Sub
 
 Private Sub txtUnitPrice_AfterUpdate()
@@ -80,25 +75,19 @@ Private Sub txtUnitPrice_AfterUpdate()
     Me.lblUnitPriceError.Visible = False
     Me.lblInputFieldError.Visible = False
     
-    '견적단가값이 없으면 중지
-    If Me.txtUnitPrice.Value = "" Then
-        Me.txtEstimatePrice.Value = ""
-        Exit Sub
+    If Me.txtUnitPrice.Value <> "" Then
+        '견적단가값이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtUnitPrice.Value) Then
+            Me.txtUnitPrice.Value = ""
+            Me.lblUnitPriceError.Visible = True
+            Exit Sub
+        End If
+        
+        '금액 1,000자리 컴마 처리
+        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
     End If
     
-    '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-    If Not IsNumeric(Me.txtUnitPrice.Value) Then
-        Me.txtUnitPrice.Value = ""
-        Me.lblUnitPriceError.Visible = True
-        Exit Sub
-    End If
-    
-    '견적단가와 수량을 곱한 값을 견적금액으로 세팅함
-    If Me.txtAmount.Value <> "" And IsNumeric(Me.txtAmount.Value) Then
-        Me.txtEstimatePrice.Value = Me.txtUnitPrice * Me.txtAmount.Value
-    Else
-        Me.txtEstimatePrice.Value = Me.txtUnitPrice
-    End If
+    CalculateEstimateInsertCost
 End Sub
 
 Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
@@ -196,7 +185,7 @@ Sub InsertEstimate()
     Dim blnUnique As Boolean
     
     '입력 데이터 체크
-    If InputValidationCheck = False Then
+    If CheckEstimateInsertValidation = False Then
         Exit Sub
     End If
 
@@ -231,7 +220,7 @@ Sub InsertEstimate()
 End Sub
 
 
-Function InputValidationCheck()
+Function CheckEstimateInsertValidation()
     Dim bCorrect As Boolean
     
     bCorrect = True
@@ -280,6 +269,21 @@ Function InputValidationCheck()
         Me.lblInputFieldError.Visible = True
     End If
     
-    InputValidationCheck = bCorrect
+    CheckEstimateInsertValidation = bCorrect
 End Function
 
+Sub CalculateEstimateInsertCost()
+
+    '수량값이 공백이면 견적금액은 견적단가
+    If Me.txtAmount.Value = "" Then
+        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value
+        Exit Sub
+    End If
+    
+    '견적단가와 수량을 곱한 값을 견적금액으로 세팅함
+    If Me.txtUnitPrice.Value <> "" And IsNumeric(Me.txtUnitPrice.Value) Then
+        Me.txtEstimatePrice.Value = CLng(Me.txtUnitPrice.Value) * CLng(Me.txtAmount.Value)
+        Me.txtEstimatePrice.Text = Format(Me.txtEstimatePrice.Value, "#,##0")
+    End If
+
+End Sub
