@@ -95,12 +95,17 @@ End Function
 Function Select_ListItm(lstBox As Control, ID, Optional ColNo As Long = 1)
 
 Dim i As Long
+Dim listID As Variant
 
 If IsNumeric(ID) Then ID = CLng(ID)
 
 With lstBox
     For i = 0 To .ListCount - 1
-        If .List(i, ColNo - 1) = ID Then .Selected(i) = True: Exit For
+        listID = .List(i, ColNo - 1)
+        If IsNumeric(listID) Then listID = CLng(listID)
+        If listID = ID Then
+            .Selected(i) = True: Exit For
+        End If
     Next
 End With
 

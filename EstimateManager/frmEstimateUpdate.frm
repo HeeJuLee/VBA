@@ -26,6 +26,20 @@ Private Sub btnEstimateUpdate_MouseDown(ByVal Button As Integer, ByVal Shift As 
     UpdateEstimate
 End Sub
 
+
+
+Private Sub btnProductionDelete_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    DeleteProjection
+End Sub
+
+Private Sub btnProductionInsert_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    InsertProjection
+End Sub
+
+Private Sub btnProductionUpdate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    UpdateProjection
+End Sub
+
 Private Sub cboCustomer_Change()
     '콤보박스에서 거래처를 변경하면 해당 거래처의 담당자로 담당자 콤보박스를 세팅
     InitializeCboManager
@@ -64,54 +78,22 @@ Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As 
     GetCalendarDate Me.txtTaxInvoiceDate
 End Sub
 
+
+Private Sub lstProductionList_Click()
+    Dim arr As Variant
+
+    arr = Get_ListItm(Me.lstProductionList)
+    
+    Me.txtProductionID = arr(0)
+    Me.txtProductionItem = arr(2)
+    If IsNumeric(arr(3)) Then Me.txtProductionCost = CLng(arr(3)) Else Me.txtProductionCost = arr(3)
+    Me.txtProductionMemo = arr(4)
+    
+End Sub
+
 Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     If KeyCode = 27 Then Unload Me
 End Sub
-
-
-'버튼 마우스오버 처리
-'유저폼에 추가한 버튼에 개수만큼 아래 명령문을 유저폼에 추가한 뒤, btnClose 를 버튼 이름으로 변경합니다.
-Private Sub btnEstimateUpdate_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-OutHover_Css Me.btnEstimateUpdate
-End Sub
-
-Private Sub btnEstimateUpdate_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-OnHover_Css Me.btnEstimateUpdate
-End Sub
-
-Private Sub btnEstimateUpdate_Enter()
-OnHover_Css Me.btnEstimateUpdate
-End Sub
-
-'유저폼에 추가한 버튼에 개수만큼 아래 명령문을 유저폼에 추가한 뒤, btnClose 를 버튼 이름으로 변경합니다.
-Private Sub btnEstimateClose_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-OutHover_Css Me.btnEstimateClose
-End Sub
-
-Private Sub btnEstimateClose_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-OnHover_Css Me.btnEstimateClose
-End Sub
-
-Private Sub btnEstimateClose_Enter()
-OnHover_Css Me.btnEstimateClose
-End Sub
-
-
-'아래 코드를 유저폼에 추가한 뒤, "btnXXX, btnYYY"를 버튼이름을 쉼표로 구분한 값으로 변경합니다.
-Private Sub UserForm_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-Dim ctl As Control
-Dim btnList As String: btnList = "btnEstimateUpdate, btnEstimateClose" ' 버튼 이름을 쉼표로 구분하여 입력하세요.
-Dim vLists As Variant: Dim vList As Variant
-If InStr(1, btnList, ",") > 0 Then vLists = Split(btnList, ",") Else vLists = Array(btnList)
-For Each ctl In Me.Controls
- For Each vList In vLists
- If InStr(1, ctl.Name, Trim(vList)) > 0 Then OutHover_Css ctl
- Next
-Next
-End Sub
-'커서 이동시 버튼 색깔을 변경하는 보조명령문을 유저폼에 추가합니다.
-Private Sub OnHover_Css(lbl As Control): With lbl: .BackColor = RGB(211, 240, 224): .BorderColor = RGB(134, 191, 160): End With: End Sub
-Private Sub OutHover_Css(lbl As Control): With lbl: .BackColor = &H8000000E: .BorderColor = -2147483638: End With: End Sub
 
 
 Private Sub UserForm_Initialize()
@@ -119,6 +101,7 @@ Private Sub UserForm_Initialize()
     Dim estimate As Variant
     Dim manager As Variant
     Dim customer As Variant
+    Dim DB As Variant
     
     '선택한 행 번호
     cRow = Selection.row
@@ -157,7 +140,9 @@ Private Sub UserForm_Initialize()
     Me.txtDeliveryDate.Value = estimate(14)    '납품일자
     Me.txtInsuranceDate.Value = estimate(15)    '증권일자
     
+    InitializeLstProduction    '예상실행 입력목록
     Me.txtProductionTotalCost.Value = estimate(16)    '예상실행가
+    
     Me.txtBidPrice.Value = estimate(17)    '입찰가
     Me.txtBidMargin.Value = estimate(18)    '차액
     Me.txtBidMarginRate.Value = estimate(19)    '마진율
@@ -267,5 +252,83 @@ Sub InitializeCboUnit()
     Update_Cbo Me.cboUnit, DB
 End Sub
 
+Sub InitializeLstProduction()
+    Dim DB As Variant
+    
+    DB = Get_DB(shtProduction)
+    DB = Filtered_DB(DB, Me.txtID.Value, 2)
+    
+    Update_List Me.lstProductionList, DB, "0pt;0pt;60pt;50pt;100pt;"
+    
+End Sub
+
+Sub InitalizeProductionInput()
+    Me.txtProductionID.Value = ""
+    Me.txtProductionItem.Value = ""
+    Me.txtProductionCost.Value = ""
+    Me.txtProductionMemo.Value = ""
+End Sub
+
+Sub InsertProjection()
+    Dim cost As Variant
+
+    If Me.txtProductionItem.Value = "" Then MsgBox "항목을 입력하세요.": Exit Sub
+    If Me.txtProductionCost.Value = "" Then MsgBox "비용을 입력하세요.": Exit Sub
+    
+    If IsNumeric(Me.txtProductionCost.Value) Then
+        cost = CLng(Me.txtProductionCost.Value)
+    Else
+        cost = Me.txtProductionCost.Value
+    End If
+    
+    Insert_Record shtProduction, CLng(Me.txtID.Value), Me.txtProductionItem.Value, cost, Me.txtProductionMemo.Value
+    
+    InitializeLstProduction
+    
+    InitalizeProductionInput
+    
+End Sub
+
+
+Sub UpdateProjection()
+    Dim cost As Variant
+
+    If Me.txtProductionItem.Value = "" Then MsgBox "항목을 입력하세요.": Exit Sub
+    If Me.txtProductionCost.Value = "" Then MsgBox "비용을 입력하세요.": Exit Sub
+
+    If IsNumeric(Me.txtProductionCost.Value) Then
+        cost = CLng(Me.txtProductionCost.Value)
+    Else
+        cost = Me.txtProductionCost.Value
+    End If
+        
+    Update_Record shtProduction, Me.txtProductionID.Value, Me.txtID.Value, Me.txtProductionItem.Value, cost, Me.txtProductionMemo.Value
+
+    InitializeLstProduction
+    
+    Select_ListItm Me.lstProductionList, Me.txtProductionID.Value
+
+End Sub
+
+
+Sub DeleteProjection()
+    Dim DB As Variant
+    Dim YN As VbMsgBoxResult
+
+    Delete_Record shtProduction, Me.txtProductionID.Value
+
+    InitializeLstProduction
+    
+    InitalizeProductionInput
+End Sub
+
+'=============================================
+'리스트박스 스크롤
+'Private Sub lstProductionList_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+'UnhookListBoxScroll
+'End Sub
+'Private Sub lstProductionList_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+'HookListBoxScroll Me, Me.lstProductionList
+'End Sub
 
 
