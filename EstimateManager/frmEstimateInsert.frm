@@ -64,6 +64,7 @@ Private Sub txtAmount_AfterUpdate()
     
     '수량값이 숫자가 아닐 경우 오류메시지 출력
     If Not IsNumeric(Me.txtAmount.Value) Then
+        Me.txtAmount.Value = ""
         Me.lblAmountError.Visible = True
         Exit Sub
     End If
@@ -87,6 +88,7 @@ Private Sub txtUnitPrice_AfterUpdate()
     
     '견적단가값이 숫자가 아닐 경우 오류메시지 출력
     If Not IsNumeric(Me.txtUnitPrice.Value) Then
+        Me.txtUnitPrice.Value = ""
         Me.lblUnitPriceError.Visible = True
         Exit Sub
     End If

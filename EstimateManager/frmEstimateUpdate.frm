@@ -26,8 +26,6 @@ Private Sub btnEstimateUpdate_MouseDown(ByVal Button As Integer, ByVal Shift As 
     UpdateEstimate
 End Sub
 
-
-
 Private Sub btnProductionDelete_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     DeleteProjection
 End Sub
@@ -40,42 +38,198 @@ Private Sub btnProductionUpdate_MouseDown(ByVal Button As Integer, ByVal Shift A
     UpdateProjection
 End Sub
 
+
 Private Sub cboCustomer_Change()
     '콤보박스에서 거래처를 변경하면 해당 거래처의 담당자로 담당자 콤보박스를 세팅
     InitializeCboManager
 End Sub
 
-
-Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtAcceptedDate
+'수주일자 입력 박스
+Private Sub txtAcceptedDate_AfterUpdate()
+    EveryCostUpdate
 End Sub
 
+'증권보험 일자 입력박스
+Private Sub txtInsuranceDate_AfterUpdate()
+    EveryCostUpdate
+End Sub
+
+'거래명세서 일자 입력박스
+Private Sub txtSpecificationDate_AfterUpdate()
+    EveryCostUpdate
+End Sub
+
+'세금계산서 일자 입력박스
+Private Sub txtTaxInvoiceDate_AfterUpdate()
+   EveryCostUpdate
+End Sub
+
+'결제일자 입력박스
+Private Sub txtPaymentDate_AfterUpdate()
+    EveryCostUpdate
+End Sub
+
+'예상결제일자 입력박스
+Private Sub txtExpectPaymentDate_AfterUpdate()
+    EveryCostUpdate
+End Sub
+
+Private Sub txtEstimateDate_Change()
+    '오류 메시지 숨김
+    Me.lblErrorMessage.Visible = False
+End Sub
+
+Private Sub txtEstimateID_AfterUpdate()
+    '오류 메시지 숨김
+    Me.lblErrorMessage.Visible = False
+End Sub
+
+Private Sub txtEstimateName_AfterUpdate()
+    '오류 메시지 숨김
+    Me.lblErrorMessage.Visible = False
+End Sub
+
+'수량 입력
+Private Sub txtAmount_AfterUpdate()
+    '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    '수량값이 공백이면 중지
+    If Me.txtAmount.Value <> "" Then
+        '수량값이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtAmount.Value) Then
+            Me.txtAmount.Value = ""
+            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
+            Me.lblErrorMessage.Visible = True
+        End If
+    End If
+    
+    '비용 필드 계산
+    EveryCostUpdate
+End Sub
+
+'견적단가 입력
+Private Sub txtUnitPrice_AfterUpdate()
+     '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    If Me.txtUnitPrice.Value <> "" Then
+        '견적단가값이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtUnitPrice.Value) Then
+            Me.txtUnitPrice.Value = ""
+            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
+            Me.lblErrorMessage.Visible = True
+        End If
+    End If
+    
+    '비용 필드 계산
+    EveryCostUpdate
+End Sub
+
+'예상 실행 시뮬레이션 비용 입력
+Private Sub txtProductionCost_AfterUpdate()
+    '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    If Me.txtProductionCost.Value = "" Then
+        Exit Sub
+    End If
+    
+    '비용 입력값이 숫자가 아닐 경우 오류메시지 출력
+    If Not IsNumeric(Me.txtProductionCost.Value) Then
+        Me.txtProductionCost.Value = ""
+        Me.lblErrorMessage.Caption = "숫자를 입력하세요."
+        Me.lblErrorMessage.Visible = True
+        Exit Sub
+    End If
+End Sub
+
+'예상실행가 입력
+Private Sub txtProductionTotalCost_AfterUpdate()
+     '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    If Me.txtProductionTotalCost.Value <> "" Then
+        '예상실행가 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtProductionTotalCost.Value) Then
+            Me.txtProductionTotalCost.Value = ""
+            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
+            Me.lblErrorMessage.Visible = True
+        End If
+    End If
+    
+    '비용 필드 계산
+    EveryCostUpdate
+End Sub
+
+'입찰금액 입력
+Private Sub txtBidPrice_AfterUpdate()
+     '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    If Me.txtBidPrice.Value <> "" Then
+        '입찰금액이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtBidPrice.Value) Then
+            Me.txtBidPrice.Value = ""
+            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
+            Me.lblErrorMessage.Visible = True
+        End If
+    End If
+
+    '비용 필드 계산
+    EveryCostUpdate
+    
+End Sub
+
+'수주일자 캘린더 선택
+Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtAcceptedDate
+    EveryCostUpdate
+End Sub
+
+'입찰일자 캘린더 선택
 Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtBidDate
 End Sub
 
+'납품일자 캘린더 선택
 Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtDeliveryDate
 End Sub
 
+'견적일자 캘린더 선택
 Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtEstimateDate
 End Sub
 
+'증권보험 캘린더 선택
 Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtInsuranceDate
+    EveryCostUpdate
 End Sub
 
+'결제일자 캘린더 선택
 Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtPaymentDate
+    EveryCostUpdate
 End Sub
 
+'거래명세서 캘린더 선택
 Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtSpecificationDate
+    EveryCostUpdate
 End Sub
 
+'세금계산서 캘린더 선택
 Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtTaxInvoiceDate
+    EveryCostUpdate
+End Sub
+
+'예상결제일자 캘린더 선택
+Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtExpectPaymentDate
+    EveryCostUpdate
 End Sub
 
 
@@ -151,10 +305,10 @@ Private Sub UserForm_Initialize()
     
     Me.txtSpecificationDate.Value = estimate(22)    '거래명세서
     Me.txtTaxInvoiceDate.Value = estimate(23)    '세금계산서
-    Me.txtPaymentDate.Value = estimate(24)    '결제일
-    Me.txtPaymentMonth.Value = estimate(25)    '예상결제월
+    Me.txtPaymentDate.Value = estimate(24)    '결제일자
+    Me.txtExpectPaymentDate.Value = estimate(25)    '예상결제일자
     Me.txtVAT.Value = estimate(26)    '부가세
-    Me.txtProjection.Value = estimate(27)    '입금예상액
+    Me.txtExpectPay.Value = estimate(27)    '입금예상액
     Me.txtPaid.Value = estimate(28)    '입금액
     Me.txtUnpaid.Value = estimate(29)    '미입금액
     
@@ -172,9 +326,9 @@ Sub UpdateEstimate()
     Dim blnUnique As Boolean
     
     '입력 데이터 체크
-'    If InputValidationCheck = False Then
-'        Exit Sub
-'    End If
+    If InputValidationCheck = False Then
+        Exit Sub
+    End If
 
     '견적정보 DB 읽어오기
     DB = Get_DB(shtEstimate)
@@ -203,8 +357,8 @@ Sub UpdateEstimate()
         Me.txtBidMarginRate.Value, Me.txtAcceptedPrice.Value, _
         Me.txtAcceptedMargin.Value, Me.txtSpecificationDate.Value, _
         Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
-        Me.txtPaymentMonth.Value, Me.txtVAT.Value, _
-        Me.txtProjection.Value, Me.txtPaid.Value, _
+        Me.txtExpectPaymentDate.Value, Me.txtVAT.Value, _
+        Me.txtExpectPay.Value, Me.txtPaid.Value, _
         Me.txtUnpaid.Value, _
         Me.txtInsertDate.Value, Date
 
@@ -254,11 +408,23 @@ End Sub
 
 Sub InitializeLstProduction()
     Dim DB As Variant
+    Dim i, totalCost As Long
     
+    '견적ID에 해당하는 예상비용항목을 읽어옴
     DB = Get_DB(shtProduction)
     DB = Filtered_DB(DB, Me.txtID.Value, 2)
     
     Update_List Me.lstProductionList, DB, "0pt;0pt;60pt;50pt;100pt;"
+    
+    '비용 합계 구함
+    If Not IsEmpty(DB) Then
+        For i = 1 To UBound(DB)
+            If IsNumeric(DB(i, 4)) Then
+                totalCost = totalCost + CLng(DB(i, 4))
+            End If
+        Next
+    End If
+    Me.txtProductionSum = totalCost
     
 End Sub
 
@@ -320,6 +486,114 @@ Sub DeleteProjection()
     InitializeLstProduction
     
     InitalizeProductionInput
+End Sub
+
+Function InputValidationCheck()
+    Dim bCorrect As Boolean
+    
+    bCorrect = True
+    
+    '견적명이 입력되었는지 체크
+    If Me.txtEstimateName.Value = "" Then
+        bCorrect = False
+        Me.lblErrorMessage.Caption = "견적명을 입력하세요."
+    End If
+    
+    '관리번호가 입력되었는지 체크
+    If Me.txtEstimateID.Value = "" Then
+        bCorrect = False
+        Me.lblErrorMessage.Caption = "관리번호를 입력하세요."
+    End If
+    
+    '수량이 입력되었는지 체크
+    If Me.txtAmount.Value = "" Then
+        bCorrect = False
+        Me.lblErrorMessage.Caption = "수량을 입력하세요."
+    End If
+    
+    '견적단가가 입력되었는지 체크
+    If Me.txtUnitPrice.Value = "" Then
+        bCorrect = False
+        Me.lblErrorMessage.Caption = "견적단가를 입력하세요."
+    End If
+    
+    '견적일자가 입력되었는지 체크
+    If Me.txtEstimateDate.Value = "" Then
+        bCorrect = False
+        Me.lblErrorMessage.Caption = "견적일자를 입력하세요."
+    End If
+    
+    If bCorrect = False Then
+        Me.lblErrorMessage.Visible = True
+    Else
+        Me.lblErrorMessage.Visible = False
+    End If
+    
+    InputValidationCheck = bCorrect
+End Function
+
+Sub EveryCostUpdate()
+
+    '견적금액 계산
+    '수량값이 공백이면 견적금액은 견적단가
+    If Me.txtAmount.Value = "" Then
+        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value
+    Else
+        Me.txtEstimatePrice.Value = CLng(Me.txtUnitPrice.Value) * CLng(Me.txtAmount.Value)
+    End If
+
+    '차액과 마진율 계산
+    If Me.txtBidPrice.Value <> "" And Me.txtProductionTotalCost <> "" Then
+        '차액 = 입찰금액 - 예상실행금액
+        Me.txtBidMargin.Value = CLng(Me.txtBidPrice.Value) - CLng(Me.txtProductionTotalCost.Value)
+        '마진율 = 차액 / 입찰금액
+        Me.txtBidMarginRate.Value = CLng(Me.txtBidMargin.Value) / CLng(Me.txtBidPrice.Value)
+    Else
+        Me.txtBidMargin.Value = 0
+    End If
+
+    '수주금액 계산
+    '수주일자가 있는 경우만
+    If Me.txtAcceptedDate.Value = "" Then
+        Me.txtAcceptedPrice.Value = 0
+        Me.txtAcceptedMargin.Value = 0
+    Else
+        '수주금액은 입찰금액으로 세팅
+        Me.txtAcceptedPrice.Value = Me.txtBidPrice
+        '수주차액은 차액으로 세팅
+        Me.txtAcceptedMargin.Value = Me.txtBidMargin.Value
+    End If
+
+    '부가세 계산
+    '세금계산서 일자가 있는 경우만
+    If Me.txtTaxInvoiceDate.Value = "" Then
+        Me.txtVAT.Value = 0
+    Else
+        '부가세는 수주금액의 10%
+        If Me.txtAcceptedPrice.Value <> "" And Me.txtAcceptedPrice.Value <> 0 Then
+            Me.txtVAT.Value = CLng(Me.txtAcceptedPrice.Value) * 0.1
+        End If
+    End If
+
+    '입금예상액 계산
+    If Me.txtTaxInvoiceDate.Value = "" Then
+        '세금계산서 일자가 없는 경우는 수주금액
+        Me.txtExpectPay.Value = Me.txtAcceptedPrice
+    Else
+        '세금계산서 일자가 있는 경우는 수주금액+부가세
+        Me.txtExpectPay.Value = CLng(Me.txtAcceptedPrice) + CLng(Me.txtVAT.Value)
+    End If
+
+    '입금액 계산
+    If Me.txtPaymentDate.Value = "" Then
+        Me.txtPaid.Value = 0
+    Else
+        Me.txtPaid.Value = Me.txtExpectPay.Value
+    End If
+    
+    '미입금액 계산
+    Me.txtUnpaid.Value = CLng(Me.txtExpectPay.Value) - CLng(Me.txtPaid.Value)
+    
 End Sub
 
 '=============================================
