@@ -1,6 +1,10 @@
 ﻿Option Explicit
 
 
+'최초 로드 시
+Private Sub Worksheet_Activate()
+    Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
+End Sub
 
 
 '견적 데이터를 검색해서 시트에 출력
@@ -14,10 +18,16 @@ Sub EstimateSearch()
     DB = Connect_DB(DB, 2, shtManager, "ID_거래처, 담당자", False)
     DB = Connect_DB(DB, 32, shtCustomer, "거래처", False)
     
-    If Me.txtFrom.Value <> "" Then DB = Filtered_DB(DB, ">=" & Me.txtFrom.Value, 30)
-    If Me.txtTo.Value <> "" Then DB = Filtered_DB(DB, "<=" & Me.txtTo.Value, 30)
-    'If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value, 5)
-    If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value)
+    If Not IsEmpty(DB) Then
+        If Me.txtFrom.Value <> "" Then DB = Filtered_DB(DB, ">=" & Me.txtFrom.Value, 30)
+    End If
+    If Not IsEmpty(DB) Then
+        If Me.txtTo.Value <> "" Then DB = Filtered_DB(DB, "<=" & Me.txtTo.Value, 30)
+    End If
+    If Not IsEmpty(DB) Then
+        'If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value, 5)
+        If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value)
+    End If
     
     '기존 검색결과를 화면에서 지움
     ClearEstimateSearchResult
@@ -27,9 +37,9 @@ Sub EstimateSearch()
         resultCount = 0     '검색결과 건수는 0
     Else
         '순번 출력
-        SequenceToRng shtEstimateAdmin.Range("D8"), UBound(DB, 1)
+        SequenceToRng shtEstimateAdmin.Range("D7"), UBound(DB, 1)
         '검색결과 출력
-        ArrayToRng shtEstimateAdmin.Range("B8"), DB, "1, 2, , 3, 4,  34, 33, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31"
+        ArrayToRng shtEstimateAdmin.Range("B7"), DB, "1, 2, , 3, 4,  34, 33, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31"
         '검색결과 건수를 저장
         resultCount = UBound(DB, 1)
     End If
@@ -43,9 +53,10 @@ End Sub
 Sub ClearEstimateSearchResult()
     
     '3번 순번 열을 기준으로 B7~AI 열을 지움
-    ClearContentsBelow shtEstimateAdmin.Range("B8"), "AI", 3
+    ClearContentsBelow shtEstimateAdmin.Range("B7"), "AI", 3
     
 End Sub
+
 
 
 '조회기간 - 이번달
@@ -53,10 +64,12 @@ Private Sub optThisMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
     
+    Me.cboSelectMonth.Value = M & "월"
+    
     Me.txtFrom.Value = DateSerial(Y, M, 1)
     Me.txtTo.Value = DateSerial(Y, M + 1, 0)
     
-    EstimateSearch
+    'EstimateSearch
 End Sub
 
 '조회기간 - 이전달
@@ -64,27 +77,47 @@ Private Sub optLastMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
     
+    If M = 1 Then
+        Me.cboSelectMonth.Value = "12월"
+    Else
+        Me.cboSelectMonth.Value = M - 1 & "월"
+    End If
+    
     Me.txtFrom.Value = DateSerial(Y, M - 1, 1)
     Me.txtTo.Value = DateSerial(Y, M, 0)
     
-    EstimateSearch
+    'EstimateSearch
 End Sub
 
-'조회기간 - 올해
-Private Sub optThisYear_Click()
-    Dim Y As Long: Y = Year(Date)
-    Dim M As Long: M = Month(Date)
-    
-    Me.txtFrom.Value = DateSerial(Y, 1, 1)
-    Me.txtTo.Value = DateSerial(Y, 12, 31)
-    
-    EstimateSearch
-End Sub
 
 '조회기간 - 전체
 Private Sub optAll_Click()
     Me.txtFrom.Value = ""
     Me.txtTo.Value = ""
+    
+    Me.cboSelectMonth.Value = "전체"
+    
+    'EstimateSearch
+End Sub
+
+'월 선택
+Private Sub cboSelectMonth_Change()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = Month(Date)
+    Dim pos As Long
+    
+    If Me.cboSelectMonth.Value = "전체" Then
+        Me.txtFrom.Value = ""
+        Me.txtTo.Value = ""
+    Else
+        pos = InStr(Me.cboSelectMonth.Value, "월")
+        If pos <> 0 Then
+            M = left(Me.cboSelectMonth.Value, pos - 1)
+            
+            Me.txtFrom.Value = DateSerial(Y, M, 1)
+            Me.txtTo.Value = DateSerial(Y, M + 1, 0)
+        End If
+    End If
     
     EstimateSearch
 End Sub
@@ -101,8 +134,6 @@ Sub CalendarFromClick()
     Else
         Me.txtFrom.Value = vDate
     End If
-
-    Me.optPeriod.Value = True
 End Sub
 
 'To 달력 선택
@@ -117,8 +148,6 @@ Sub CalendarToClick()
     Else
         Me.txtTo.Value = vDate
     End If
-
-    Me.optPeriod.Value = True
 End Sub
 
 
@@ -148,6 +177,7 @@ Sub OpenEstimateUpdateForm()
     frmEstimateUpdate.Show (False)
 End Sub
 
+
 '시트 더블클릭 시 견적수정 폼 열기
 Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
     '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
@@ -166,7 +196,7 @@ Sub EstimateDelete()
     cRow = Selection.row
 
     '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 8 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
+    If cRow < 7 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
         MsgBox "삭제할 행을 선택하신 후 '삭제' 버튼을 클릭하세요."
         End
     End If
