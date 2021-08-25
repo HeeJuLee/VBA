@@ -173,7 +173,7 @@ Function IsUniqueArray(arr As Variant, Optional ColNo As String = "") As Boolean
 '##############################################################
 
 Dim D As Long: Dim i As Long
-Dim c As Variant
+Dim C As Variant
 Dim vCols As Variant: Dim vCol As Variant
 Dim sTemp As String
 
@@ -183,21 +183,21 @@ If ColNo = "" Then If D > 1 Then ColNo = LBound(arr, 2)
 vCols = Split(ColNo, ",")
 
 If D = 1 Then
-    c = arr(LBound(arr))
+    C = arr(LBound(arr))
     For i = LBound(arr) To UBound(arr)
-        If arr(i) <> c Then IsUniqueArray = False: Exit Function
+        If arr(i) <> C Then IsUniqueArray = False: Exit Function
     Next
 Else
     For Each vCol In vCols
         sTemp = sTemp & arr(LBound(arr, 1), CLng(Trim(vCol)))
     Next
-    c = sTemp
+    C = sTemp
     For i = LBound(arr, 1) To UBound(arr, 1)
         sTemp = ""
         For Each vCol In vCols
             sTemp = sTemp & arr(i, CLng(Trim(vCol)))
         Next
-        If c <> sTemp Then IsUniqueArray = False: Exit Function
+        If C <> sTemp Then IsUniqueArray = False: Exit Function
     Next
 End If
 

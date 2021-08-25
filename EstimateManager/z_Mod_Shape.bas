@@ -1,5 +1,5 @@
 Attribute VB_Name = "z_Mod_Shape"
-Function ShapeInRange(Rng As Range, _
+Function ShapeInRange(rng As Range, _
                 Optional iRed As Long = 255, _
                 Optional iGreen As Long = 0, _
                 Optional iBlue As Long = 0, _
@@ -40,9 +40,9 @@ Function ShapeInRange(Rng As Range, _
 Dim Shp As Shape
 Dim WS As Worksheet
 
-Set WS = Rng.Parent
+Set WS = rng.Parent
 
-With Rng
+With rng
     Set Shp = WS.Shapes.AddShape(ShapeType, .left, .top, .Width, .Height)
 End With
 

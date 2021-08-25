@@ -1,18 +1,20 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
-   Caption         =   "견적 수정"
-   ClientHeight    =   10095
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate_org 
+   Caption         =   "견적 정보 수정"
+   ClientHeight    =   7875
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   18720
-   OleObjectBlob   =   "frmEstimateUpdate.frx":0000
+   ClientWidth     =   17730
+   OleObjectBlob   =   "frmEstimateUpdate_org.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
-Attribute VB_Name = "frmEstimateUpdate"
+Attribute VB_Name = "frmEstimateUpdate_org"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+
 Option Explicit
 
 Dim orgEstimateID As Variant
@@ -24,15 +26,6 @@ End Sub
 
 Private Sub btnEstimateUpdate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     UpdateEstimate
-End Sub
-
-
-Private Sub btnProductionClear_Change()
-
-End Sub
-
-Private Sub btnProductionClear_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    InitalizeProductionInput
 End Sub
 
 Private Sub btnProductionDelete_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
@@ -53,7 +46,9 @@ Private Sub cboCustomer_Change()
     InitializeCboManager
 End Sub
 
+Private Sub frmWorkingDate_Click()
 
+End Sub
 
 '수주일자 입력 박스
 Private Sub txtAcceptedDate_AfterUpdate()
@@ -263,15 +258,12 @@ Private Sub lstProductionList_Click()
     Dim arr As Variant
 
     arr = Get_ListItm(Me.lstProductionList)
-    Me.txtProductionID.Value = arr(0)                       'ID
-    Select_CboItm Me.cboCustomer2, Trim(arr(3)), 1    '거래처
-    Me.txtProductionItem.Value = arr(4)                     '품명
-    Me.txtProductionAmount.Value = arr(5)           '수량
-    Me.txtProductionUnitPrice.Value = arr(6)        '단가
-    Me.txtProductionUnitPrice.Text = Format(arr(6), "#,##0")
-    Me.txtProductionCost.Value = arr(7)         '금액
-    Me.txtProductionCost.Text = Format(arr(7), "#,##0")
-    Me.txtProductionMemo = arr(8)       '메모
+    
+    Me.txtProductionID.Value = arr(0)
+    Me.txtProductionItem.Value = arr(2)
+    Me.txtProductionCost.Value = arr(3)
+    Me.txtProductionCost.Text = Format(arr(3), "#,##0")
+    Me.txtProductionMemo = arr(4)
     
 End Sub
 
@@ -295,15 +287,20 @@ Private Sub UserForm_Initialize()
     
     '견적/담당자/거래처 데이터 읽어오기
     estimate = Get_Record_Array(shtEstimate, shtEstimateAdmin.Cells(cRow, 2))
+    'manager = Get_Record_Array(shtManager, estimate(2))
+    'customer = Get_Record_Array(shtCustomer, manager(2))
 
     Me.txtID.Value = estimate(1)    'ID
+    'Me.txtManagerID.Value = estimate(2) 'ID_담당자
     Me.txtEstimateName.Value = estimate(6)  '견적명
     Me.txtEstimateID.Value = estimate(2)    '관리번호
     Me.txtLinkedID.Value = estimate(3)  '자재번호
     
     InitializeCboCustomer
+    'Select_CboItm Me.cboCustomer, customer(1), 1    '거래처
     Select_CboItm Me.cboCustomer, Trim(estimate(4)), 1    '거래처
     InitializeCboManager
+    'Select_CboItm Me.cboManager, manager(1), 1  '담당자
     Select_CboItm Me.cboManager, Trim(estimate(5)), 1  '담당자
     
     Me.txtSize.Value = estimate(7)  '규격
@@ -321,10 +318,8 @@ Private Sub UserForm_Initialize()
     Me.txtDeliveryDate.Value = estimate(15)    '납품일자
     Me.txtInsuranceDate.Value = estimate(16)    '증권일자
     
-    InitializeLstProduction    '예상실행항목 목록
-    InitializeCboCustomer2   '예상실행항목 거래처
+    InitializeLstProduction    '예상실행 입력목록
     Me.txtProductionTotalCost.Value = Format(estimate(17), "#,##0")    '예상실행가
-    Me.txtProductionID.Value = ""
     
     Me.txtBidPrice.Value = Format(estimate(18), "#,##0")    '입찰가
     Me.txtBidMargin.Value = Format(estimate(19), "#,##0")    '차액
@@ -332,7 +327,6 @@ Private Sub UserForm_Initialize()
     Me.txtAcceptedPrice.Value = Format(estimate(21), "#,##0")    '수주금액
     Me.txtAcceptedMargin.Value = Format(estimate(22), "#,##0")   '수주차액
     
-    Me.txtEstimateCategory.Value = estimate(25)     '분류
     Me.txtSpecificationDate.Value = estimate(26)    '거래명세서
     Me.txtTaxInvoiceDate.Value = estimate(27)    '세금계산서
     Me.txtPaymentDate.Value = estimate(28)    '결제일자
@@ -345,7 +339,7 @@ Private Sub UserForm_Initialize()
     Me.txtInsertDate.Value = estimate(23)    '등록일자
     Me.txtUpdateDate.Value = estimate(24)    '수정일자
     
-    
+
     '변경 전 관리번호
     orgEstimateID = Me.txtEstimateID
     
@@ -377,9 +371,8 @@ Sub UpdateEstimate()
     End If
     
     '데이터 업데이트
-    Update_Record shtEstimate, Me.txtID.Value, _
+    Update_Record shtEstimate, Me.txtID.Value, Me.cboManager.Value, _
         Me.txtEstimateID.Value, Me.txtLinkedID.Value, _
-        Me.cboCustomer.Value, Me.cboManager.Value, _
         Me.txtEstimateName.Value, Me.txtSize.Value, _
         Me.txtAmount.Value, Me.cboUnit.Value, _
         Me.txtUnitPrice.Value, Me.txtEstimatePrice.Value, _
@@ -388,11 +381,12 @@ Sub UpdateEstimate()
         Me.txtInsuranceDate.Value, Me.txtProductionTotalCost.Value, _
         Me.txtBidPrice.Value, Me.txtBidMargin.Value, _
         Me.txtBidMarginRate.Value, Me.txtAcceptedPrice.Value, _
-        Me.txtAcceptedMargin.Value, _
-        Me.txtInsertDate.Value, Date, _
-        Me.txtEstimateCategory.Value, Me.txtSpecificationDate.Value, _
+        Me.txtAcceptedMargin.Value, Me.txtSpecificationDate.Value, _
         Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
-        Me.txtExpectPaymentDate.Value, Me.txtVAT.Value
+        Me.txtExpectPaymentDate.Value, Me.txtVAT.Value, _
+        Me.txtExpectPay.Value, Me.txtPaid.Value, _
+        Me.txtUnpaid.Value, _
+        Me.txtInsertDate.Value, Date
 
     Unload Me
     
@@ -405,13 +399,6 @@ Sub InitializeCboCustomer()
     db = Get_DB(shtCustomer, True)
 
     Update_Cbo Me.cboCustomer, db
-End Sub
-
-Sub InitializeCboCustomer2()
-    Dim db As Variant
-    db = Get_DB(shtCustomer, True)
-
-    Update_Cbo Me.cboCustomer2, db
 End Sub
 
 Sub InitializeCboManager()
@@ -458,20 +445,16 @@ Sub InitializeLstProduction()
             End If
         Next
         
-        Me.txtProductionTotalCost = Format(totalCost, "#,##0")
+        Me.txtProductionSum = Format(totalCost, "#,##0")
         
-        Update_List Me.lstProductionList, db, "0pt;0pt;0pt,50pt,130pt;20pt;50pt;50pt;130pt;0pt"
-        
+        Update_List Me.lstProductionList, db, "0pt;0pt;0pt,10pt,10pt;10pt;10pt;10pt;50pt;0pt"
     End If
     
 End Sub
 
 Sub InitalizeProductionInput()
     Me.txtProductionID.Value = ""
-    Me.cboCustomer2.Value = ""
     Me.txtProductionItem.Value = ""
-    Me.txtProductionAmount.Value = ""
-    Me.txtProductionUnitPrice.Value = ""
     Me.txtProductionCost.Value = ""
     Me.txtProductionMemo.Value = ""
 End Sub
@@ -479,8 +462,8 @@ End Sub
 Sub InsertProjection()
     Dim cost As Variant
 
-    If Me.txtProductionItem.Value = "" Then MsgBox "품명을 입력하세요.": Exit Sub
-    If Me.txtProductionCost.Value = "" Then MsgBox "금액을 입력하세요.": Exit Sub
+    If Me.txtProductionItem.Value = "" Then MsgBox "항목을 입력하세요.": Exit Sub
+    If Me.txtProductionCost.Value = "" Then MsgBox "비용을 입력하세요.": Exit Sub
     
     If IsNumeric(Me.txtProductionCost.Value) Then
         cost = CLng(Me.txtProductionCost.Value)
@@ -488,12 +471,10 @@ Sub InsertProjection()
         cost = Me.txtProductionCost.Value
     End If
     
-    Insert_Record shtProduction, CLng(Me.txtID.Value), Me.txtEstimateID.Value, Me.cboCustomer2.Value, Me.txtProductionItem.Value, _
-            Me.txtProductionAmount, Me.txtProductionUnitPrice, Me.txtProductionCost, Me.txtProductionMemo.Value, Date
-    
-    Me.txtProductionID.Value = ""
+    Insert_Record shtProduction, CLng(Me.txtID.Value), Me.txtProductionItem.Value, cost, Me.txtProductionMemo.Value
     
     InitializeLstProduction
+    
     InitalizeProductionInput
     
 End Sub
@@ -502,10 +483,8 @@ End Sub
 Sub UpdateProjection()
     Dim cost As Variant
 
-    If Me.txtProductionID.Value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
-    
-    If Me.txtProductionItem.Value = "" Then MsgBox "품명을 입력하세요.": Exit Sub
-    If Me.txtProductionCost.Value = "" Then MsgBox "금액을 입력하세요.": Exit Sub
+    If Me.txtProductionItem.Value = "" Then MsgBox "항목을 입력하세요.": Exit Sub
+    If Me.txtProductionCost.Value = "" Then MsgBox "비용을 입력하세요.": Exit Sub
 
     If IsNumeric(Me.txtProductionCost.Value) Then
         cost = CLng(Me.txtProductionCost.Value)
@@ -513,9 +492,8 @@ Sub UpdateProjection()
         cost = Me.txtProductionCost.Value
     End If
         
-    Update_Record shtProduction, Me.txtProductionID.Value, Me.txtID.Value, Me.txtEstimateID.Value, Me.cboCustomer2.Value, Me.txtProductionItem.Value, _
-            Me.txtProductionAmount, Me.txtProductionUnitPrice, Me.txtProductionCost, Me.txtProductionMemo.Value, Date
-    
+    Update_Record shtProduction, Me.txtProductionID.Value, Me.txtID.Value, Me.txtProductionItem.Value, cost, Me.txtProductionMemo.Value
+
     InitializeLstProduction
     
     Select_ListItm Me.lstProductionList, Me.txtProductionID.Value
@@ -527,19 +505,11 @@ Sub DeleteProjection()
     Dim db As Variant
     Dim YN As VbMsgBoxResult
 
-    If Me.txtProductionID.Value = "" Then
-        MsgBox "삭제할 항목을 선택하세요."
-        Exit Sub
-    Else
-        Delete_Record shtProduction, Me.txtProductionID.Value
+    Delete_Record shtProduction, Me.txtProductionID.Value
 
-        Me.txtProductionID.Value = ""
+    InitializeLstProduction
     
-        InitializeLstProduction
-    
-        InitalizeProductionInput
-    End If
-    
+    InitalizeProductionInput
 End Sub
 
 Function CheckEstimateUpdateValidation()
@@ -557,6 +527,24 @@ Function CheckEstimateUpdateValidation()
     If Me.txtEstimateID.Value = "" Then
         bCorrect = False
         Me.lblErrorMessage.Caption = "관리번호를 입력하세요."
+    End If
+    
+    '수량이 입력되었는지 체크
+    If Me.txtAmount.Value = "" Then
+        bCorrect = False
+        Me.lblErrorMessage.Caption = "수량을 입력하세요."
+    End If
+    
+    '견적단가가 입력되었는지 체크
+    If Me.txtUnitPrice.Value = "" Then
+        bCorrect = False
+        Me.lblErrorMessage.Caption = "견적단가를 입력하세요."
+    End If
+    
+    '견적일자가 입력되었는지 체크
+    If Me.txtEstimateDate.Value = "" Then
+        bCorrect = False
+        Me.lblErrorMessage.Caption = "견적일자를 입력하세요."
     End If
     
     If bCorrect = False Then

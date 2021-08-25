@@ -1,103 +1,118 @@
 ﻿Option Explicit
 
+Dim fromDate As String
+Dim toDate As String
+Dim isKeyworldSearch As Boolean
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
+    Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년")
     Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
+    
+    isKeyworldSearch = False
 End Sub
 
-
-'견적 데이터를 검색해서 시트에 출력
 Sub EstimateSearch()
-
-    Dim DB As Variant
+    Dim db As Variant
     Dim resultCount As Integer
 
-    '견적 데이터를 읽어옴
-    DB = Get_DB(shtEstimate, False, False)
-    DB = Connect_DB(DB, 2, shtManager, "ID_거래처, 담당자", False)
-    DB = Connect_DB(DB, 32, shtCustomer, "거래처", False)
+    '첫 행으로 이동
+    shtEstimateAdmin.Range("S6").Select
     
-    If Not IsEmpty(DB) Then
-        If Me.txtFrom.Value <> "" Then DB = Filtered_DB(DB, ">=" & Me.txtFrom.Value, 30)
+    '견적 데이터를 읽어옴
+    db = Get_DB(shtEstimate, False, False)
+    'db = Connect_DB(db, 2, shtManager, "ID_거래처, 담당자", False)
+    'db = Connect_DB(db, 32, shtCustomer, "거래처", False)
+    
+    If Not IsEmpty(db) Then
+        If fromDate <> "" Then db = Filtered_DB(db, ">=" & fromDate, 23)
     End If
-    If Not IsEmpty(DB) Then
-        If Me.txtTo.Value <> "" Then DB = Filtered_DB(DB, "<=" & Me.txtTo.Value, 30)
+    If Not IsEmpty(db) Then
+        If toDate <> "" Then db = Filtered_DB(db, "<=" & toDate, 23)
     End If
-    If Not IsEmpty(DB) Then
+    If Not IsEmpty(db) Then
         'If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value, 5)
-        If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value)
+        If Me.txtKeyword.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword.Value)
     End If
     
     '기존 검색결과를 화면에서 지움
     ClearEstimateSearchResult
     
     '검색결과를 화면에 출력
-    If IsEmpty(DB) Then
+    If IsEmpty(db) Then
         resultCount = 0     '검색결과 건수는 0
     Else
         '순번 출력
-        SequenceToRng shtEstimateAdmin.Range("D7"), UBound(DB, 1)
+        SequenceToRng shtEstimateAdmin.Range("C6"), UBound(db, 1)
         '검색결과 출력
-        ArrayToRng shtEstimateAdmin.Range("B7"), DB, "1, 2, , 3, 4,  34, 33, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31"
+        ArrayToRng shtEstimateAdmin.Range("B6"), db, "1, , 25, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 26, 27, 28, 29, 30, 23, 24"
+        
+        '배열을 화면 Range에 출력하는 것이 더 빠름
+        '검색결과 DB에서 출력할 필드만 다시 DB로 만듦
+        'shtEstimateAdmin.Range("C6").Resize(UBound(db, 1), UBound(db, 2)) = db
+        
         '검색결과 건수를 저장
-        resultCount = UBound(DB, 1)
+        resultCount = UBound(db, 1)
+        
     End If
 
     '검색 결과 건수 출력
     Me.lblSearchResult.Caption = "총 " & resultCount & "건을 검색하였습니다."
     
+    If isKeyworldSearch = True Then
+        Me.txtKeyword.Activate
+    End If
+   
 End Sub
 
 '견적 검색결과를 화면에서 지움
 Sub ClearEstimateSearchResult()
     
     '3번 순번 열을 기준으로 B7~AI 열을 지움
-    ClearContentsBelow shtEstimateAdmin.Range("B7"), "AI", 3
+    ClearContentsBelow shtEstimateAdmin.Range("B6"), "AH", 2
     
 End Sub
 
-
-
-'조회기간 - 이번달
-Private Sub optThisMonth_Click()
+'년 선택
+Private Sub cboSelectYear_Change()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
+    Dim pos As Long
     
-    Me.cboSelectMonth.Value = M & "월"
-    
-    Me.txtFrom.Value = DateSerial(Y, M, 1)
-    Me.txtTo.Value = DateSerial(Y, M + 1, 0)
-    
-    'EstimateSearch
-End Sub
-
-'조회기간 - 이전달
-Private Sub optLastMonth_Click()
-    Dim Y As Long: Y = Year(Date)
-    Dim M As Long: M = Month(Date)
-    
-    If M = 1 Then
-        Me.cboSelectMonth.Value = "12월"
+    If Me.cboSelectYear.Value = "전체" Then
+        fromDate = ""
+        toDate = ""
+        
+        If Me.cboSelectMonth.Value = "전체" Then
+            '월 선택이 전체로 선택되어 있으면 바로 검색 실행
+            EstimateSearch
+        Else
+            '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
+            Me.cboSelectMonth.Value = "전체"
+        End If
     Else
-        Me.cboSelectMonth.Value = M - 1 & "월"
+        '년도를 선택한 경우
+        pos = InStr(Me.cboSelectYear.Value, "년")
+        If pos <> 0 Then
+            Y = left(Me.cboSelectYear.Value, pos - 1)
+        End If
+    
+        If Me.cboSelectMonth.Value = "전체" Then
+            fromDate = DateSerial(Y, 1, 1)
+            toDate = DateSerial(Y, 12, 31)
+        Else
+            pos = InStr(Me.cboSelectMonth.Value, "월")
+            If pos <> 0 Then
+                M = left(Me.cboSelectMonth.Value, pos - 1)
+                
+                fromDate = DateSerial(Y, M, 1)
+                toDate = DateSerial(Y, M + 1, 0)
+            End If
+        End If
+        
+        EstimateSearch
     End If
     
-    Me.txtFrom.Value = DateSerial(Y, M - 1, 1)
-    Me.txtTo.Value = DateSerial(Y, M, 0)
-    
-    'EstimateSearch
-End Sub
-
-
-'조회기간 - 전체
-Private Sub optAll_Click()
-    Me.txtFrom.Value = ""
-    Me.txtTo.Value = ""
-    
-    Me.cboSelectMonth.Value = "전체"
-    
-    'EstimateSearch
 End Sub
 
 '월 선택
@@ -106,20 +121,69 @@ Private Sub cboSelectMonth_Change()
     Dim M As Long: M = Month(Date)
     Dim pos As Long
     
-    If Me.cboSelectMonth.Value = "전체" Then
-        Me.txtFrom.Value = ""
-        Me.txtTo.Value = ""
-    Else
-        pos = InStr(Me.cboSelectMonth.Value, "월")
-        If pos <> 0 Then
-            M = left(Me.cboSelectMonth.Value, pos - 1)
-            
-            Me.txtFrom.Value = DateSerial(Y, M, 1)
-            Me.txtTo.Value = DateSerial(Y, M + 1, 0)
+    If Me.cboSelectYear.Value = "전체" Then
+        fromDate = ""
+        toDate = ""
+        
+         If Me.cboSelectMonth.Value = "전체" Then
+             '월 선택이 전체로 선택되어 있으면 바로 검색 실행
+            EstimateSearch
+        Else
+            '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
+            Me.cboSelectMonth.Value = "전체"
         End If
+    Else
+        pos = InStr(Me.cboSelectYear.Value, "년")
+        If pos <> 0 Then
+            Y = left(Me.cboSelectYear.Value, pos - 1)
+        End If
+    
+        If Me.cboSelectMonth.Value = "전체" Then
+            fromDate = DateSerial(Y, 1, 1)
+            toDate = DateSerial(Y, 12, 31)
+        Else
+            pos = InStr(Me.cboSelectMonth.Value, "월")
+            If pos <> 0 Then
+                M = left(Me.cboSelectMonth.Value, pos - 1)
+                
+                fromDate = DateSerial(Y, M, 1)
+                toDate = DateSerial(Y, M + 1, 0)
+            End If
+        End If
+        EstimateSearch
+    End If
+End Sub
+
+
+'조회기간 - 이번달
+Private Sub optThisMonth_Click()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = Month(Date)
+    
+    fromDate = DateSerial(Y, M, 1)
+    toDate = DateSerial(Y, M + 1, 0)
+    
+    Me.cboSelectYear.Value = Y & "년"
+    Me.cboSelectMonth.Value = M & "월"      '실제 검색은 cboSelectMonth_change()에서 검색 됨
+    
+End Sub
+
+'조회기간 - 이전달
+Private Sub optLastMonth_Click()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = Month(Date)
+    
+    fromDate = DateSerial(Y, M - 1, 1)
+    toDate = DateSerial(Y, M, 0)
+    
+    If M = 1 Then
+        Me.cboSelectYear.Value = Y - 1 & "년"
+        Me.cboSelectMonth.Value = "12월"
+    Else
+        Me.cboSelectYear.Value = Y & "년"
+        Me.cboSelectMonth.Value = M - 1 & "월"
     End If
     
-    EstimateSearch
 End Sub
 
 'From 달력 선택
@@ -130,9 +194,9 @@ Sub CalendarFromClick()
     
     ' X를 누르고 나오는 경우 날짜 포맷이 '오전 10:00' 이런식으로 입력되는 것 오류 체크
     If InStr(vDate, "오전") <> 0 Or InStr(vDate, "오후") <> 0 Then
-        Me.txtFrom.Value = ""
+        fromDate = ""
     Else
-        Me.txtFrom.Value = vDate
+        toDate = vDate
     End If
 End Sub
 
@@ -155,7 +219,9 @@ End Sub
 Private Sub txtKeyword_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     '엔터키 눌려질 경우에만 검색
     If KeyCode = 13 Then
+        isKeyworldSearch = True
         EstimateSearch
+        isKeyworldSearch = False
     End If
 End Sub
 
@@ -180,6 +246,16 @@ End Sub
 
 '시트 더블클릭 시 견적수정 폼 열기
 Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
+    Dim cRow As Long
+    
+    '선택한 행 번호
+    cRow = Selection.row
+    
+    '데이터가 있는 행이 아닐 경우는 중지
+    If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
+        End
+    End If
+    
     '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
     Range("E" & Selection.row).Select
     
@@ -196,7 +272,7 @@ Sub EstimateDelete()
     cRow = Selection.row
 
     '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 7 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
+    If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
         MsgBox "삭제할 행을 선택하신 후 '삭제' 버튼을 클릭하세요."
         End
     End If

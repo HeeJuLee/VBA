@@ -148,40 +148,40 @@ Private Sub OutHover_Css(lbl As Control): With lbl: .BackColor = &H8000000E: .Bo
 
 
 Sub InitializeCboUnit()
-    Dim DB As Variant
-    DB = Get_DB(shtUnit, True)
+    Dim db As Variant
+    db = Get_DB(shtUnit, True)
 
-    Update_Cbo Me.cboUnit, DB
+    Update_Cbo Me.cboUnit, db
 End Sub
 
 Sub InitializeCboCustomer()
-    Dim DB As Variant
-    DB = Get_DB(shtCustomer)
+    Dim db As Variant
+    db = Get_DB(shtCustomer)
 
-    Update_Cbo Me.cboCustomer, DB, 2
+    Update_Cbo Me.cboCustomer, db, 2
 End Sub
 
 Sub InitializeCboManager()
-    Dim DB As Variant
+    Dim db As Variant
     
     '담당자 DB를 읽어와서
-    DB = Get_DB(shtManager)
+    db = Get_DB(shtManager)
     '거래처ID로 필터링
-    DB = Filtered_DB(DB, Me.cboCustomer.Value, 2)
+    db = Filtered_DB(db, Me.cboCustomer.Value, 2)
     
     '기존 콤보박스 내용지우기
     Me.cboManager.Clear
     
     '담당자가 있으면 콤보박스에 추가함
-    If Not IsEmpty(DB) Then
-        Update_Cbo Me.cboManager, DB, 3
+    If Not IsEmpty(db) Then
+        Update_Cbo Me.cboManager, db, 3
     End If
 End Sub
 
 
 
 Sub InsertEstimate()
-    Dim DB As Variant
+    Dim db As Variant
     Dim blnUnique As Boolean
     
     '입력 데이터 체크
@@ -190,10 +190,10 @@ Sub InsertEstimate()
     End If
 
     '견적정보 DB 읽어오기
-    DB = Get_DB(shtEstimate)
+    db = Get_DB(shtEstimate)
     
     '동일한 관리번호가 있는지 체크
-    blnUnique = IsUnique(DB, Me.txtEstimateID.Value, 3)
+    blnUnique = IsUnique(db, Me.txtEstimateID.Value, 3)
     If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
     
     Insert_Record shtEstimate, _
@@ -239,34 +239,6 @@ Function CheckEstimateInsertValidation()
         Me.lblEstimateIDEmpty.Visible = True
     Else
         Me.lblEstimateIDEmpty.Visible = False
-    End If
-    
-    '수량이 입력되었는지 체크
-    If Trim(Me.txtAmount.Value) = "" Then
-        bCorrect = False
-        Me.lblAmountEmpty.Visible = True
-    Else
-        Me.lblAmountEmpty.Visible = False
-    End If
-    
-    '견적단가가 입력되었는지 체크
-    If Trim(Me.txtUnitPrice.Value) = "" Then
-        bCorrect = False
-        Me.lblUnitPriceEmpty.Visible = True
-    Else
-        Me.lblUnitPriceEmpty.Visible = False
-    End If
-    
-    '견적일자가 입력되었는지 체크
-    If Trim(Me.txtEstimateDate.Value) = "" Then
-        bCorrect = False
-        Me.lblEstimateDateEmpty.Visible = True
-    Else
-        Me.lblEstimateDateEmpty.Visible = False
-    End If
-    
-    If bCorrect = False Then
-        Me.lblInputFieldError.Visible = True
     End If
     
     CheckEstimateInsertValidation = bCorrect
