@@ -5,13 +5,13 @@ Option Explicit
 ' 콤보박스를 DB 값으로 갱신
 ' Update_Cbo cboBox, DB, "1"
 '########################
-Sub Update_Cbo(cboBox As MSForms.ComboBox, DB As Variant, Optional DisplayCol As Long = 1, Optional SetDefault As Boolean = False)
+Sub Update_Cbo(cboBox As MSForms.ComboBox, db As Variant, Optional DisplayCol As Long = 1, Optional SetDefault As Boolean = False)
 
 Dim colCount As Long
 Dim colWidths As String
 Dim i As Long
 
-colCount = UBound(DB, 2)
+colCount = UBound(db, 2)
 
 With cboBox
     .ColumnCount = colCount
@@ -19,7 +19,7 @@ With cboBox
         If DisplayCol = i Then colWidths = colWidths & .Width - 15 & "," Else colWidths = colWidths & "0,"
     Next
     colWidths = Left(colWidths, Len(colWidths) - 1)
-    .List = DB
+    .List = db
     .ColumnWidths = colWidths
     If SetDefault = True Then .ListIndex = 0
 End With
@@ -48,14 +48,14 @@ End Sub
 ' 리스트박스를 DB 값으로 갱신
 ' Update_List ListBox, DB, "0pt; 80pt; 50pt"
 '########################
-Sub Update_List(lstBox As MSForms.ListBox, DB As Variant, Widths As String)
+Sub Update_List(lstBox As MSForms.ListBox, db As Variant, Widths As String)
 
 With lstBox
     .Clear
     .ColumnWidths = Widths
-    If Not IsEmpty(DB) Then
-        .ColumnCount = UBound(DB, 2)
-        .List = DB
+    If Not IsEmpty(db) Then
+        .ColumnCount = UBound(db, 2)
+        .List = db
     End If
 End With
 

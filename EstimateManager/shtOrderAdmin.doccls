@@ -56,16 +56,17 @@ Sub OrderSearch()
     If Not IsEmpty(db) Then
         If toDate <> "" Then db = Filtered_DB(db, "<=" & toDate, 23)    '등록일자 필드와 날짜 비교
     End If
+    
+    If Not IsEmpty(db) Then
+        '견적테이블에서 견적정보를 추가로 읽어옴
+        db = Join_DB(db, 25, shtEstimate, "ID", "거래처, 담당자, 견적명", False)
+    End If
+    
     If Not IsEmpty(db) Then
         'If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value, 5)
         If Me.txtKeyword.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword.Value)     '모든 필드에서 키워드 검색
     End If
     
-    'db = Connect_DB(db, 3, shtCustomer, "거래처", False)                '거래처 데이터에서 발주처를 가져옴 (발주 거래처)
-    'db = Connect_DB(db, 2, shtEstimate, "관리번호, 견적명, ID_담당자", False)             '견적 데이터에서 견적명, 담당자_ID를 가져옴 (견적)
-    'db = Connect_DB(db, 26, shtManager, "담당자, ID_거래처", False)           '담당자 데이터에서 담당자, 거래처_ID를 가져옴 (견적의 담당자)
-    'db = Connect_DB(db, 28, shtCustomer, "거래처", False)          '거래처 데이터에서 거래처를 가져옴 (견적의 거래처)
-  
     '기존 검색결과를 화면에서 지움
     ClearOrderSearchResult
     
@@ -90,7 +91,7 @@ Sub OrderSearch()
     
 End Sub
 
-'견적 검색결과를 화면에서 지움
+'발주 검색결과를 화면에서 지움
 Sub ClearOrderSearchResult()
     
     '3번 순번 열을 기준으로 B7~AI 열을 지움
@@ -236,19 +237,19 @@ Private Sub optLastMonth_Click()
 End Sub
 
 
-'견적등록 폼 열기
-Sub OpenEstimateInsertForm()
-    frmEstimateInsert.Show (False)
+'발주등록 폼 열기
+Sub OpenOrderInsertForm()
+    frmOrderInsert.Show (False)
 End Sub
 
 
-'견적수정 폼 열기
-Sub OpenEstimateUpdateForm()
-    frmEstimateUpdate.Show (False)
+'발주수정 폼 열기
+Sub OpenOrderUpdateForm()
+    frmOrderUpdate.Show (False)
 End Sub
 
 
-'시트 더블클릭 시 견적수정 폼 열기
+'시트 더블클릭 시 발주수정 폼 열기
 Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
     Dim cRow As Long
     
@@ -256,7 +257,7 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     cRow = Selection.row
     
     '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 7 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
+    If cRow < 7 Or shtOrderAdmin.Range("B" & cRow).Value = "" Then
         End
     End If
     
@@ -264,11 +265,11 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     Range("E" & Selection.row).Select
     
     '수정 화면 띄움
-    frmEstimateUpdate.Show (False)
+    frmOrderUpdate.Show (False)
 End Sub
 
-'견적삭제
-Sub EstimateDelete()
+'발주삭제
+Sub OrderDelete()
     Dim cRow As Long
     Dim YN As VbMsgBoxResult
     
@@ -276,17 +277,17 @@ Sub EstimateDelete()
     cRow = Selection.row
 
     '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 7 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
+    If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
         MsgBox "삭제할 행을 선택하신 후 '삭제' 버튼을 클릭하세요."
         End
     End If
 
     '안내 문구 출력
-    YN = MsgBox("선택한 견적정보를 정말로 삭제하시겠습니까? 삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+    YN = MsgBox("선택한 발주정보를 정말로 삭제하시겠습니까? 삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     If YN = vbNo Then Exit Sub
     
     'DB에서 견적정보 삭제
-    Delete_Record shtEstimate, Range("B" & cRow).Value
+    Delete_Record shtOrder, Range("B" & cRow).Value
 
     OrderSearch
 End Sub

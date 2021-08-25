@@ -11,7 +11,7 @@ Type Production
 End Type
 
 '견적 구조체
-Type Estimate
+Type estimate
     ID As Long
     관리번호 As String
     자재번호 As String
@@ -165,7 +165,7 @@ Function ImportEstimateData_Type1(WS As Worksheet, sheetName As String, year As 
     Dim endCol As Long
     Dim endRow As Long
     Dim importCount As Long
-    Dim est As Estimate
+    Dim est As estimate
     Dim prod As Production
     Dim regDate As Date
     Dim pos As Integer
@@ -250,31 +250,31 @@ Function ImportEstimateData_Type1(WS As Worksheet, sheetName As String, year As 
                 prod.항목 = "자재비"
                 prod.비용 = .Cells(i, 16)
                 If WS.Cells(i, 16).Comment Is Nothing Then prod.메모 = "" Else prod.메모 = WS.Cells(i, 16).Comment.Text
-                Insert_Record shtProductionData, currentId, est.관리번호, prod.항목, prod.비용, prod.메모, regDate
+                Insert_Record shtProductionData, currentId, est.관리번호, , prod.항목, , , prod.비용, prod.메모, regDate
             End If
             If .Cells(i, 17) <> "" Then
                 prod.항목 = "미르"
                 prod.비용 = .Cells(i, 17)
                 If WS.Cells(i, 17).Comment Is Nothing Then prod.메모 = "" Else prod.메모 = WS.Cells(i, 17).Comment.Text
-                Insert_Record shtProductionData, currentId, est.관리번호, prod.항목, prod.비용, prod.메모, regDate
+                Insert_Record shtProductionData, currentId, est.관리번호, , prod.항목, , , prod.비용, prod.메모, regDate
             End If
             If .Cells(i, 18) <> "" Then
                 prod.항목 = "외주"
                 prod.비용 = .Cells(i, 18)
                 If WS.Cells(i, 18).Comment Is Nothing Then prod.메모 = "" Else prod.메모 = WS.Cells(i, 18).Comment.Text
-                Insert_Record shtProductionData, currentId, est.관리번호, prod.항목, prod.비용, prod.메모, regDate
+                Insert_Record shtProductionData, currentId, est.관리번호, , prod.항목, , , prod.비용, prod.메모, regDate
             End If
             If .Cells(i, 19) <> "" Then
                 prod.항목 = "인건비"
                 prod.비용 = .Cells(i, 19)
                 If WS.Cells(i, 19).Comment Is Nothing Then prod.메모 = "" Else prod.메모 = WS.Cells(i, 19).Comment.Text
-                Insert_Record shtProductionData, currentId, est.관리번호, prod.항목, prod.비용, prod.메모, regDate
+                Insert_Record shtProductionData, currentId, est.관리번호, , prod.항목, , , prod.비용, prod.메모, regDate
             End If
             If .Cells(i, 20) <> "" Then
                 prod.항목 = "기타"
                 prod.비용 = .Cells(i, 20)
                 If WS.Cells(i, 20).Comment Is Nothing Then prod.메모 = "" Else prod.메모 = WS.Cells(i, 20).Comment.Text
-                Insert_Record shtProductionData, currentId, est.관리번호, prod.항목, prod.비용, prod.메모, regDate
+                Insert_Record shtProductionData, currentId, est.관리번호, , prod.항목, , , prod.비용, prod.메모, regDate
             End If
             
             est.실행가 = .Cells(i, 21)

@@ -302,6 +302,66 @@ Next
 Connect_DB = db
     
 End Function
+
+'########################
+' hjlee 2021.08.23 추가
+' 배열의 외부ID키 필드를 본 시트DB와 연결하여 해당 외부ID키의 연관된 값을 배열로 반환
+' Array = Join_DB(Get_DB(Sheet1), 2, Sheet2, "JOIN필드", "리턴필드1, 리턴필드2, 리턴필드3")
+'########################
+Function Join_DB(db As Variant, ForeignID_Fields As Variant, FromWS As Worksheet, joinField As String, returnFields As String, Optional IncludeHeader As Boolean = False)
+
+Dim cRow As Long: Dim cCol As Long
+Dim vForeignID_Fields As Variant: Dim vForeignID_Field As Variant
+Dim ForeignID As Variant
+Dim vFields As Variant: Dim vField As Variant
+Dim vID As Variant: Dim vFieldNo As Variant
+Dim Dict As Object
+Dim i As Long: Dim j As Long
+Dim AddCols As Long
+
+
+cRow = UBound(db, 1)
+cCol = UBound(db, 2)
+If InStr(1, returnFields, ",") > 1 Then
+    AddCols = Len(returnFields) - Len(Replace(returnFields, ",", "")) + 1
+    vFields = Split(returnFields, ",")
+Else
+    AddCols = 1
+    vFields = Array(returnFields)
+End If
+
+ReDim Preserve db(1 To cRow, 1 To cCol + AddCols)
+        
+Set Dict = Get_Dict_KeyField(FromWS, joinField)
+vID = Dict(joinField)
+
+ReDim vFieldNo(0 To UBound(vFields))
+
+For Each vField In vFields
+    For i = 1 To UBound(vID)
+        If vID(i) = Trim(vField) Then vFieldNo(j) = i: j = j + 1
+    Next
+Next
+
+If InStr(1, ForeignID_Fields, ",") > 0 Then vForeignID_Fields = Split(ForeignID_Fields, ",") Else vForeignID_Fields = Array(ForeignID_Fields)
+
+For Each vForeignID_Field In vForeignID_Fields
+    For i = 1 To cRow
+        If IncludeHeader = True And i = 1 Then ForeignID = joinField Else ForeignID = db(i, Trim(vForeignID_Field))
+        If ForeignID <> "" Then
+            If Dict.Exists(CLng(ForeignID)) Then
+                For j = 1 To AddCols
+                    db(i, cCol + j) = Dict(CLng(ForeignID))(vFieldNo(j - 1))
+                Next
+            End If
+        End If
+    Next
+Next
+
+Join_DB = db
+    
+End Function
+
 '########################
 ' 특정 배열에서 Value를 포함하는 레코드만 찾아 다시 배열로 반환
 ' Array = Filtered_DB(Array, "검색값", False)
@@ -498,6 +558,51 @@ With WS
 End With
 
 Set Get_Dict = Dict
+
+End Function
+
+'########################
+' hjlee 2021.08.24 추가
+' 특정 시트의 DB 정보를 Dictionary로 반환 (이번 예제파일에서만 사용)
+' keyFieldName을 기준으로 Dict 구성
+' Dict = Get_Dict_KeyField(Sheet1, keyFieldName as string)
+'########################
+Function Get_Dict_KeyField(WS As Worksheet, keyFieldName As String) As Object
+
+Dim cRow As Long: Dim cCol As Long
+Dim Dict As Object
+Dim vArr As Variant
+Dim i As Long: Dim j As Long
+Dim keyFieldNo As Long
+
+Set Dict = CreateObject("Scripting.Dictionary")
+
+With WS
+    cRow = Get_InsertRow(WS) - 1
+    cCol = Get_ColumnCnt(WS)
+    
+    keyFieldNo = 1
+    For i = 1 To cCol
+        If .Cells(1, i) = keyFieldName Then
+            keyFieldNo = i
+        End If
+    Next
+    
+    For i = 1 To cRow
+        ReDim vArr(1 To cCol)
+        For j = 1 To cCol
+            vArr(j) = .Cells(i, j)
+        Next
+        
+        'Dict(.Cells(i, keyFieldNo).Value) = vArr
+        If Dict.Exists(.Cells(i, keyFieldNo).Value) Then
+            Dict.Remove (.Cells(i, keyFieldNo).Value)
+        End If
+        Dict.Add .Cells(i, keyFieldNo).Value, vArr
+    Next
+End With
+
+Set Get_Dict_KeyField = Dict
 
 End Function
 

@@ -251,7 +251,7 @@ End Sub
 ' 배열의 외부ID키 필드를 본 시트DB와 연결하여 해당 외부ID키의 연관된 값을 배열로 반환
 ' Array = Connect_DB(Get_DB(Sheet1),2,Sheet2, "필드1, 필드2, 필드3")
 '########################
-Function Connect_DB(DB As Variant, ForeignID_Fields As Variant, FromWS As Worksheet, fields As String, Optional IncludeHeader As Boolean = False)
+Function Connect_DB(db As Variant, ForeignID_Fields As Variant, FromWS As Worksheet, fields As String, Optional IncludeHeader As Boolean = False)
 
 Dim cRow As Long: Dim cCol As Long
 Dim vForeignID_Fields As Variant: Dim vForeignID_Field As Variant
@@ -263,8 +263,8 @@ Dim i As Long: Dim j As Long
 Dim AddCols As Long
 
 
-cRow = UBound(DB, 1)
-cCol = UBound(DB, 2)
+cRow = UBound(db, 1)
+cCol = UBound(db, 2)
 If InStr(1, fields, ",") > 1 Then
     AddCols = Len(fields) - Len(Replace(fields, ",", "")) + 1
     vFields = Split(fields, ",")
@@ -273,7 +273,7 @@ Else
     vFields = Array(fields)
 End If
 
-ReDim Preserve DB(1 To cRow, 1 To cCol + AddCols)
+ReDim Preserve db(1 To cRow, 1 To cCol + AddCols)
         
 Set Dict = Get_Dict(FromWS)
 vID = Dict("ID")
@@ -290,16 +290,16 @@ If InStr(1, ForeignID_Fields, ",") > 0 Then vForeignID_Fields = Split(ForeignID_
 
 For Each vForeignID_Field In vForeignID_Fields
     For i = 1 To cRow
-        If IncludeHeader = True And i = 1 Then ForeignID = "ID" Else ForeignID = DB(i, Trim(vForeignID_Field))
+        If IncludeHeader = True And i = 1 Then ForeignID = "ID" Else ForeignID = db(i, Trim(vForeignID_Field))
         If Dict.Exists(ForeignID) Then
             For j = 1 To AddCols
-                DB(i, cCol + j) = Dict(ForeignID)(vFieldNo(j - 1))
+                db(i, cCol + j) = Dict(ForeignID)(vFieldNo(j - 1))
             Next
         End If
     Next
 Next
 
-Connect_DB = DB
+Connect_DB = db
     
 End Function
 
@@ -308,7 +308,7 @@ End Function
 ' 배열의 외부ID키 필드를 본 시트DB와 연결하여 해당 외부ID키의 연관된 값을 배열로 반환
 ' Array = Join_DB(Get_DB(Sheet1), 2, Sheet2, "JOIN필드", "리턴필드1, 리턴필드2, 리턴필드3")
 '########################
-Function Join_DB(DB As Variant, ForeignID_Fields As Variant, FromWS As Worksheet, joinField As String, returnFields As String, Optional IncludeHeader As Boolean = False)
+Function Join_DB(db As Variant, ForeignID_Fields As Variant, FromWS As Worksheet, joinField As String, returnFields As String, Optional IncludeHeader As Boolean = False)
 
 Dim cRow As Long: Dim cCol As Long
 Dim vForeignID_Fields As Variant: Dim vForeignID_Field As Variant
@@ -320,8 +320,8 @@ Dim i As Long: Dim j As Long
 Dim AddCols As Long
 
 
-cRow = UBound(DB, 1)
-cCol = UBound(DB, 2)
+cRow = UBound(db, 1)
+cCol = UBound(db, 2)
 If InStr(1, returnFields, ",") > 1 Then
     AddCols = Len(returnFields) - Len(Replace(returnFields, ",", "")) + 1
     vFields = Split(returnFields, ",")
@@ -330,7 +330,7 @@ Else
     vFields = Array(returnFields)
 End If
 
-ReDim Preserve DB(1 To cRow, 1 To cCol + AddCols)
+ReDim Preserve db(1 To cRow, 1 To cCol + AddCols)
         
 Set Dict = Get_Dict_KeyField(FromWS, joinField)
 vID = Dict(joinField)
@@ -347,16 +347,16 @@ If InStr(1, ForeignID_Fields, ",") > 0 Then vForeignID_Fields = Split(ForeignID_
 
 For Each vForeignID_Field In vForeignID_Fields
     For i = 1 To cRow
-        If IncludeHeader = True And i = 1 Then ForeignID = joinField Else ForeignID = DB(i, Trim(vForeignID_Field))
+        If IncludeHeader = True And i = 1 Then ForeignID = joinField Else ForeignID = db(i, Trim(vForeignID_Field))
         If Dict.Exists(ForeignID) Then
             For j = 1 To AddCols
-                DB(i, cCol + j) = Dict(ForeignID)(vFieldNo(j - 1))
+                db(i, cCol + j) = Dict(ForeignID)(vFieldNo(j - 1))
             Next
         End If
     Next
 Next
 
-Join_DB = DB
+Join_DB = db
     
 End Function
 
@@ -364,7 +364,7 @@ End Function
 ' 특정 배열에서 Value를 포함하는 레코드만 찾아 다시 배열로 반환
 ' Array = Filtered_DB(Array, "검색값", False)
 '########################
-Function Filtered_DB(DB, Value, Optional FilterCol, Optional ExactMatch As Boolean = False) As Variant
+Function Filtered_DB(db, Value, Optional FilterCol, Optional ExactMatch As Boolean = False) As Variant
 
 Dim cRow As Long
 Dim cCol As Long
@@ -378,13 +378,13 @@ Dim Operator As String
 Set Dict = CreateObject("Scripting.Dictionary")
 
 If Value <> "" Then
-    cRow = UBound(DB, 1)
-    cCol = UBound(DB, 2)
+    cRow = UBound(db, 1)
+    cCol = UBound(db, 2)
     ReDim vArr(1 To cRow)
     For i = 1 To cRow
         s = ""
         For j = 1 To cCol
-            s = s & DB(i, j) & "|^"
+            s = s & db(i, j) & "|^"
         Next
         vArr(i) = s
     Next
@@ -397,7 +397,7 @@ If Value <> "" Then
         For i = 1 To cRow
             s = ""
             For Each col In Cols
-                s = s & DB(i, Trim(col)) & "|^"
+                s = s & db(i, Trim(col)) & "|^"
             Next
             filterArr(i) = s
         Next
@@ -484,7 +484,7 @@ If Value <> "" Then
     
     Filtered_DB = vResult
 Else
-    Filtered_DB = DB
+    Filtered_DB = db
 End If
 
 End Function
@@ -494,7 +494,7 @@ End Function
 ' DB = Get_Balance(DB, shtInventory, 입고수량열번호, 출고수량열번호, 제품ID열번호)
 '########################
 
-Function Get_Balance(DB, InventoryWS As Worksheet, ColumnIN, ColumnOUT, ColumnID) As Variant
+Function Get_Balance(db, InventoryWS As Worksheet, ColumnIN, ColumnOUT, ColumnID) As Variant
 
 Dim InventoryDB As Variant
 Dim Dict As Dictionary
@@ -505,13 +505,13 @@ If Not IsNumeric(ColumnOUT) Then ColumnOUT = Range(ColumnOUT & 1).Column
 If Not IsNumeric(ColumnIN) Then ColumnIN = Range(ColumnIN & 1).Column
 If Not IsNumeric(ColumnID) Then ColumnID = Range(ColumnID & 1).Column
 
-cRow = UBound(DB, 1)
-cCol = UBound(DB, 2)
+cRow = UBound(db, 1)
+cCol = UBound(db, 2)
 Set Dict = CreateObject("Scripting.Dictionary")
 
-ReDim Preserve DB(1 To cRow, 1 To cCol + 1)
+ReDim Preserve db(1 To cRow, 1 To cCol + 1)
 
-For i = 1 To cRow:    Dict.Add DB(i, 1), 0: Next
+For i = 1 To cRow:    Dict.Add db(i, 1), 0: Next
 InventoryDB = Get_DB(InventoryWS)
 
 For i = LBound(InventoryDB, 1) To UBound(InventoryDB, 1)
@@ -521,11 +521,11 @@ For i = LBound(InventoryDB, 1) To UBound(InventoryDB, 1)
     End If
 Next
 
-For i = LBound(DB, 1) To UBound(DB, 1)
-    DB(i, cCol + 1) = Dict(DB(i, 1))
+For i = LBound(db, 1) To UBound(db, 1)
+    db(i, cCol + 1) = Dict(db(i, 1))
 Next
 
-Get_Balance = DB
+Get_Balance = db
 
 End Function
 
@@ -561,6 +561,7 @@ End Function
 
 
 '########################
+' hjlee 2021.08.24 추가
 ' 특정 시트의 DB 정보를 Dictionary로 반환 (이번 예제파일에서만 사용)
 ' keyFieldName을 기준으로 Dict 구성
 ' Dict = Get_Dict_KeyField(Sheet1, keyFieldName as string)
@@ -672,13 +673,13 @@ End Function
 ' 시트의 특정 필드 내에서 추가되는 값이 고유값인지 확인. 고유값일 경우 TRUE를 반환
 ' boolean = IsUnique(Sheet1, "사과", 1)
 '########################
-Function IsUnique(DB As Variant, uniqueVal, Optional ColNo As Long = 1, Optional Exclude) As Boolean
+Function IsUnique(db As Variant, uniqueVal, Optional ColNo As Long = 1, Optional Exclude) As Boolean
 
 Dim endRow As Long
 Dim i As Long
 
-For i = LBound(DB, 1) To UBound(DB, 1)
-    If DB(i, ColNo) = uniqueVal Then
+For i = LBound(db, 1) To UBound(db, 1)
+    If db(i, ColNo) = uniqueVal Then
         If Not IsMissing(Exclude) Then
             If Exclude <> uniqueVal Then
                 IsUnique = False
@@ -705,14 +706,14 @@ End Function
 'Arr = Extract_Column(Arr, 3) '<- 3번째 열을 추출합니다.
 '##############################################################
 
-Function Extract_Column(DB As Variant, col As Long) As Variant
+Function Extract_Column(db As Variant, col As Long) As Variant
 
 Dim i As Long
 Dim vArr As Variant
 
-ReDim vArr(LBound(DB) To UBound(DB), 1 To 1)
-For i = LBound(DB) To UBound(DB)
-        vArr(i, 1) = DB(i, col)
+ReDim vArr(LBound(db) To UBound(db), 1 To 1)
+For i = LBound(db) To UBound(db)
+        vArr(i, 1) = db(i, col)
 Next
 
 Extract_Column = vArr

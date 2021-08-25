@@ -1,7 +1,7 @@
 Attribute VB_Name = "z_Mod_Sort"
 Option Explicit
 
-Function Sort2DArray(DB, ByVal Index As Long, Optional ByVal order As Integer = -1, Optional ByVal ByColumn As Boolean = False, Optional ByVal lngStart As Long = 0, Optional ByVal lngEnd As Long = 0, Optional THRESHOLD As Long = 20)
+Function Sort2DArray(db, ByVal Index As Long, Optional ByVal order As Integer = -1, Optional ByVal ByColumn As Boolean = False, Optional ByVal lngStart As Long = 0, Optional ByVal lngEnd As Long = 0, Optional THRESHOLD As Long = 20)
 
 '###############################################################
 '오빠두엑셀 VBA 사용자지정함수 (https://www.oppadu.com)
@@ -28,16 +28,16 @@ Dim Pivot: Dim Temp
 Dim Stack(1 To 64) As Long: Dim StackPtr As Long
 
 If lngStart = 0 Then
-    If ByColumn = False Then lngStart = LBound(DB, 1) Else lngStart = LBound(DB, 2)
+    If ByColumn = False Then lngStart = LBound(db, 1) Else lngStart = LBound(db, 2)
 End If
 
 If lngEnd = 0 Then
-    If ByColumn = False Then lngEnd = UBound(DB, 1) Else lngEnd = UBound(DB, 2)
+    If ByColumn = False Then lngEnd = UBound(db, 1) Else lngEnd = UBound(db, 2)
 End If
 
 '가로방향 정렬
   If ByColumn Then
-    ReDim Temp(LBound(DB, 1) To UBound(DB, 1))
+    ReDim Temp(LBound(db, 1) To UBound(db, 1))
     Stack(StackPtr + 1) = lngStart
     Stack(StackPtr + 2) = lngEnd
     StackPtr = StackPtr + 2
@@ -48,42 +48,42 @@ End If
       If lngEnd - lngStart < THRESHOLD Then
         ' 비교 대상의 첫번째 값과 마지막값 차이가 20 미만일 경우 Insertion Sort
         For j = lngStart + 1 To lngEnd
-          For k = LBound(DB, 1) To UBound(DB, 1)
-            Temp(k) = DB(k, j)
+          For k = LBound(db, 1) To UBound(db, 1)
+            Temp(k) = db(k, j)
           Next
-          Pivot = DB(Index, j)
+          Pivot = db(Index, j)
           For i = j - 1 To lngStart Step -1
             If order >= 0 Then
-              If DB(Index, i) <= Pivot Then Exit For
+              If db(Index, i) <= Pivot Then Exit For
             Else
-              If DB(Index, i) >= Pivot Then Exit For
+              If db(Index, i) >= Pivot Then Exit For
             End If
-            For k = LBound(DB) To UBound(DB)
-              DB(k, i + 1) = DB(k, i)
+            For k = LBound(db) To UBound(db)
+              db(k, i + 1) = db(k, i)
             Next
           Next
-          For k = LBound(DB) To UBound(DB)
-            DB(k, i + 1) = Temp(k)
+          For k = LBound(db) To UBound(db)
+            db(k, i + 1) = Temp(k)
           Next
         Next
       Else
         ' 비교 대상의 첫번째 값과 마지막값 차이가 20 이상일 경우 Quick Sort
         i = lngStart: j = lngEnd
-        Pivot = DB(Index, (lngStart + lngEnd) \ 2)
+        Pivot = db(Index, (lngStart + lngEnd) \ 2)
         Do
           If order >= 0 Then
-            Do While (DB(Index, i) < Pivot): i = i + 1: Loop
-            Do While (DB(Index, j) > Pivot): j = j - 1: Loop
+            Do While (db(Index, i) < Pivot): i = i + 1: Loop
+            Do While (db(Index, j) > Pivot): j = j - 1: Loop
           Else
-            Do While (DB(Index, i) > Pivot): i = i + 1: Loop
-            Do While (DB(Index, j) < Pivot): j = j - 1: Loop
+            Do While (db(Index, i) > Pivot): i = i + 1: Loop
+            Do While (db(Index, j) < Pivot): j = j - 1: Loop
           End If
           If i <= j Then
             If i < j Then
-              For k = LBound(DB) To UBound(DB)
-                Temp(k) = DB(k, i)
-                DB(k, i) = DB(k, j)
-                DB(k, j) = Temp(k)
+              For k = LBound(db) To UBound(db)
+                Temp(k) = db(k, i)
+                db(k, i) = db(k, j)
+                db(k, j) = Temp(k)
               Next
             End If
             i = i + 1: j = j - 1
@@ -103,7 +103,7 @@ End If
     Loop Until StackPtr = 0
 '세로방향 정렬
 Else
-    ReDim Temp(LBound(DB, 2) To UBound(DB, 2))
+    ReDim Temp(LBound(db, 2) To UBound(db, 2))
         ' Stack 설정
         Stack(StackPtr + 1) = lngStart
         Stack(StackPtr + 2) = lngEnd
@@ -115,42 +115,42 @@ Else
                     ' 비교 대상의 첫번째 값과 마지막값 차이가 20 미만일 경우 Insertion Sort
                     If lngEnd - lngStart < THRESHOLD Then
                           For j = lngStart + 1 To lngEnd
-                            For k = LBound(DB, 2) To UBound(DB, 2)
-                              Temp(k) = DB(j, k)
+                            For k = LBound(db, 2) To UBound(db, 2)
+                              Temp(k) = db(j, k)
                             Next
-                            Pivot = DB(j, Index)
+                            Pivot = db(j, Index)
                             For i = j - 1 To lngStart Step -1
                               If order >= 0 Then
-                                If DB(i, Index) <= Pivot Then Exit For
+                                If db(i, Index) <= Pivot Then Exit For
                               Else
-                                If DB(i, Index) >= Pivot Then Exit For
+                                If db(i, Index) >= Pivot Then Exit For
                               End If
-                              For k = LBound(DB, 2) To UBound(DB, 2)
-                                DB(i + 1, k) = DB(i, k)
+                              For k = LBound(db, 2) To UBound(db, 2)
+                                db(i + 1, k) = db(i, k)
                               Next
                             Next
-                            For k = LBound(DB, 2) To UBound(DB, 2)
-                              DB(i + 1, k) = Temp(k)
+                            For k = LBound(db, 2) To UBound(db, 2)
+                              db(i + 1, k) = Temp(k)
                             Next
                           Next
                 Else
                     ' 비교 대상의 첫번째 값과 마지막값 차이가 20 이상일 경우 Quick Sort
                     i = lngStart: j = lngEnd
-                    Pivot = DB((lngStart + lngEnd) \ 2, Index)
+                    Pivot = db((lngStart + lngEnd) \ 2, Index)
                         Do
                             If order >= 0 Then
-                                Do While (DB(i, Index) < Pivot): i = i + 1: Loop
-                                Do While (DB(j, Index) > Pivot): j = j - 1: Loop
+                                Do While (db(i, Index) < Pivot): i = i + 1: Loop
+                                Do While (db(j, Index) > Pivot): j = j - 1: Loop
                             Else
-                                Do While (DB(i, Index) > Pivot): i = i + 1: Loop
-                                Do While (DB(j, Index) < Pivot): j = j - 1: Loop
+                                Do While (db(i, Index) > Pivot): i = i + 1: Loop
+                                Do While (db(j, Index) < Pivot): j = j - 1: Loop
                             End If
                             If i <= j Then
                                   If i < j Then
-                                        For k = LBound(DB, 2) To UBound(DB, 2)
-                                            Temp(k) = DB(i, k)
-                                            DB(i, k) = DB(j, k)
-                                            DB(j, k) = Temp(k)
+                                        For k = LBound(db, 2) To UBound(db, 2)
+                                            Temp(k) = db(i, k)
+                                            db(i, k) = db(j, k)
+                                            db(j, k) = Temp(k)
                                         Next
                                   End If
                                     i = i + 1: j = j - 1
@@ -170,7 +170,7 @@ Else
             Loop Until StackPtr = 0
 End If
   
-Sort2DArray = DB
+Sort2DArray = db
   
 End Function
 
