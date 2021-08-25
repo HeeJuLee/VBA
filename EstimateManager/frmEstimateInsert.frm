@@ -156,25 +156,25 @@ End Sub
 
 Sub InitializeCboCustomer()
     Dim db As Variant
-    db = Get_DB(shtCustomer)
+    db = Get_DB(shtCustomer, True)
 
-    Update_Cbo Me.cboCustomer, db, 2
+    Update_Cbo Me.cboCustomer, db, 1
 End Sub
 
 Sub InitializeCboManager()
     Dim db As Variant
     
     '담당자 DB를 읽어와서
-    db = Get_DB(shtManager)
-    '거래처ID로 필터링
-    db = Filtered_DB(db, Me.cboCustomer.Value, 2)
+    db = Get_DB(shtManager, True)
+    '거래처명으로 필터링
+    db = Filtered_DB(db, Me.cboCustomer.Value, 1)
     
     '기존 콤보박스 내용지우기
     Me.cboManager.Clear
     
     '담당자가 있으면 콤보박스에 추가함
     If Not IsEmpty(db) Then
-        Update_Cbo Me.cboManager, db, 3
+        Update_Cbo Me.cboManager, db, 2
     End If
 End Sub
 
@@ -197,9 +197,10 @@ Sub InsertEstimate()
     If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
     
     Insert_Record shtEstimate, _
-            Me.cboManager.Value, _
             Me.txtEstimateID.Value, _
             Me.txtLinkedID.Value, _
+            Me.cboCustomer.Value, _
+            Me.cboManager.Value, _
             Me.txtEstimateName.Value, _
             Me.txtSize.Value, _
             Me.txtAmount.Value, _
@@ -209,10 +210,8 @@ Sub InsertEstimate()
             Me.txtEstimateDate.Value, _
             , , , , _
             , , , , , , _
-            , , , , _
-            , , , , _
-            Date, Date
-
+            Date
+            
     Unload Me
     
     shtEstimateAdmin.EstimateSearch

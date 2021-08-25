@@ -6,8 +6,35 @@ Dim isKeyworldSearch As Boolean
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = Month(Date)
+    Dim pos As Long
+    
     Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년")
     Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
+    
+    If Me.cboSelectYear.Value = "전체" Then
+        fromDate = ""
+        toDate = ""
+    Else
+        pos = InStr(Me.cboSelectYear.Value, "년")
+        If pos <> 0 Then
+            Y = left(Me.cboSelectYear.Value, pos - 1)
+        End If
+    
+        If Me.cboSelectMonth.Value = "전체" Then
+            fromDate = DateSerial(Y, 1, 1)
+            toDate = DateSerial(Y, 12, 31)
+        Else
+            pos = InStr(Me.cboSelectMonth.Value, "월")
+            If pos <> 0 Then
+                M = left(Me.cboSelectMonth.Value, pos - 1)
+                
+                fromDate = DateSerial(Y, M, 1)
+                toDate = DateSerial(Y, M + 1, 0)
+            End If
+        End If
+    End If
     
     isKeyworldSearch = False
 End Sub
@@ -57,7 +84,7 @@ Sub EstimateSearch()
     End If
 
     '검색 결과 건수 출력
-    Me.lblSearchResult.Caption = "총 " & resultCount & "건을 검색하였습니다."
+    Me.lblSearchResult.Caption = "총 " & resultCount & "건 검색"
     
     If isKeyworldSearch = True Then
         Me.txtKeyword.Activate
@@ -154,6 +181,15 @@ Private Sub cboSelectMonth_Change()
     End If
 End Sub
 
+'전체 선택 시 '월'만 전체로 바꿈
+Private Sub optAll_Click()
+    If Me.cboSelectMonth.Value = "전체" Then
+        EstimateSearch
+    Else
+        Me.cboSelectMonth.Value = "전체"
+    End If
+    
+End Sub
 
 '조회기간 - 이번달
 Private Sub optThisMonth_Click()
@@ -257,7 +293,7 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     End If
     
     '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
-    Range("E" & Selection.row).Select
+    Range("C" & Selection.row).Select
     
     '수정 화면 띄움
     frmEstimateUpdate.Show (False)

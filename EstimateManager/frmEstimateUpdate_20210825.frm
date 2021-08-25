@@ -1,14 +1,14 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate_20210825 
    Caption         =   "견적 수정"
    ClientHeight    =   10095
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   18720
-   OleObjectBlob   =   "frmEstimateUpdate.frx":0000
+   OleObjectBlob   =   "frmEstimateUpdate_20210825.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
-Attribute VB_Name = "frmEstimateUpdate"
+Attribute VB_Name = "frmEstimateUpdate_20210825"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
@@ -674,9 +674,5 @@ End Sub
 'Private Sub lstProductionList_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
 'HookListBoxScroll Me, Me.lstProductionList
 'End Sub
-
-
-
-
 
 
