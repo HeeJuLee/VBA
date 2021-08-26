@@ -428,14 +428,14 @@ Sub InitializeCboManager()
     '담당자 DB를 읽어와서
     db = Get_DB(shtManager, True)
     '거래처명으로 필터링
-    db = Filtered_DB(db, Me.cboCustomer.Value, 2)
+    db = Filtered_DB(db, Me.cboCustomer.Value, 1)
     
     '기존 콤보박스 내용지우기
     Me.cboManager.Clear
     
     '담당자가 있으면 콤보박스에 추가함
     If Not IsEmpty(db) Then
-        Update_Cbo Me.cboManager, db, 1
+        Update_Cbo Me.cboManager, db, 2
     End If
 End Sub
 
@@ -586,10 +586,12 @@ Sub CalculateEstimateUpdateCost()
 
     '견적금액 계산
     '수량값이 공백이면 견적금액은 견적단가
-    If Me.txtAmount.Value = "" Then
-        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value
-    Else
-        Me.txtEstimatePrice.Value = CLng(Me.txtUnitPrice.Value) * CLng(Me.txtAmount.Value)
+    If Me.txtUnitPrice <> "" Then
+        If Me.txtAmount.Value = "" Then
+            Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value
+        Else
+            Me.txtEstimatePrice.Value = CLng(Me.txtUnitPrice.Value) * CLng(Me.txtAmount.Value)
+        End If
     End If
     Me.txtEstimatePrice.Text = Format(Me.txtEstimatePrice.Value, "#,##0")
 
