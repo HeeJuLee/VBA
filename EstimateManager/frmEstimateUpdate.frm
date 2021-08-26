@@ -343,7 +343,11 @@ Private Sub UserForm_Initialize()
     Me.txtPaymentDate.Value = estimate(28)    '결제일자
     Me.txtExpectPaymentDate.Value = estimate(29)    '예상결제일자
     Me.txtVAT.Value = Format(estimate(30), "#,##0")    '부가세
-    Me.chkVAT.Value = estimate(31)
+    If estimate(31) = "" Then
+        Me.chkVAT.Value = False
+    Else
+        Me.chkVAT.Value = estimate(31)
+    End If
 '    Me.txtExpectPay.Value = Format(estimate(27), "#,##0")    '입금예상액
 '    Me.txtPaid.Value = Format(estimate(28), "#,##0")   '입금액
 '    Me.txtUnpaid.Value = Format(estimate(29), "#,##0")   '미입금액
