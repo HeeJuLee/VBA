@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateInsert 
    Caption         =   "견적 등록"
-   ClientHeight    =   7620
+   ClientHeight    =   6315
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   6840
+   ClientWidth     =   7050
    OleObjectBlob   =   "frmEstimateInsert.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
@@ -15,28 +15,16 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-
-Private Sub txtEstimateDate_Change()
-    '오류 메시지 숨김
-    Me.lblInputFieldError.Visible = False
-End Sub
-
-Private Sub txtEstimateID_AfterUpdate()
-    '오류 메시지 숨김
-    Me.lblInputFieldError.Visible = False
-End Sub
-
-Private Sub txtEstimateName_AfterUpdate()
-    '오류 메시지 숨김
-    Me.lblInputFieldError.Visible = False
-End Sub
-
-Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then Unload Me
-End Sub
-
 Private Sub UserForm_Initialize()
-
+    Dim contr As Control
+    
+    'Label 위치 맞추기
+    For Each contr In Me.Controls
+    If contr.Name Like "Label*" Then
+        contr.top = contr.top + 2
+    End If
+    Next
+    
     '거래처, 담당자 콤보박스 세팅
     InitializeCboCustomer
     InitializeCboUnit
@@ -45,107 +33,6 @@ Private Sub UserForm_Initialize()
     Me.txtEstimateName.SetFocus
     
 End Sub
-
-Private Sub cboCustomer_Change()
-    '콤보박스에서 거래처를 변경하면 해당 거래처의 담당자로 담당자 콤보박스를 세팅
-    InitializeCboManager
-End Sub
-
-Private Sub txtAmount_AfterUpdate()
-    '오류메시지 숨김
-    Me.lblAmountError.Visible = False
-    Me.lblInputFieldError.Visible = False
-    
-    If Me.txtAmount.Value <> "" Then
-         '수량값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtAmount.Value) Then
-            Me.txtAmount.Value = ""
-            Me.lblAmountError.Visible = True
-        End If
-    End If
-    
-    '수량 1,000자리 컴마 처리
-    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
-    
-    CalculateEstimateInsertCost
-End Sub
-
-Private Sub txtUnitPrice_AfterUpdate()
-     '오류메시지 숨김
-    Me.lblUnitPriceError.Visible = False
-    Me.lblInputFieldError.Visible = False
-    
-    If Me.txtUnitPrice.Value <> "" Then
-        '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtUnitPrice.Value) Then
-            Me.txtUnitPrice.Value = ""
-            Me.lblUnitPriceError.Visible = True
-            Exit Sub
-        End If
-        
-        '금액 1,000자리 컴마 처리
-        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
-    End If
-    
-    CalculateEstimateInsertCost
-End Sub
-
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtEstimateDate
-End Sub
-
-
-Private Sub btnEstimateInsert_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    InsertEstimate
-End Sub
-
-Private Sub btnEstimateClose_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    Unload Me
-End Sub
-
-'버튼 마우스오버 처리
-'유저폼에 추가한 버튼에 개수만큼 아래 명령문을 유저폼에 추가한 뒤, btnClose 를 버튼 이름으로 변경합니다.
-Private Sub btnEstimateInsert_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-OutHover_Css Me.btnEstimateInsert
-End Sub
-
-Private Sub btnEstimateInsert_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-OnHover_Css Me.btnEstimateInsert
-End Sub
-
-Private Sub btnEstimateInsert_Enter()
-OnHover_Css Me.btnEstimateInsert
-End Sub
-
-'유저폼에 추가한 버튼에 개수만큼 아래 명령문을 유저폼에 추가한 뒤, btnClose 를 버튼 이름으로 변경합니다.
-Private Sub btnEstimateClose_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-OutHover_Css Me.btnEstimateClose
-End Sub
-
-Private Sub btnEstimateClose_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-OnHover_Css Me.btnEstimateClose
-End Sub
-
-Private Sub btnEstimateClose_Enter()
-OnHover_Css Me.btnEstimateClose
-End Sub
-
-'아래 코드를 유저폼에 추가한 뒤, "btnXXX, btnYYY"를 버튼이름을 쉼표로 구분한 값으로 변경합니다.
-Private Sub UserForm_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-Dim ctl As Control
-Dim btnList As String: btnList = "btnEstimateInsert, btnEstimateClose" ' 버튼 이름을 쉼표로 구분하여 입력하세요.
-Dim vLists As Variant: Dim vList As Variant
-If InStr(1, btnList, ",") > 0 Then vLists = Split(btnList, ",") Else vLists = Array(btnList)
-For Each ctl In Me.Controls
- For Each vList In vLists
- If InStr(1, ctl.Name, Trim(vList)) > 0 Then OutHover_Css ctl
- Next
-Next
-End Sub
-'커서 이동시 버튼 색깔을 변경하는 보조명령문을 유저폼에 추가합니다.
-Private Sub OnHover_Css(lbl As Control): With lbl: .BackColor = RGB(211, 240, 224): .BorderColor = RGB(134, 191, 160): End With: End Sub
-Private Sub OutHover_Css(lbl As Control): With lbl: .BackColor = &H8000000E: .BorderColor = -2147483638: End With: End Sub
-
 
 Sub InitializeCboUnit()
     Dim db As Variant
@@ -178,8 +65,6 @@ Sub InitializeCboManager()
     End If
 End Sub
 
-
-
 Sub InsertEstimate()
     Dim db As Variant
     Dim blnUnique As Boolean
@@ -193,11 +78,11 @@ Sub InsertEstimate()
     db = Get_DB(shtEstimate)
     
     '동일한 관리번호가 있는지 체크
-    blnUnique = IsUnique(db, Me.txtEstimateID.Value, 3)
+    blnUnique = IsUnique(db, Me.txtManagementID.Value, 3)
     If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
     
     Insert_Record shtEstimate, _
-            Me.txtEstimateID.Value, _
+            Me.txtManagementID.Value, _
             Me.txtLinkedID.Value, _
             Me.cboCustomer.Value, _
             Me.cboManager.Value, _
@@ -218,7 +103,6 @@ Sub InsertEstimate()
     
 End Sub
 
-
 Function CheckEstimateInsertValidation()
     Dim bCorrect As Boolean
     
@@ -233,11 +117,11 @@ Function CheckEstimateInsertValidation()
     End If
     
     '관리번호가 입력되었는지 체크
-    If Trim(Me.txtEstimateID.Value) = "" Then
+    If Trim(Me.txtManagementID.Value) = "" Then
         bCorrect = False
-        Me.lblEstimateIDEmpty.Visible = True
+        Me.lblManagementIDEmpty.Visible = True
     Else
-        Me.lblEstimateIDEmpty.Visible = False
+        Me.lblManagementIDEmpty.Visible = False
     End If
     
     CheckEstimateInsertValidation = bCorrect
@@ -258,3 +142,74 @@ Sub CalculateEstimateInsertCost()
     End If
 
 End Sub
+
+Private Sub btnEstimateClose_Click()
+    Unload Me
+    
+    shtEstimateAdmin.EstimateSearch
+End Sub
+
+Private Sub btnEstimateInsert_Click()
+    InsertEstimate
+End Sub
+
+Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then Unload Me
+End Sub
+
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtEstimateDate
+End Sub
+
+Private Sub cboCustomer_Change()
+    '콤보박스에서 거래처를 변경하면 해당 거래처의 담당자로 담당자 콤보박스를 세팅
+    InitializeCboManager
+End Sub
+
+Private Sub txtEstimateName_AfterUpdate()
+    Me.lblEstimateNameEmpty.Visible = False
+End Sub
+
+Private Sub txtManagementID_AfterUpdate()
+    Me.lblManagementIDEmpty.Visible = False
+End Sub
+
+Private Sub txtAmount_AfterUpdate()
+    '오류메시지 숨김
+    Me.lblAmountError.Visible = False
+'    Me.lblInputFieldError.Visible = False
+    
+    If Me.txtAmount.Value <> "" Then
+         '수량값이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtAmount.Value) Then
+            Me.txtAmount.Value = ""
+            Me.lblAmountError.Visible = True
+        End If
+    End If
+    
+    '수량 1,000자리 컴마 처리
+    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
+    
+    CalculateEstimateInsertCost
+End Sub
+
+Private Sub txtUnitPrice_AfterUpdate()
+     '오류메시지 숨김
+    Me.lblUnitPriceError.Visible = False
+    'Me.lblInputFieldError.Visible = False
+    
+    If Me.txtUnitPrice.Value <> "" Then
+        '견적단가값이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtUnitPrice.Value) Then
+            Me.txtUnitPrice.Value = ""
+            Me.lblUnitPriceError.Visible = True
+            Exit Sub
+        End If
+        
+        '금액 1,000자리 컴마 처리
+        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
+    End If
+    
+    CalculateEstimateInsertCost
+End Sub
+

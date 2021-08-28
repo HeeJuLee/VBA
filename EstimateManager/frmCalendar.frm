@@ -115,7 +115,7 @@ Dim YearBetween As Long
 
 Private Sub cboMonth_Click()
 Me.lblMonth.Caption = Me.cboMonth.Value
-Me.scrlMonth.Value = left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
+Me.scrlMonth.Value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
 End Sub
 
 Private Sub cboYear_Click()
@@ -126,13 +126,13 @@ End Sub
 Private Sub bgNow_Click()
 Me.lblMonth.Caption = Month(Date) & "월"
 Me.lblYear.Caption = Year(Date) & "년"
-Me.scrlMonth.Value = left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
+Me.scrlMonth.Value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
 End Sub
 
 Private Sub lblNow_Click()
 Me.lblMonth.Caption = Month(Date) & "월"
 Me.lblYear.Caption = Year(Date) & "년"
-Me.scrlMonth.Value = left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
+Me.scrlMonth.Value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
 End Sub
 
 Private Sub lblMonth_Click()
@@ -148,9 +148,9 @@ Private Sub scrlMonth_Change()
 If scrlMonth.Value > 0 And scrlMonth.Value < 13 Then
 Me.lblMonth.Caption = Me.scrlMonth.Value & "월"
 ElseIf scrlMonth.Value <= 0 Then
-    scrlMonth.Value = 12: Me.lblMonth.Caption = Me.scrlMonth.Value & "월": Me.lblYear.Caption = left(Me.lblYear.Caption, 4) - 1 & "년"
+    scrlMonth.Value = 12: Me.lblMonth.Caption = Me.scrlMonth.Value & "월": Me.lblYear.Caption = Left(Me.lblYear.Caption, 4) - 1 & "년"
 Else
-    scrlMonth.Value = 1: Me.lblMonth.Caption = Me.scrlMonth.Value & "월": Me.lblYear.Caption = left(Me.lblYear.Caption, 4) + 1 & "년"
+    scrlMonth.Value = 1: Me.lblMonth.Caption = Me.scrlMonth.Value & "월": Me.lblYear.Caption = Left(Me.lblYear.Caption, 4) + 1 & "년"
 End If
 
 resetDate
@@ -171,7 +171,7 @@ For i = 43 To 84
     With Me.Controls("Label" & i)
         .Caption = ""
         .top = .top - 2
-        .left = .left - 2
+        .Left = .Left - 2
         .Width = .Width + 3
         .Height = .Height + 2
         .BackStyle = 1
@@ -198,7 +198,7 @@ End Sub
 
 Function GetDate(Optional Location As frmLocation = 2, Optional YearGap As Long = 3) As Date
 
-Dim top As Double: Dim left As Double
+Dim top As Double: Dim Left As Double
 Dim MousePos As POINTAPI
 
 If Location = 0 Then
@@ -206,12 +206,12 @@ If Location = 0 Then
 ElseIf Location = 1 Then
     Me.StartUpPosition = 0
     Me.top = ActiveCell.top + ActiveCell.Height + Me.Height
-    Me.left = ActiveCell.Offset(0, 1).left
+    Me.Left = ActiveCell.Offset(0, 1).Left
 Else
     MousePos = convertMouseToForm()
     Me.StartUpPosition = 0
     Me.top = MousePos.Y
-    Me.left = MousePos.X
+    Me.Left = MousePos.X
 End If
 
 YearBetween = YearGap
@@ -235,7 +235,7 @@ End With
 End Sub
 Sub lblClick(lbl As MSForms.Label)
 Dim Y As Integer: Dim M As Integer: Dim D As Integer
-Y = left(Me.lblYear.Caption, 4): M = left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1): D = lbl.Caption
+Y = Left(Me.lblYear.Caption, 4): M = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1): D = lbl.Caption
 
 returnDate = DateSerial(Y, M, D)
 Unload Me
@@ -246,7 +246,7 @@ Sub resetDate()
 
 Dim Y As Integer: Dim M As Integer: Dim D As Integer: Dim w As Integer
 Dim i As Integer
-Y = left(Me.lblYear.Caption, 4): M = left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1): D = Day(DateSerial(Y, M + 1, 1) - 1)
+Y = Left(Me.lblYear.Caption, 4): M = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1): D = Day(DateSerial(Y, M + 1, 1) - 1)
 w = Weekday(DateSerial(Y, M, 1))
 
 For i = 1 To 42

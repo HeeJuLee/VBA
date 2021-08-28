@@ -95,7 +95,7 @@ Private Sub cboSelectYear_Change()
         '년도를 선택한 경우
         pos = InStr(Me.cboSelectYear.Value, "년")
         If pos <> 0 Then
-            Y = left(Me.cboSelectYear.Value, pos - 1)
+            Y = Left(Me.cboSelectYear.Value, pos - 1)
         End If
     
         If Me.cboSelectMonth.Value = "전체" Then
@@ -104,7 +104,7 @@ Private Sub cboSelectYear_Change()
         Else
             pos = InStr(Me.cboSelectMonth.Value, "월")
             If pos <> 0 Then
-                M = left(Me.cboSelectMonth.Value, pos - 1)
+                M = Left(Me.cboSelectMonth.Value, pos - 1)
                 
                 txtFromDate.Value = DateSerial(Y, M, 1)
                 txtToDate.Value = DateSerial(Y, M + 1, 0)
@@ -136,7 +136,7 @@ Private Sub cboSelectMonth_Change()
     Else
         pos = InStr(Me.cboSelectYear.Value, "년")
         If pos <> 0 Then
-            Y = left(Me.cboSelectYear.Value, pos - 1)
+            Y = Left(Me.cboSelectYear.Value, pos - 1)
         End If
     
         If Me.cboSelectMonth.Value = "전체" Then
@@ -145,7 +145,7 @@ Private Sub cboSelectMonth_Change()
         Else
             pos = InStr(Me.cboSelectMonth.Value, "월")
             If pos <> 0 Then
-                M = left(Me.cboSelectMonth.Value, pos - 1)
+                M = Left(Me.cboSelectMonth.Value, pos - 1)
                 
                 txtFromDate.Value = DateSerial(Y, M, 1)
                 txtToDate.Value = DateSerial(Y, M + 1, 0)
@@ -195,35 +195,6 @@ Private Sub optLastMonth_Click()
     End If
     
 End Sub
-
-'From 달력 선택
-Sub CalendarFromClick()
-    Dim vDate As Date
-    
-    vDate = frmCalendar.GetDate
-    
-    ' X를 누르고 나오는 경우 날짜 포맷이 '오전 10:00' 이런식으로 입력되는 것 오류 체크
-    If InStr(vDate, "오전") <> 0 Or InStr(vDate, "오후") <> 0 Then
-        txtFromDate.Value = ""
-    Else
-        txtToDate.Value = vDate
-    End If
-End Sub
-
-'To 달력 선택
-Sub CalendarToClick()
-    Dim vDate As Date
-    
-    vDate = frmCalendar.GetDate
-    
-    ' X를 누르고 나오는 경우 날짜 포맷이 '오전 10:00' 이런식으로 입력되는 것 오류 체크
-    If InStr(vDate, "오전") <> 0 Or InStr(vDate, "오후") <> 0 Then
-        Me.txtTo.Value = ""
-    Else
-        Me.txtTo.Value = vDate
-    End If
-End Sub
-
 
 '키워드 검색 입력 시
 Private Sub txtKeyword_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
@@ -282,7 +253,7 @@ Sub EstimateDelete()
     cRow = Selection.row
 
     '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
+    If cRow < 6 Or Range("B" & cRow).Value = "" Then
         MsgBox "삭제할 행을 선택하신 후 '삭제' 버튼을 클릭하세요."
         End
     End If
@@ -295,4 +266,14 @@ Sub EstimateDelete()
     Delete_Record shtEstimate, Range("B" & cRow).Value
 
     EstimateSearch
+End Sub
+
+Sub GoToEnd()
+    Dim endRow As Long
+    
+    With shtEstimateAdmin
+        .Activate
+        endRow = .Range("C5").End(xlDown).row
+        .Range("E" & endRow).Select
+    End With
 End Sub

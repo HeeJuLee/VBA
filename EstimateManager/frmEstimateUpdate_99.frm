@@ -46,10 +46,6 @@ Private Sub cboCustomer_Change()
     InitializeCboManager
 End Sub
 
-Private Sub frmWorkingDate_Click()
-
-End Sub
-
 '수주일자 입력 박스
 Private Sub txtAcceptedDate_AfterUpdate()
     CalculateEstimateUpdateCost

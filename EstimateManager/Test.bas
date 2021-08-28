@@ -1,7 +1,7 @@
 Attribute VB_Name = "Test"
 Option Explicit
 
-Sub Test()
+Sub test()
 '
 'Update_Record_Column shtTest, 15, "담당자", "이희주"
 'Update_Record_Column shtTest, 15, "연락처", "123-331-333"

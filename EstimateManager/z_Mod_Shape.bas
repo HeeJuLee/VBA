@@ -43,7 +43,7 @@ Dim WS As Worksheet
 Set WS = rng.Parent
 
 With rng
-    Set Shp = WS.Shapes.AddShape(ShapeType, .left, .top, .Width, .Height)
+    Set Shp = WS.Shapes.AddShape(ShapeType, .Left, .top, .Width, .Height)
 End With
 
 With Shp

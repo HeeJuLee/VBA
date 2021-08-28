@@ -1,28 +1,277 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate_50 
    Caption         =   "견적 수정"
-   ClientHeight    =   9015.001
+   ClientHeight    =   9540.001
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   17565
-   OleObjectBlob   =   "frmEstimateUpdate.frx":0000
+   ClientWidth     =   18300
+   OleObjectBlob   =   "frmEstimateUpdate_50.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
-Attribute VB_Name = "frmEstimateUpdate"
+Attribute VB_Name = "frmEstimateUpdate_50"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
-Dim orgManagementID As Variant
+Dim orgEstimateID As Variant
+
+Private Sub btnEstimateClose_Click()
+    Unload Me
+    
+    '견적관리 화면 새로고침
+    shtEstimateAdmin.Activate
+    shtEstimateAdmin.EstimateSearch
+End Sub
+
+Private Sub btnEstimateUpdate_Click()
+    UpdateEstimate
+End Sub
+
+Private Sub btnProductionClear_Click()
+    ClearProductionInput
+End Sub
+
+Private Sub btnProductionDelete_Click()
+    DeleteProduction
+End Sub
+
+Private Sub btnProductionInsert_Click()
+    InsertProduction
+End Sub
+
+Private Sub btnProductionUpdate_Click()
+    UpdateProduction
+End Sub
+
+Private Sub cboCategory_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then Unload Me
+End Sub
+
+Private Sub cboCustomer_Change()
+    InitializeCboManager
+End Sub
+
+Private Sub chkVAT_AfterUpdate()
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtAcceptedDate_AfterUpdate()
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtInsuranceDate_AfterUpdate()
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtSpecificationDate_AfterUpdate()
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtTaxInvoiceDate_AfterUpdate()
+   CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtPaymentDate_AfterUpdate()
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtExpectPaymentDate_AfterUpdate()
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtEstimateDate_Change()
+    Me.lblErrorMessage.Visible = False
+End Sub
+
+Private Sub txtManagementID_AfterUpdate()
+    Me.lblErrorMessage.Visible = False
+End Sub
+
+Private Sub txtEstimateName_AfterUpdate()
+    Me.lblErrorMessage.Visible = False
+End Sub
+
+Private Sub txtAmount_AfterUpdate()
+    '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    '수량값이 공백이면 중지
+    If Me.txtAmount.Value <> "" Then
+        '수량값이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtAmount.Value) Then
+            Me.txtAmount.Value = ""
+            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
+            Me.lblErrorMessage.Visible = True
+        End If
+    End If
+    
+    '수량 1,000자리 컴마 처리
+    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
+    
+    '비용 필드 계산
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtUnitPrice_AfterUpdate()
+     '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    If Me.txtUnitPrice.Value <> "" Then
+        '견적단가값이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtUnitPrice.Value) Then
+            Me.txtUnitPrice.Value = ""
+            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
+            Me.lblErrorMessage.Visible = True
+        End If
+    End If
+    
+    '견적단가 1,000자리 컴마 처리
+    Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
+    
+    '비용 필드 계산
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub txtBidPrice_AfterUpdate()
+     '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    If Me.txtBidPrice.Value <> "" Then
+        '입찰금액이 숫자가 아닐 경우 오류메시지 출력
+        If Not IsNumeric(Me.txtBidPrice.Value) Then
+            Me.txtBidPrice.Value = ""
+            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
+            Me.lblErrorMessage.Visible = True
+        End If
+    End If
+
+    '입찰금액 1,000자리 컴마 처리
+    Me.txtBidPrice.Text = Format(Me.txtBidPrice.Value, "#,##0")
+    
+    '비용 필드 계산
+    CalculateEstimateUpdateCost
+    
+End Sub
+
+Private Sub txtProductionAmount_AfterUpdate()
+    '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    If Me.txtProductionAmount.Value = "" Then
+        Exit Sub
+    End If
+    
+    If IsNumeric(Me.txtProductionAmount.Value) Then
+        Me.txtProductionAmount.Text = Format(Me.txtProductionAmount.Value, "#,##0")
+        
+        '금액 = 수량 * 단가
+        If IsNumeric(Me.txtProductionUnitPrice.Value) Then
+            Me.txtProductionCost.Value = CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value)
+            Me.txtProductionCost.Text = Format(Me.txtProductionCost.Value, "#,##0")
+        End If
+    End If
+End Sub
+
+Private Sub txtProductionUnitPrice_AfterUpdate()
+    '오류메시지 숨김
+    Me.lblErrorMessage.Visible = False
+    
+    If Me.txtProductionUnitPrice.Value = "" Then
+        Exit Sub
+    End If
+    
+    If IsNumeric(Me.txtProductionUnitPrice.Value) Then
+        Me.txtProductionUnitPrice.Text = Format(Me.txtProductionUnitPrice.Value, "#,##0")
+        
+        If Me.txtProductionAmount.Value = "" Then
+            Me.txtProductionCost.Value = Me.txtProductionUnitPrice.Value
+            Me.txtProductionCost.Text = Format(Me.txtProductionCost.Value, "#,##0")
+        Else
+            If IsNumeric(Me.txtProductionAmount.Value) Then
+                '금액 = 수량 * 단가
+                Me.txtProductionCost.Value = CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value)
+                Me.txtProductionCost.Text = Format(Me.txtProductionCost.Value, "#,##0")
+            End If
+        End If
+    End If
+End Sub
+
+Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtAcceptedDate
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtBidDate
+End Sub
+
+Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtDeliveryDate
+End Sub
+
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtEstimateDate
+End Sub
+
+Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtInsuranceDate
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtPaymentDate
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtSpecificationDate
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtTaxInvoiceDate
+    CalculateEstimateUpdateCost
+End Sub
+
+Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtExpectPaymentDate
+    CalculateEstimateUpdateCost
+End Sub
+
+
+Private Sub lstProductionList_Click()
+    Dim arr As Variant
+
+    arr = Get_ListItm(Me.lstProductionList)
+    Me.txtProductionID.Value = arr(0)                       'ID
+    Me.txtProductionCustomer = arr(3)               '거래처
+    Me.txtProductionItem.Value = arr(4)                     '품명
+    Me.txtProductionMaterial.Value = arr(5)           '재질
+    Me.txtProductionSize.Value = arr(6)                '규격
+    Me.txtProductionAmount.Value = arr(7)           '수량
+    Me.cboProductionUnit.Value = arr(8)               '단위
+    Me.txtProductionUnitPrice.Value = arr(9)        '단가
+    Me.txtProductionUnitPrice.Text = Format(arr(9), "#,##0")
+    Me.txtProductionCost.Value = arr(10)         '금액
+    Me.txtProductionCost.Text = Format(arr(10), "#,##0")
+    Me.txtProductionMemo = arr(11)       '메모
+    
+End Sub
+
+Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then Unload Me
+End Sub
 
 
 Private Sub UserForm_Initialize()
     Dim cRow As Long
     Dim estimate As Variant
+    Dim manager As Variant
+    Dim customer As Variant
     Dim db As Variant
-    Dim contr As Control
     
     '선택한 행 번호
     cRow = Selection.row
@@ -30,14 +279,7 @@ Private Sub UserForm_Initialize()
     '데이터가 있는 행이 아닐 경우는 중지
     If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then End
     
-    'Label 위치 맞추기
-    For Each contr In Me.Controls
-    If contr.Name Like "Label*" Then
-        contr.top = contr.top + 2
-    End If
-    Next
-    
-    '견적 데이터 읽어오기
+    '견적/담당자/거래처 데이터 읽어오기
     estimate = Get_Record_Array(shtEstimate, shtEstimateAdmin.Cells(cRow, 2))
 
     Me.txtID.Value = estimate(1)    'ID
@@ -82,7 +324,7 @@ Private Sub UserForm_Initialize()
     Me.txtPaymentDate.Value = estimate(28)    '결제일자
     Me.txtExpectPaymentDate.Value = estimate(29)    '예상결제일자
     Me.txtVAT.Value = Format(estimate(30), "#,##0")    '부가세
-    Me.chkVAT.Value = estimate(31)      '부가세 제외 여부
+    Me.chkVAT.Value = estimate(31)
     
 '    Me.txtExpectPay.Value = Format(estimate(27), "#,##0")    '입금예상액
 '    Me.txtPaid.Value = Format(estimate(28), "#,##0")   '입금액
@@ -91,8 +333,59 @@ Private Sub UserForm_Initialize()
     Me.txtInsertDate.Value = estimate(23)    '등록일자
     Me.txtUpdateDate.Value = estimate(24)    '수정일자
     
+    
     '변경 전 관리번호
-    orgManagementID = Me.txtManagementID
+    orgEstimateID = Me.txtManagementID
+    
+    
+End Sub
+
+
+Sub UpdateEstimate()
+    Dim db As Variant
+    Dim blnUnique As Boolean
+    
+    '입력 데이터 체크
+    If CheckEstimateUpdateValidation = False Then
+        Exit Sub
+    End If
+
+    '견적정보 DB 읽어오기
+    db = Get_DB(shtEstimate)
+    
+    '동일한 관리번호가 있는지 체크
+    blnUnique = IsUnique(db, Me.txtManagementID.Value, 3, orgEstimateID)
+    If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
+    
+    '견적금액 계산 = 견적단가 * 수량
+    If Me.txtAmount.Value = "" Then
+        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value
+    Else
+        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value * Me.txtAmount.Value
+    End If
+    
+    '데이터 업데이트
+    Update_Record shtEstimate, Me.txtID.Value, _
+        Me.txtManagementID.Value, Me.txtLinkedID.Value, _
+        Me.cboCustomer.Value, Me.cboManager.Value, _
+        Me.txtEstimateName.Value, Me.txtSize.Value, _
+        Me.txtAmount.Value, Me.cboUnit.Value, _
+        Me.txtUnitPrice.Value, Me.txtEstimatePrice.Value, _
+        Me.txtEstimateDate.Value, Me.txtBidDate.Value, _
+        Me.txtAcceptedDate.Value, Me.txtDeliveryDate.Value, _
+        Me.txtInsuranceDate.Value, Me.txtExecutionCost.Value, _
+        Me.txtBidPrice.Value, Me.txtBidMargin.Value, _
+        Me.txtBidMarginRate.Value, Me.txtAcceptedPrice.Value, _
+        Me.txtAcceptedMargin.Value, _
+        Me.txtInsertDate.Value, Date, _
+        Me.cboCategory.Value, Me.txtSpecificationDate.Value, _
+        Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
+        Me.txtExpectPaymentDate.Value, Me.txtVAT.Value, Me.chkVAT.Value
+
+    Unload Me
+    
+    shtEstimateAdmin.Activate
+    shtEstimateAdmin.EstimateSearch
     
 End Sub
 
@@ -178,45 +471,17 @@ Sub InitializeCboProductonUnit()
     Update_Cbo Me.cboProductionUnit, db
 End Sub
 
-Sub UpdateEstimate()
-    Dim db As Variant
-    Dim blnUnique As Boolean
-    
-    '입력 데이터 체크
-    If CheckEstimateUpdateValidation = False Then
-        Exit Sub
-    End If
-
-    '견적정보 DB 읽어오기
-    db = Get_DB(shtEstimate)
-    
-    '동일한 관리번호가 있는지 체크
-    blnUnique = IsUnique(db, Me.txtManagementID.Value, 3, orgManagementID)
-    If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
-    
-    '데이터 업데이트
-    Update_Record shtEstimate, Me.txtID.Value, _
-        Me.txtManagementID.Value, Me.txtLinkedID.Value, _
-        Me.cboCustomer.Value, Me.cboManager.Value, _
-        Me.txtEstimateName.Value, Me.txtSize.Value, _
-        Me.txtAmount.Value, Me.cboUnit.Value, _
-        Me.txtUnitPrice.Value, Me.txtEstimatePrice.Value, _
-        Me.txtEstimateDate.Value, Me.txtBidDate.Value, _
-        Me.txtAcceptedDate.Value, Me.txtDeliveryDate.Value, _
-        Me.txtInsuranceDate.Value, Me.txtExecutionCost.Value, _
-        Me.txtBidPrice.Value, Me.txtBidMargin.Value, _
-        Me.txtBidMarginRate.Value, Me.txtAcceptedPrice.Value, _
-        Me.txtAcceptedMargin.Value, _
-        Me.txtInsertDate.Value, Date, _
-        Me.cboCategory.Value, Me.txtSpecificationDate.Value, _
-        Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
-        Me.txtExpectPaymentDate.Value, Me.txtVAT.Value, Me.chkVAT.Value
-
-    Unload Me
-    
-    shtEstimateAdmin.Activate
-    shtEstimateAdmin.EstimateSearch
-    
+Sub ClearProductionInput()
+    Me.txtProductionID.Value = ""
+    Me.txtProductionCustomer.Value = ""
+    Me.txtProductionItem.Value = ""
+    Me.txtProductionMaterial.Value = ""
+    Me.txtProductionSize.Value = ""
+    Me.txtProductionAmount.Value = ""
+    Me.cboProductionUnit.Value = ""
+    Me.txtProductionUnitPrice.Value = ""
+    Me.txtProductionCost.Value = ""
+    Me.txtProductionMemo.Value = ""
 End Sub
 
 Function CheckEstimateUpdateValidation()
@@ -414,63 +679,38 @@ Sub DeleteProduction()
     Dim db As Variant
     Dim YN As VbMsgBoxResult
 
-    If Me.txtProductionID.Value = "" Then MsgBox "삭제할 항목을 선택하세요.": Exit Sub
-        
-    '안내 문구 출력
-    YN = MsgBox("선택한 항목을 삭제하시겠습니까? 삭제한 정보는 복구가 불가능합니다.", vbYesNo)
-    If YN = vbNo Then Exit Sub
-
-    '예상실행항목에서 삭제
-    Delete_Record shtProduction, Me.txtProductionID.Value
-
-    '예상실행가 계산
-    Me.txtProductionTotalCost.Value = GetProductionTotalCost
-    Me.txtExecutionCost.Value = Me.txtProductionTotalCost.Value
+    If Me.txtProductionID.Value = "" Then
+        MsgBox "삭제할 항목을 선택하세요."
+        Exit Sub
+    Else
+        '안내 문구 출력
+        YN = MsgBox("선택한 항목을 삭제하시겠습니까? 삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+        If YN = vbNo Then Exit Sub
     
-     '예상실행가 기준으로 비용 다시 계산
-     CalculateEstimateUpdateCost
+        '예상실행항목에서 삭제
+        Delete_Record shtProduction, Me.txtProductionID.Value
 
-     '예상실행가, 입찰차액, 마진율, 수주차액 금액을 견적테이블에 저장
-    Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "실행가", CLng(Me.txtProductionTotalCost.Value)
-    Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "차액", CLng(Me.txtBidMargin.Value)
-    Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "마진율", Me.txtBidMarginRate.Value
-    Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "수주차액", CLng(Me.txtAcceptedMargin.Value)
-
-    Me.txtProductionID.Value = ""
-
-    InitializeLstProduction
-
-    ClearProductionInput
+        '예상실행가 계산
+        Me.txtProductionTotalCost.Value = GetProductionTotalCost
+        Me.txtExecutionCost.Value = Me.txtProductionTotalCost.Value
+        
+         '예상실행가 기준으로 비용 다시 계산
+         CalculateEstimateUpdateCost
+    
+         '예상실행가, 입찰차액, 마진율, 수주차액 금액을 견적테이블에 저장
+        Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "실행가", CLng(Me.txtProductionTotalCost.Value)
+        Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "차액", CLng(Me.txtBidMargin.Value)
+        Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "마진율", Me.txtBidMarginRate.Value
+        Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "수주차액", CLng(Me.txtAcceptedMargin.Value)
+    
+        Me.txtProductionID.Value = ""
+    
+        InitializeLstProduction
+    
+        ClearProductionInput
+    End If
     
 End Sub
-
-Sub ProductionToOrder()
-
-    If Me.txtProductionID.Value = "" Then MsgBox "발주할 항목을 선택하세요.": Exit Sub
-    
-    '선택한 예상실행항목을 발주 테이블에 등록
-    Insert_Record shtOrder, _
-        , , Me.txtManagementID.Value, _
-        Me.txtProductionCustomer.Value, _
-        Me.txtProductionItem.Value, _
-        Me.txtProductionMaterial.Value, _
-        Me.txtProductionSize.Value, _
-        Me.txtProductionAmount.Value, _
-        Me.cboProductionUnit.Value, _
-        Me.txtProductionUnitPrice.Value, _
-        Me.txtProductionCost.Value, _
-        , _
-        , _
-        , , , _
-        , , , , , _
-        Date, , Me.txtID, False, Me.txtProductionMemo
-        
-        shtOrderAdmin.Activate
-        shtOrderAdmin.OrderSearch
-        shtOrderAdmin.GoToEnd
-        
-        MsgBox "'" & Me.txtProductionItem & "' 항목을 발주하였습니다."
-    End Sub
 
 Function GetProductionTotalCost()
     Dim i As Long
@@ -495,248 +735,14 @@ Function GetProductionTotalCost()
     GetProductionTotalCost = totalCost
 End Function
 
-Sub ClearProductionInput()
-    Me.txtProductionID.Value = ""
-    Me.txtProductionCustomer.Value = ""
-    Me.txtProductionItem.Value = ""
-    Me.txtProductionMaterial.Value = ""
-    Me.txtProductionSize.Value = ""
-    Me.txtProductionAmount.Value = ""
-    Me.cboProductionUnit.Value = ""
-    Me.txtProductionUnitPrice.Value = ""
-    Me.txtProductionCost.Value = ""
-    Me.txtProductionMemo.Value = ""
-End Sub
-
-Private Sub btnEstimateUpdate_Click()
-    UpdateEstimate
-End Sub
-
-Private Sub btnEstimateClose_Click()
-    Unload Me
-    
-    '견적관리 화면 새로고침
-    shtEstimateAdmin.Activate
-    shtEstimateAdmin.EstimateSearch
-End Sub
-
-Private Sub lstProductionList_Click()
-    Dim arr As Variant
-
-    arr = Get_ListItm(Me.lstProductionList)
-    Me.txtProductionID.Value = arr(0)                       'ID
-    Me.txtProductionCustomer = arr(3)               '거래처
-    Me.txtProductionItem.Value = arr(4)                     '품명
-    Me.txtProductionMaterial.Value = arr(5)           '재질
-    Me.txtProductionSize.Value = arr(6)                '규격
-    Me.txtProductionAmount.Value = arr(7)           '수량
-    Me.cboProductionUnit.Value = arr(8)               '단위
-    Me.txtProductionUnitPrice.Value = arr(9)        '단가
-    Me.txtProductionUnitPrice.Text = Format(arr(9), "#,##0")
-    Me.txtProductionCost.Value = arr(10)         '금액
-    Me.txtProductionCost.Text = Format(arr(10), "#,##0")
-    Me.txtProductionMemo = arr(11)       '메모
-    
-End Sub
-
-Private Sub btnProductionClear_Click()
-    ClearProductionInput
-End Sub
-
-Private Sub btnProductionDelete_Click()
-    DeleteProduction
-End Sub
-
-Private Sub btnProductionInsert_Click()
-    InsertProduction
-End Sub
-
-Private Sub btnProductionUpdate_Click()
-    UpdateProduction
-End Sub
-
-Private Sub btnProductionToOrder_Click()
-    ProductionToOrder
-End Sub
-
-Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then Unload Me
-End Sub
-
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtEstimateDate
-End Sub
-
-Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtAcceptedDate
-    CalculateEstimateUpdateCost
-End Sub
-
-Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtBidDate
-End Sub
-
-Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtDeliveryDate
-End Sub
-
-Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtInsuranceDate
-    CalculateEstimateUpdateCost
-End Sub
-
-Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtSpecificationDate
-    CalculateEstimateUpdateCost
-End Sub
-
-Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
-    CalculateEstimateUpdateCost
-End Sub
-
-Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtPaymentDate
-End Sub
-
-Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtExpectPaymentDate
-End Sub
-
-Private Sub cboCustomer_Change()
-    InitializeCboManager
-End Sub
-
-Private Sub txtEstimateDate_Change()
-    Me.lblErrorMessage.Visible = False
-End Sub
-
-Private Sub txtManagementID_AfterUpdate()
-    Me.lblErrorMessage.Visible = False
-End Sub
-
-Private Sub txtEstimateName_AfterUpdate()
-    Me.lblErrorMessage.Visible = False
-End Sub
-
-Private Sub txtAmount_AfterUpdate()
-    '오류메시지 숨김
-    Me.lblErrorMessage.Visible = False
-    
-    '수량값이 공백이면 중지
-    If Me.txtAmount.Value <> "" Then
-        '수량값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtAmount.Value) Then
-            Me.txtAmount.Value = ""
-            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
-            Me.lblErrorMessage.Visible = True
-        End If
-    End If
-    
-    '수량 1,000자리 컴마 처리
-    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
-    
-    '비용 필드 계산
-    CalculateEstimateUpdateCost
-End Sub
-
-Private Sub txtUnitPrice_AfterUpdate()
-     '오류메시지 숨김
-    Me.lblErrorMessage.Visible = False
-    
-    If Me.txtUnitPrice.Value <> "" Then
-        '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtUnitPrice.Value) Then
-            Me.txtUnitPrice.Value = ""
-            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
-            Me.lblErrorMessage.Visible = True
-        End If
-    End If
-    
-    '견적단가 1,000자리 컴마 처리
-    Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
-    
-    '비용 필드 계산
-    CalculateEstimateUpdateCost
-End Sub
-
-Private Sub txtBidPrice_AfterUpdate()
-     '오류메시지 숨김
-    Me.lblErrorMessage.Visible = False
-    
-    If Me.txtBidPrice.Value <> "" Then
-        '입찰금액이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtBidPrice.Value) Then
-            Me.txtBidPrice.Value = ""
-            Me.lblErrorMessage.Caption = "숫자를 입력하세요."
-            Me.lblErrorMessage.Visible = True
-        End If
-    End If
-
-    '입찰금액 1,000자리 컴마 처리
-    Me.txtBidPrice.Text = Format(Me.txtBidPrice.Value, "#,##0")
-    
-    '비용 필드 계산
-    CalculateEstimateUpdateCost
-    
-End Sub
-
-Private Sub txtProductionAmount_AfterUpdate()
-    
-    If Me.txtProductionAmount.Value = "" Then
-        Exit Sub
-    End If
-    
-    If IsNumeric(Me.txtProductionAmount.Value) Then
-        Me.txtProductionAmount.Text = Format(Me.txtProductionAmount.Value, "#,##0")
-        
-        '금액 = 수량 * 단가
-        If IsNumeric(Me.txtProductionUnitPrice.Value) Then
-            Me.txtProductionCost.Value = CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value)
-            Me.txtProductionCost.Text = Format(Me.txtProductionCost.Value, "#,##0")
-        End If
-    End If
-End Sub
-
-Private Sub txtProductionUnitPrice_AfterUpdate()
-    
-    If Me.txtProductionUnitPrice.Value = "" Then
-        Exit Sub
-    End If
-    
-    If IsNumeric(Me.txtProductionUnitPrice.Value) Then
-        Me.txtProductionUnitPrice.Text = Format(Me.txtProductionUnitPrice.Value, "#,##0")
-        
-        If Me.txtProductionAmount.Value = "" Then
-            Me.txtProductionCost.Value = Me.txtProductionUnitPrice.Value
-            Me.txtProductionCost.Text = Format(Me.txtProductionCost.Value, "#,##0")
-        Else
-            If IsNumeric(Me.txtProductionAmount.Value) Then
-                '금액 = 수량 * 단가
-                Me.txtProductionCost.Value = CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value)
-                Me.txtProductionCost.Text = Format(Me.txtProductionCost.Value, "#,##0")
-            End If
-        End If
-    End If
-End Sub
-
-Private Sub txtAcceptedDate_AfterUpdate()
-    CalculateEstimateUpdateCost
-End Sub
-
-Private Sub txtTaxInvoiceDate_AfterUpdate()
-   CalculateEstimateUpdateCost
-End Sub
-
-Private Sub txtPaymentDate_AfterUpdate()
-    CalculateEstimateUpdateCost
-End Sub
-
-Private Sub chkVAT_AfterUpdate()
-    CalculateEstimateUpdateCost
-End Sub
-
-
+'=============================================
+'리스트박스 스크롤
+'Private Sub lstProductionList_Exit(ByVal Cancel As MSForms.ReturnBoolean)
+'UnhookListBoxScroll
+'End Sub
+'Private Sub lstProductionList_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+'HookListBoxScroll Me, Me.lstProductionList
+'End Sub
 
 
 

@@ -18,7 +18,7 @@ With cboBox
     For i = 1 To colCount
         If DisplayCol = i Then colWidths = colWidths & .Width - 15 & "," Else colWidths = colWidths & "0,"
     Next
-    colWidths = left(colWidths, Len(colWidths) - 1)
+    colWidths = Left(colWidths, Len(colWidths) - 1)
     .List = db
     .ColumnWidths = colWidths
     If SetDefault = True Then .ListIndex = 0

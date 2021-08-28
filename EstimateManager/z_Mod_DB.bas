@@ -405,11 +405,11 @@ If Value <> "" Then
         Next
     End If
     
-    If left(Value, 2) = ">=" Or left(Value, 2) = "<=" Or left(Value, 2) = "=>" Or left(Value, 2) = "=<" Then
-        Operator = left(Value, 2)
+    If Left(Value, 2) = ">=" Or Left(Value, 2) = "<=" Or Left(Value, 2) = "=>" Or Left(Value, 2) = "=<" Then
+        Operator = Left(Value, 2)
         If IsDate(Right(Value, Len(Value) - 2)) Then isDateVal = True
-    ElseIf left(Value, 1) = ">" Or left(Value, 1) = "<" Then
-        Operator = left(Value, 1)
+    ElseIf Left(Value, 1) = ">" Or Left(Value, 1) = "<" Then
+        Operator = Left(Value, 1)
         If IsDate(Right(Value, Len(Value) - 1)) Then isDateVal = True
     Else: End If
     
@@ -418,38 +418,38 @@ If Value <> "" Then
             Select Case Operator
                 Case ">"
                     For i = 1 To cRow
-                        If CDbl(left(filterArr(i), Len(filterArr(i)) - 2)) > CDbl(Right(Value, Len(Value) - 1)) Then: vArr(i) = left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) > CDbl(Right(Value, Len(Value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 Case "<"
                     For i = 1 To cRow
-                        If CDbl(left(filterArr(i), Len(filterArr(i)) - 2)) < CDbl(Right(Value, Len(Value) - 1)) Then: vArr(i) = left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) < CDbl(Right(Value, Len(Value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 Case ">=", "=>"
                     For i = 1 To cRow
-                        If CDbl(left(filterArr(i), Len(filterArr(i)) - 2)) >= CDbl(Right(Value, Len(Value) - 2)) Then: vArr(i) = left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) >= CDbl(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                  Case "<=", "=<"
                     For i = 1 To cRow
-                        If CDbl(left(filterArr(i), Len(filterArr(i)) - 2)) <= CDbl(Right(Value, Len(Value) - 2)) Then: vArr(i) = left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDbl(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
             End Select
         Else
             Select Case Operator
                 Case ">"
                     For i = 1 To cRow
-                        If CDate(left(filterArr(i), Len(filterArr(i)) - 2)) > CDate(Right(Value, Len(Value) - 1)) Then: vArr(i) = left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) > CDate(Right(Value, Len(Value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 Case "<"
                     For i = 1 To cRow
-                        If CDate(left(filterArr(i), Len(filterArr(i)) - 2)) < CDate(Right(Value, Len(Value) - 1)) Then: vArr(i) = left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) < CDate(Right(Value, Len(Value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 Case ">=", "=>"
                     For i = 1 To cRow
-                        If CDate(left(filterArr(i), Len(filterArr(i)) - 2)) >= CDate(Right(Value, Len(Value) - 2)) Then: vArr(i) = left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) >= CDate(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                  Case "<=", "=<"
                     For i = 1 To cRow
-                        If CDate(left(filterArr(i), Len(filterArr(i)) - 2)) <= CDate(Right(Value, Len(Value) - 2)) Then: vArr(i) = left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDate(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
             End Select
         End If
@@ -457,7 +457,7 @@ If Value <> "" Then
         If ExactMatch = False Then
             For i = 1 To cRow
                 If filterArr(i) Like "*" & Value & "*" Then
-                    vArr(i) = left(vArr(i), Len(vArr(i)) - 2)
+                    vArr(i) = Left(vArr(i), Len(vArr(i)) - 2)
                     vReturn = Split(vArr(i), "|^")
                     Dict.Add i, vReturn
                 End If
@@ -465,7 +465,7 @@ If Value <> "" Then
         Else
             For i = 1 To cRow
                 If filterArr(i) Like Value & "|^" Then
-                    vArr(i) = left(vArr(i), Len(vArr(i)) - 2)
+                    vArr(i) = Left(vArr(i), Len(vArr(i)) - 2)
                     vReturn = Split(vArr(i), "|^")
                     Dict.Add i, vReturn
                 End If

@@ -31,7 +31,7 @@ Public Function getLocalFullName$(ByVal fullPath$)
     Dim oneDrivePath$
     Dim endFilePath$
 
-    If left(fullPath, 8) = "https://" Then 'Possibly a OneDrive URL
+    If Left(fullPath, 8) = "https://" Then 'Possibly a OneDrive URL
         If InStr(1, fullPath, "my.sharepoint.com") <> 0 Or InStr(1, fullPath, "https://onedrive.") <> 0 Then 'Commercial OneDrive
             'For commercial OneDrive, path looks like
             ' "https://companyName-my.sharepoint.com/personal/userName_domain_com/Documents" & file.FullName)
