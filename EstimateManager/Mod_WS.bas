@@ -1,6 +1,7 @@
 Attribute VB_Name = "Mod_WS"
 Option Explicit
 
+Public clickOrderId As Variant
 
 Sub GetCalendarDate(textBox As MSForms.textBox)
     Dim vDate As Date

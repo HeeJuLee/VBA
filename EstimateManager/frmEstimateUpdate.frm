@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
    Caption         =   "견적 수정"
-   ClientHeight    =   9075.001
+   ClientHeight    =   13440
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   17565
+   ClientWidth     =   18195
    OleObjectBlob   =   "frmEstimateUpdate.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
@@ -17,7 +17,7 @@ Option Explicit
 
 Dim orgManagementID As Variant
 Dim orgExecutionCost As String
-Dim checkCount As Long
+Dim totlalCheckCount As Long
 
 Private Sub UserForm_Initialize()
     Dim cRow As Long
@@ -66,9 +66,6 @@ Private Sub UserForm_Initialize()
     Me.txtDeliveryDate.Value = estimate(15)    '납품일자
     Me.txtInsuranceDate.Value = estimate(16)    '증권일자
     
-    InitializeLswProduction    '예상실행항목 목록
-    InitializeCboProductonUnit  '예상실행항목 단위
-    
     Me.txtExecutionCost.Value = Format(estimate(17), "#,##0")   '실행가
     orgExecutionCost = Me.txtExecutionCost.Value
     Me.txtBidPrice.Value = Format(estimate(18), "#,##0")    '입찰가
@@ -95,6 +92,11 @@ Private Sub UserForm_Initialize()
     
     '변경 전 관리번호
     orgManagementID = Me.txtManagementID
+    
+    InitializeLswProductionList    '예상실행항목 목록
+    InitializeCboProductonUnit  '예상실행항목 단위
+    
+    InitializeLswOrderList      '발주 현황
     
 End Sub
 
@@ -138,7 +140,7 @@ Sub InitializeCboCategory()
     Update_Cbo Me.cboCategory, db
 End Sub
 
-Sub InitializeLswProduction()
+Sub InitializeLswProductionList()
     Dim db As Variant
     Dim i, j, totalCost As Long
     Dim li As ListItem
@@ -210,6 +212,77 @@ Sub InitializeCboProductonUnit()
     db = Get_DB(shtUnit, True)
 
     Update_Cbo Me.cboProductionUnit, db
+End Sub
+
+Sub InitializeLswOrderList()
+    Dim db As Variant
+    Dim i, j, totalCost As Long
+    Dim li As ListItem
+    
+    '견적ID에 해당하는 발주 정보를 읽어옴
+    db = Get_DB(shtOrder)
+    db = Filtered_DB(db, Me.txtID.Value, 25)
+    
+     '리스트뷰 값 설정
+    With Me.lswOrderList
+        .View = lvwReport
+        .Gridlines = True
+        .FullRowSelect = True
+        .HideColumnHeaders = False
+        .HideSelection = True
+        .FullRowSelect = True
+        .MultiSelect = False
+        .LabelEdit = lvwManual
+        
+        .ColumnHeaders.Clear
+        .ColumnHeaders.Add , , "품명", 115
+        .ColumnHeaders.Add , , "ID", 0
+        .ColumnHeaders.Add , , "ID_견적", 0
+        .ColumnHeaders.Add , , "관리번호", 0
+        .ColumnHeaders.Add , , "거래처", 50
+        .ColumnHeaders.Add , , "재질", 60
+        .ColumnHeaders.Add , , "규격", 60
+        .ColumnHeaders.Add , , "수량", 30, lvwColumnRight
+        .ColumnHeaders.Add , , "단위", 30, lvwColumnCenter
+        .ColumnHeaders.Add , , "단가", 60, lvwColumnRight
+        .ColumnHeaders.Add , , "금액", 60, lvwColumnRight
+        .ColumnHeaders.Add , , "발주", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "납기", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "입고", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "명세서", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "계산서", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제일", 59, lvwColumnCenter
+        
+        .ColumnHeaders(1).Position = 5
+    
+        .ListItems.Clear
+        If Not IsEmpty(db) Then
+            For i = 1 To UBound(db)
+                If IsNumeric(db(i, 11)) Then
+                    '비용 합계 구함
+                    totalCost = totalCost + CLng(db(i, 11))
+                End If
+                
+                Set li = .ListItems.Add(, , db(i, 6))   '품명
+                li.ListSubItems.Add , , db(i, 1)        'ID
+                li.ListSubItems.Add , , db(i, 25)       'ID_견적
+                li.ListSubItems.Add , , db(i, 4)        '관리번호
+                li.ListSubItems.Add , , db(i, 5)        '거래처
+                li.ListSubItems.Add , , db(i, 7)        '재질
+                li.ListSubItems.Add , , db(i, 8)        '규격
+                li.ListSubItems.Add , , db(i, 9)        '수량
+                li.ListSubItems.Add , , db(i, 10)       '단위
+                li.ListSubItems.Add , , Format(db(i, 11), "#,##0")      '단가
+                li.ListSubItems.Add , , Format(db(i, 12), "#,##0")      '금액
+                li.ListSubItems.Add , , db(i, 14)       '발주일
+                li.ListSubItems.Add , , db(i, 15)       '납기일
+                li.ListSubItems.Add , , db(i, 16)       '입고일
+                li.ListSubItems.Add , , db(i, 17)       '명세서
+                li.ListSubItems.Add , , db(i, 18)       '계산서
+                li.ListSubItems.Add , , db(i, 19)       '결제일
+            Next
+        End If
+    End With
 End Sub
 
 Sub UpdateEstimate()
@@ -393,7 +466,7 @@ Sub InsertProduction()
     Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "수주차액", CLng(Me.txtAcceptedMargin.Value)
     
     '예상실행항목 리스트박스 새로고침
-    InitializeLswProduction
+    InitializeLswProductionList
     
     '등록한 아이템 선택
     Me.txtProductionID.Value = Get_LastID(shtProduction)
@@ -434,7 +507,7 @@ Sub UpdateProduction()
     Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "마진율", Me.txtBidMarginRate.Value
     Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "수주차액", CLng(Me.txtAcceptedMargin.Value)
     
-    InitializeLswProduction
+    InitializeLswProductionList
     SelectItemLswProduction Me.txtProductionID.Value
     
 End Sub
@@ -468,7 +541,7 @@ Sub DeleteProduction()
 
     Me.txtProductionID.Value = ""
 
-    InitializeLswProduction
+    InitializeLswProductionList
 
     ClearProductionInput
     
@@ -509,6 +582,9 @@ Sub ProductionToOrder()
             count = count + 1
         End If
     Next
+    
+    InitializeLswOrderList
+    
     MsgBox "총 " & count & "개 항목을 발주하였습니다.", vbInformation
     
     shtOrderAdmin.Activate
@@ -583,6 +659,14 @@ Private Sub lswProductionList_Click()
     End With
 End Sub
 
+Private Sub lswOrderList_DblClick()
+    With Me.lswOrderList
+        clickOrderId = .SelectedItem.ListSubItems(1)
+        
+        frmOrderUpdate.Show (False)
+    End With
+End Sub
+
 Private Sub btnEstimateUpdate_Click()
     UpdateEstimate
     
@@ -631,18 +715,18 @@ Private Sub lswProductionList_ItemCheck(ByVal Item As MSComctlLib.ListItem)
         If Item.Checked = True Then
             Item.Bold = True
             Item.ForeColor = vbBlue
-            checkCount = checkCount + 1
+            totlalCheckCount = totlalCheckCount + 1
         Else
             Item.Bold = False
             Item.ForeColor = vbBlack
-            checkCount = checkCount - 1
+            totlalCheckCount = totlalCheckCount - 1
         End If
     End With
     
-    If checkCount = 0 Then
+    If totlalCheckCount = 0 Then
         Me.btnProductionToOrder.Caption = "체크 항목 발주"
     Else
-        Me.btnProductionToOrder.Caption = checkCount & "개 항목 발주"
+        Me.btnProductionToOrder.Caption = totlalCheckCount & "개 항목 발주"
     End If
 End Sub
 

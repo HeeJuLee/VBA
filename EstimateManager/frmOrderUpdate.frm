@@ -22,12 +22,22 @@ Private Sub UserForm_Initialize()
     Dim order As Variant
     Dim db As Variant
     Dim contr As Control
+    Dim orderId As Long
     
-    '선택한 행 번호
-    cRow = Selection.row
+    If clickOrderId <> "" Then              '견적수정 폼의 발주현황에서 더블클릭한 경우
+        If IsNumeric(clickOrderId) Then
+            orderId = CLng(clickOrderId)
+        Else
+            orderId = clickOrderId
+        End If
+        clickOrderId = ""
+    Else
+        cRow = Selection.row                '발주관리화면에서 더블클릭으로 선택한 행 번호
 
-    '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).Value = "" Then End
+        If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).Value = "" Then End         '데이터가 있는 행이 아닐 경우는 중지
+        
+        orderId = shtOrderAdmin.Cells(cRow, 2)
+    End If
     
     'Label 위치 맞추기
     For Each contr In Me.Controls
@@ -37,7 +47,7 @@ Private Sub UserForm_Initialize()
     Next
     
     '발주 데이터 읽어오기
-    order = Get_Record_Array(shtOrder, shtOrderAdmin.Cells(cRow, 2))
+    order = Get_Record_Array(shtOrder, orderId)
     
     Me.txtID.Value = order(1)   'ID
     Me.txtOrderName.Value = order(6)    '발주 품명
@@ -142,8 +152,12 @@ Sub UpdateOrder()
 
     Unload Me
     
-    shtOrderAdmin.Activate
-    shtOrderAdmin.OrderSearch
+    If frmEstimateUpdate.Visible = True Then
+        frmEstimateUpdate.InitializeLswOrderList
+    Else
+        shtOrderAdmin.Activate
+        shtOrderAdmin.OrderSearch
+    End If
     
 End Sub
 
