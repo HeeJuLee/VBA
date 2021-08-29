@@ -46,7 +46,7 @@ startRng.Cells(1, 1).Resize(UBound(arr, 1) - LBound(arr, 1) + 1, 1) = tempArr
 
 End Sub
 
-Sub SequenceToRng(startRng As Range, Count As Long, Optional StartNo As Double = 1, Optional Increment As Double = 1, Optional ToRight As Boolean = False)
+Sub SequenceToRng(startRng As Range, count As Long, Optional StartNo As Double = 1, Optional Increment As Double = 1, Optional ToRight As Boolean = False)
 
 '###############################################################
 '오빠두엑셀 VBA 사용자지정함수 (https://www.oppadu.com)
@@ -64,25 +64,25 @@ Sub SequenceToRng(startRng As Range, Count As Long, Optional StartNo As Double =
 
 Dim arr As Variant: Dim v As Double: v = StartNo - Increment
 
-If ToRight = False Then ReDim arr(1 To Count, 1 To 1) Else ReDim arr(1 To 1, 1 To Count)
+If ToRight = False Then ReDim arr(1 To count, 1 To 1) Else ReDim arr(1 To 1, 1 To count)
 
 If ToRight = False Then
-    For i = 1 To Count
+    For i = 1 To count
         v = v + Increment
         arr(i, 1) = v
     Next
 Else
-    For i = 1 To Count
+    For i = 1 To count
         v = v + Increment
         arr(1, i) = v
     Next
 End If
 
-If ToRight = False Then startRng.Cells(1, 1).Resize(Count) = arr Else startRng.Cells(1, 1).Resize(1, Count) = arr
+If ToRight = False Then startRng.Cells(1, 1).Resize(count) = arr Else startRng.Cells(1, 1).Resize(1, count) = arr
 
 End Sub
 
-Sub ValueToRng(startRng As Range, Count As Long, Value, Optional ToRight As Boolean = False)
+Sub ValueToRng(startRng As Range, count As Long, Value, Optional ToRight As Boolean = False)
 
 '###############################################################
 '오빠두엑셀 VBA 사용자지정함수 (https://www.oppadu.com)
@@ -97,11 +97,11 @@ Sub ValueToRng(startRng As Range, Count As Long, Value, Optional ToRight As Bool
 'ValueToRng Range("A1"), 10, "A"  '<- A1:A10 범위에 "A"를 출력합니다.
 '##############################################################
 
-If ToRight = False Then startRng.Cells(1, 1).Resize(Count) = Value Else startRng.Cells(1, 1).Resize(1, Count) = Value
+If ToRight = False Then startRng.Cells(1, 1).Resize(count) = Value Else startRng.Cells(1, 1).Resize(1, count) = Value
 
 End Sub
 
-Sub RunningSumRng(startRng As Range, Count As Long, _
+Sub RunningSumRng(startRng As Range, count As Long, _
                                     Optional Offset_Add As Long = -1, Optional Offset_Deduct As Long = 0, _
                                     Optional blnReverse As Boolean = False)
 
@@ -124,25 +124,25 @@ Dim vArr As Variant
 Dim fR As Single: Dim fS As Long: Dim fE As Long
 
 If blnReverse = False Then fR = 1 Else fR = -1
-If Count < 1 Then Count = 1
+If count < 1 Then count = 1
 
-ReDim vArr(1 To Count, 1 To 1)
-    If fR = 1 Then fS = 1: fE = Count Else fS = Count: fE = 1
+ReDim vArr(1 To count, 1 To 1)
+    If fR = 1 Then fS = 1: fE = count Else fS = count: fE = 1
     
     If Offset_Deduct <> 0 Then
-        For i = 1 To Count
+        For i = 1 To count
             T = T + startRng.Offset((i - 1) * fR, Offset_Add).Value - startRng.Offset((i - 1) * fR, Offset_Deduct).Value
             vArr(i, 1) = T
         Next
     Else
-        For i = 1 To Count
+        For i = 1 To count
             T = T + startRng.Offset((i - 1) * fR, Offset_Add).Value
             vArr(i, 1) = T
         Next
     End If
 
 If fR = 1 Then
-    startRng.Resize(Count) = vArr
+    startRng.Resize(count) = vArr
 Else
     fE = UBound(vArr, 1)
     fS = LBound(vArr, 1)
@@ -152,7 +152,7 @@ Else
         vArr(i, 1) = T
         fE = fE - 1
     Next
-    startRng.Offset(-Count + 1).Resize(Count) = vArr
+    startRng.Offset(-count + 1).Resize(count) = vArr
 End If
 
 End Sub
@@ -269,10 +269,10 @@ Sub ClearContentsBelow(startRng As Range, Optional ColNo, Optional BaseCol As Lo
 '##############################################################
 
 Dim WS As Worksheet: Dim lastRow As Long: Set WS = startRng.Parent
-If IsMissing(ColNo) Then ColNo = WS.Cells(startRng.row, WS.Columns.Count).End(xlToLeft).Column
+If IsMissing(ColNo) Then ColNo = WS.Cells(startRng.row, WS.Columns.count).End(xlToLeft).Column
 If Not IsNumeric(ColNo) Then ColNo = Range(ColNo & 1).Column
 If BaseCol = 0 Then BaseCol = startRng.Column Else BaseCol = startRng.Column + BaseCol - 1
-lastRow = WS.Cells(WS.Rows.Count, BaseCol).End(xlUp).row
+lastRow = WS.Cells(WS.Rows.count, BaseCol).End(xlUp).row
 If lastRow < startRng.row Then Exit Sub
 WS.Range(startRng, WS.Cells(lastRow, ColNo)).ClearContents
 

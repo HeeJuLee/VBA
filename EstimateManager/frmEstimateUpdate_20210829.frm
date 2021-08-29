@@ -1,14 +1,14 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate_20210829 
    Caption         =   "견적 수정"
-   ClientHeight    =   9075.001
+   ClientHeight    =   9015.001
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   17565
-   OleObjectBlob   =   "frmEstimateUpdate.frx":0000
+   OleObjectBlob   =   "frmEstimateUpdate_20210829.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
-Attribute VB_Name = "frmEstimateUpdate"
+Attribute VB_Name = "frmEstimateUpdate_20210829"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
@@ -16,8 +16,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Dim orgManagementID As Variant
-Dim orgExecutionCost As String
-Dim checkCount As Long
+
 
 Private Sub UserForm_Initialize()
     Dim cRow As Long
@@ -66,11 +65,10 @@ Private Sub UserForm_Initialize()
     Me.txtDeliveryDate.Value = estimate(15)    '납품일자
     Me.txtInsuranceDate.Value = estimate(16)    '증권일자
     
-    InitializeLswProduction    '예상실행항목 목록
+    InitializeLstProduction    '예상실행항목 목록
     InitializeCboProductonUnit  '예상실행항목 단위
     
     Me.txtExecutionCost.Value = Format(estimate(17), "#,##0")   '실행가
-    orgExecutionCost = Me.txtExecutionCost.Value
     Me.txtBidPrice.Value = Format(estimate(18), "#,##0")    '입찰가
     Me.txtBidMargin.Value = Format(estimate(19), "#,##0")    '차액
     Me.txtBidMarginRate.Value = Format(estimate(20), "0.0%")    '마진율
@@ -138,7 +136,7 @@ Sub InitializeCboCategory()
     Update_Cbo Me.cboCategory, db
 End Sub
 
-Sub InitializeLswProduction()
+Sub InitializeLstProduction()
     Dim db As Variant
     Dim i, j, totalCost As Long
     Dim li As ListItem
@@ -147,62 +145,30 @@ Sub InitializeLswProduction()
     db = Get_DB(shtProduction)
     db = Filtered_DB(db, Me.txtID.Value, 2)
     
-     '리스트뷰 값 설정
-    With Me.lswProductionList
-        .View = lvwReport
-        .Gridlines = True
-        .FullRowSelect = True
-        .HideColumnHeaders = False
-        .HideSelection = True
-        .FullRowSelect = True
-        .MultiSelect = False
-        .LabelEdit = lvwManual
+    'DB에 값이 있을 경우
+    If Not IsEmpty(db) Then
+        For i = 1 To UBound(db)
+            If IsNumeric(db(i, 10)) Then
+                db(i, 10) = Format(db(i, 10), "#,##0")
+            End If
+            If IsNumeric(db(i, 11)) Then
+                '비용 합계 구함
+                totalCost = totalCost + CLng(db(i, 11))
+                '숫자 포맷 1,000자리 처리
+                db(i, 11) = Format(db(i, 11), "#,##0")
+            End If
+
+        Next
         
-        .ColumnHeaders.Clear
-        .ColumnHeaders.Add , , "품명", 115
-        .ColumnHeaders.Add , , "ID", 0
-        .ColumnHeaders.Add , , "ID_견적", 0
-        .ColumnHeaders.Add , , "관리번호", 0
-        .ColumnHeaders.Add , , "거래처", 50
-        .ColumnHeaders.Add , , "재질", 60
-        .ColumnHeaders.Add , , "규격", 60
-        .ColumnHeaders.Add , , "수량", 30, lvwColumnRight
-        .ColumnHeaders.Add , , "단위", 30, lvwColumnCenter
-        .ColumnHeaders.Add , , "단가", 60, lvwColumnRight
-        .ColumnHeaders.Add , , "금액", 60, lvwColumnRight
-        .ColumnHeaders.Add , , "메모", 110
-        .ColumnHeaders.Add , , "등록일자", 0
-        
-        .CheckBoxes = True
-        .ColumnHeaders(1).Position = 5
+        Me.txtProductionTotalCost.Value = totalCost
+        Me.txtProductionTotalCost.Text = Format(totalCost, "#,##0")
+      
+        Update_List Me.lstProductionList, db, "0pt;0pt;0pt,50pt,120pt;60pt;60pt;30pt;30pt;55pt;55pt;110pt;0pt"
+
+    End If
     
-        .ListItems.Clear
-        If Not IsEmpty(db) Then
-            For i = 1 To UBound(db)
-                If IsNumeric(db(i, 11)) Then
-                    '비용 합계 구함
-                    totalCost = totalCost + CLng(db(i, 11))
-                End If
-                
-                Set li = .ListItems.Add(, , db(i, 5))
-                li.ListSubItems.Add , , db(i, 1)
-                li.ListSubItems.Add , , db(i, 2)
-                li.ListSubItems.Add , , db(i, 3)
-                li.ListSubItems.Add , , db(i, 4)
-                li.ListSubItems.Add , , db(i, 6)
-                li.ListSubItems.Add , , db(i, 7)
-                li.ListSubItems.Add , , db(i, 8)
-                li.ListSubItems.Add , , db(i, 9)
-                li.ListSubItems.Add , , Format(db(i, 10), "#,##0")
-                li.ListSubItems.Add , , Format(db(i, 11), "#,##0")
-                li.ListSubItems.Add , , db(i, 12)
-                li.ListSubItems.Add , , db(i, 13)
-            Next
-            
-            Me.txtProductionTotalCost.Value = totalCost
-            Me.txtProductionTotalCost.Text = Format(totalCost, "#,##0")
-        End If
-    End With
+    Me.txtProductionID.Value = ""
+    
 End Sub
 
 Sub InitializeCboProductonUnit()
@@ -245,6 +211,11 @@ Sub UpdateEstimate()
         Me.cboCategory.Value, Me.txtSpecificationDate.Value, _
         Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
         Me.txtExpectPaymentDate.Value, Me.txtVAT.Value, Me.chkVAT.Value
+
+    Unload Me
+    
+    shtEstimateAdmin.Activate
+    shtEstimateAdmin.EstimateSearch
     
 End Sub
 
@@ -392,12 +363,10 @@ Sub InsertProduction()
     Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "마진율", Me.txtBidMarginRate.Value
     Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "수주차액", CLng(Me.txtAcceptedMargin.Value)
     
-    '예상실행항목 리스트박스 새로고침
-    InitializeLswProduction
+    Me.txtProductionID.Value = ""
     
-    '등록한 아이템 선택
-    Me.txtProductionID.Value = Get_LastID(shtProduction)
-    SelectItemLswProduction Me.txtProductionID.Value
+    '예상실행항목 리스트박스 새로고침
+    InitializeLstProduction
     
 End Sub
 
@@ -434,8 +403,9 @@ Sub UpdateProduction()
     Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "마진율", Me.txtBidMarginRate.Value
     Update_Record_Column shtEstimate, CLng(Me.txtID.Value), "수주차액", CLng(Me.txtAcceptedMargin.Value)
     
-    InitializeLswProduction
-    SelectItemLswProduction Me.txtProductionID.Value
+    InitializeLstProduction
+    
+    Select_ListItm Me.lstProductionList, Me.txtProductionID.Value
     
 End Sub
 
@@ -468,54 +438,39 @@ Sub DeleteProduction()
 
     Me.txtProductionID.Value = ""
 
-    InitializeLswProduction
+    InitializeLstProduction
 
     ClearProductionInput
     
 End Sub
 
 Sub ProductionToOrder()
-    Dim li As ListItem
-    Dim count As Long
-    Dim managementID, customer, Item, material, size, amount, unit, unitPrice, cost, memo As Variant
-    
-    count = 0
-    For Each li In Me.lswProductionList.ListItems
-        If li.Checked = True Then count = count + 1
-    Next
-    If count = 0 Then MsgBox "발주할 항목을 체크박스에 체크하세요.": Exit Sub
-    
-    count = 0
-    For Each li In Me.lswProductionList.ListItems
-        If li.Checked = True Then
-            Item = li.Text
-            managementID = li.SubItems(3)
-            customer = li.SubItems(4)
-            material = li.SubItems(5)
-            size = li.SubItems(6)
-            amount = li.SubItems(7)
-            unit = li.SubItems(8)
-            unitPrice = li.SubItems(9)
-            cost = li.SubItems(10)
-            memo = li.SubItems(11)
-            
-            '선택한 예상실행항목을 발주 테이블에 등록
-            Insert_Record shtOrder, _
-                , , managementID, customer, Item, material, size, amount, unit, unitPrice, cost, _
-                , , , , , _
-                , , , , , _
-                Date, , Me.txtID, False, memo
-                
-            count = count + 1
-        End If
-    Next
-    MsgBox "총 " & count & "개 항목을 발주하였습니다.", vbInformation
-    
-    shtOrderAdmin.Activate
-    shtOrderAdmin.OrderSearch
-    shtOrderAdmin.GoToEnd
 
-End Sub
+    If Me.txtProductionID.Value = "" Then MsgBox "발주할 항목을 선택하세요.": Exit Sub
+    
+    '선택한 예상실행항목을 발주 테이블에 등록
+    Insert_Record shtOrder, _
+        , , Me.txtManagementID.Value, _
+        Me.txtProductionCustomer.Value, _
+        Me.txtProductionItem.Value, _
+        Me.txtProductionMaterial.Value, _
+        Me.txtProductionSize.Value, _
+        Me.txtProductionAmount.Value, _
+        Me.cboProductionUnit.Value, _
+        Me.txtProductionUnitPrice.Value, _
+        Me.txtProductionCost.Value, _
+        , _
+        , _
+        , , , _
+        , , , , , _
+        Date, , Me.txtID, False, Me.txtProductionMemo
+        
+        shtOrderAdmin.Activate
+        shtOrderAdmin.OrderSearch
+        shtOrderAdmin.GoToEnd
+        
+        MsgBox "'" & Me.txtProductionItem & "' 항목을 발주하였습니다."
+    End Sub
 
 Function GetProductionTotalCost()
     Dim i As Long
@@ -553,55 +508,35 @@ Sub ClearProductionInput()
     Me.txtProductionMemo.Value = ""
 End Sub
 
-Sub SelectItemLswProduction(selectedID As Variant)
-    Dim i As Long
-    
-    With Me.lswProductionList
-        If Not IsMissing(selectedID) Then
-            For i = 1 To .ListItems.count
-                If selectedID = .ListItems(i).SubItems(1) Then
-                    .SelectedItem = .ListItems(i)
-                    .SetFocus
-                End If
-            Next
-        End If
-    End With
-End Sub
-
-Private Sub lswProductionList_Click()
-    With Me.lswProductionList
-        Me.txtProductionID.Value = .SelectedItem.ListSubItems(1)
-        Me.txtProductionItem.Value = .SelectedItem.Text
-        Me.txtProductionCustomer.Value = .SelectedItem.ListSubItems(4)
-        Me.txtProductionMaterial.Value = .SelectedItem.ListSubItems(5)
-        Me.txtProductionSize.Value = .SelectedItem.ListSubItems(6)
-        Me.txtProductionAmount.Value = .SelectedItem.ListSubItems(7)
-        Me.cboProductionUnit.Value = .SelectedItem.ListSubItems(8)
-        Me.txtProductionUnitPrice.Value = .SelectedItem.ListSubItems(9)
-        Me.txtProductionCost.Value = .SelectedItem.ListSubItems(10)
-        Me.txtProductionMemo.Value = .SelectedItem.ListSubItems(11)
-    End With
-End Sub
-
 Private Sub btnEstimateUpdate_Click()
     UpdateEstimate
-    
+End Sub
+
+Private Sub btnEstimateClose_Click()
     Unload Me
     
+    '견적관리 화면 새로고침
     shtEstimateAdmin.Activate
     shtEstimateAdmin.EstimateSearch
 End Sub
 
-Private Sub btnEstimateClose_Click()
-    If orgExecutionCost <> Me.txtExecutionCost.Value Then
-        Unload Me
-        
-        '실행가가 변경된 경우에만 견적관리 화면 새로고침
-        shtEstimateAdmin.Activate
-        shtEstimateAdmin.EstimateSearch
-    Else
-        Unload Me
-    End If
+Private Sub lstProductionList_Click()
+    Dim arr As Variant
+
+    arr = Get_ListItm(Me.lstProductionList)
+    Me.txtProductionID.Value = arr(0)                       'ID
+    Me.txtProductionCustomer = arr(3)               '거래처
+    Me.txtProductionItem.Value = arr(4)                     '품명
+    Me.txtProductionMaterial.Value = arr(5)           '재질
+    Me.txtProductionSize.Value = arr(6)                '규격
+    Me.txtProductionAmount.Value = arr(7)           '수량
+    Me.cboProductionUnit.Value = arr(8)               '단위
+    Me.txtProductionUnitPrice.Value = arr(9)        '단가
+    Me.txtProductionUnitPrice.Text = Format(arr(9), "#,##0")
+    Me.txtProductionCost.Value = arr(10)         '금액
+    Me.txtProductionCost.Text = Format(arr(10), "#,##0")
+    Me.txtProductionMemo = arr(11)       '메모
+    
 End Sub
 
 Private Sub btnProductionClear_Click()
@@ -622,28 +557,6 @@ End Sub
 
 Private Sub btnProductionToOrder_Click()
     ProductionToOrder
-End Sub
-
-Private Sub lswProductionList_ItemCheck(ByVal Item As MSComctlLib.ListItem)
-    With Me.lswProductionList
-        .SelectedItem.Selected = False
-        
-        If Item.Checked = True Then
-            Item.Bold = True
-            Item.ForeColor = vbBlue
-            checkCount = checkCount + 1
-        Else
-            Item.Bold = False
-            Item.ForeColor = vbBlack
-            checkCount = checkCount - 1
-        End If
-    End With
-    
-    If checkCount = 0 Then
-        Me.btnProductionToOrder.Caption = "체크 항목 발주"
-    Else
-        Me.btnProductionToOrder.Caption = checkCount & "개 항목 발주"
-    End If
 End Sub
 
 Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)

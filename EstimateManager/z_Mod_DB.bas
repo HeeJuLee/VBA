@@ -7,8 +7,8 @@ Option Compare Text
 '########################
 Function Get_MaxID(WS As Worksheet) As Long
 With WS
-    Get_MaxID = .Cells(1, .Columns.Count).End(xlToLeft).Value
-    .Cells(1, .Columns.Count).End(xlToLeft).Value = .Cells(1, .Columns.Count).End(xlToLeft).Value + 1
+    Get_MaxID = .Cells(1, .Columns.count).End(xlToLeft).Value
+    .Cells(1, .Columns.count).End(xlToLeft).Value = .Cells(1, .Columns.count).End(xlToLeft).Value + 1
 End With
 End Function
 '########################
@@ -18,7 +18,17 @@ End Function
 '########################
 Function Get_CurrentID(WS As Worksheet) As Long
 With WS
-    Get_CurrentID = .Cells(1, .Columns.Count).End(xlToLeft).Value
+    Get_CurrentID = .Cells(1, .Columns.count).End(xlToLeft).Value
+End With
+End Function
+'########################
+' hjlee 2021.08.29 추가
+' 특정 워크시트의 마지막 등록 ID번호 리턴 (시트 DB 우측 첫번째 머릿글 - 1)
+' i = Get_LastID(Sheet1)
+'########################
+Function Get_LastID(WS As Worksheet) As Long
+With WS
+    Get_LastID = .Cells(1, .Columns.count).End(xlToLeft).Value - 1
 End With
 End Function
 '########################
@@ -26,14 +36,14 @@ End Function
 ' i = Get_InsertRow(Sheet1)
 '########################
 Function Get_InsertRow(WS As Worksheet) As Long
-With WS:    Get_InsertRow = .Cells(.Rows.Count, 1).End(xlUp).row + 1: End With
+With WS:    Get_InsertRow = .Cells(.Rows.count, 1).End(xlUp).row + 1: End With
 End Function
 '########################
 ' 시트의 열 개수 반환 (이번 예제파일에서만 사용)
 ' i  = Get_ColumnCnt(Sheet1)
 '########################
 Function Get_ColumnCnt(WS As Worksheet, Optional Offset As Long = -1) As Long
-With WS:    Get_ColumnCnt = .Cells(1, .Columns.Count).End(xlToLeft).Column + Offset: End With
+With WS:    Get_ColumnCnt = .Cells(1, .Columns.count).End(xlToLeft).Column + Offset: End With
 End Function
 '########################
 ' 시트에서 특정 ID 의 행 번호 반환 (-> 해당 행 번호 데이터 업데이트)
@@ -473,8 +483,8 @@ If Value <> "" Then
         End If
     End If
         
-    If Dict.Count > 0 Then
-        ReDim vResult(1 To Dict.Count, 1 To cCol)
+    If Dict.count > 0 Then
+        ReDim vResult(1 To Dict.count, 1 To cCol)
         i = 1
         For Each dictKey In Dict.Keys
             For j = 1 To cCol
@@ -651,9 +661,9 @@ Dim i As Long: Dim j As Long: Dim dictKey As Variant: Dim cCol As Long
 Dim vTest As Variant
 i = 1
 
-If Dict.Count > 0 Then
+If Dict.count > 0 Then
     If IsObject(Dict(Dict.Keys()(0))) Then cCol = UBound(Dict(Dict.Keys()(0))) Else cCol = 1
-    ReDim vResult(1 To Dict.Count, 1 To cCol + 1)
+    ReDim vResult(1 To Dict.count, 1 To cCol + 1)
     For Each dictKey In Dict.Keys
         vResult(i, 1) = dictKey
         If cCol = 1 Then

@@ -71,7 +71,7 @@ Dim i As Integer
         MsgBox "조회조건에 해당하는 자료가 없습니다."
     Else
         '타이틀을 표시한다.
-        For i = 1 To rs.fields.Count
+        For i = 1 To rs.fields.count
           Cells(1, i).Value = rs.fields(i - 1).Name
         Next
         
