@@ -49,7 +49,7 @@ Private Sub UserForm_Initialize()
     InitializeCboCustomer
     Select_CboItm Me.cboCustomer, Trim(estimate(4)), 1    '거래처
     InitializeCboManager
-    Select_CboItm Me.cboManager, Trim(estimate(5)), 1  '담당자
+    Select_CboItm Me.cboManager, Trim(estimate(5)), 2  '담당자
     
     Me.txtSize.Value = estimate(7)  '규격
     
@@ -115,7 +115,7 @@ Sub InitializeCboManager()
     '담당자 DB를 읽어와서
     db = Get_DB(shtManager, True)
     '거래처명으로 필터링
-    db = Filtered_DB(db, Me.cboCustomer.Value, 1)
+    db = Filtered_DB(db, Me.cboCustomer.Value, 1, True)
     
     '기존 콤보박스 내용지우기
     Me.cboManager.Clear
@@ -147,7 +147,7 @@ Sub InitializeLswProductionList()
     
     '견적ID에 해당하는 예상비용항목을 읽어옴
     db = Get_DB(shtProduction)
-    db = Filtered_DB(db, Me.txtID.Value, 2)
+    db = Filtered_DB(db, Me.txtID.Value, 2, True)
     
      '리스트뷰 값 설정
     With Me.lswProductionList
@@ -221,7 +221,7 @@ Sub InitializeLswOrderList()
     
     '견적ID에 해당하는 발주 정보를 읽어옴
     db = Get_DB(shtOrder)
-    db = Filtered_DB(db, Me.txtID.Value, 25)
+    db = Filtered_DB(db, Me.txtID.Value, 25, True)
     
      '리스트뷰 값 설정
     With Me.lswOrderList
@@ -600,7 +600,7 @@ Function GetProductionTotalCost()
     
     '견적ID에 해당하는 예상비용항목을 읽어옴
     db = Get_DB(shtProduction)
-    db = Filtered_DB(db, Me.txtID.Value, 2)
+    db = Filtered_DB(db, Me.txtID.Value, 2, True)
     
     'DB에 값이 있을 경우
     totalCost = 0

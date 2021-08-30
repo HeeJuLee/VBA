@@ -4,7 +4,7 @@ Dim isKeyworldSearch As Boolean
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
-    Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년")
+    Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
     Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
     
     Me.txtFromDate.Visible = False

@@ -374,7 +374,7 @@ End Function
 
 '########################
 ' 특정 배열에서 Value를 포함하는 레코드만 찾아 다시 배열로 반환
-' Array = Filtered_DB(Array, "검색값", False)
+' Array = Filtered_DB(Array, "검색값", 2, False)
 '########################
 Function Filtered_DB(db, Value, Optional FilterCol, Optional ExactMatch As Boolean = False) As Variant
 

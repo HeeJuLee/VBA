@@ -56,7 +56,7 @@ Private Sub UserForm_Initialize()
     '관리번호로 견적정보 가져오기
     bMatchedEstimateID = False
     db = Get_DB(shtEstimate)
-    db = Filtered_DB(db, Me.txtManagementID.Value, 2)
+    db = Filtered_DB(db, Me.txtManagementID.Value, 2, True)
     If IsEmpty(db) Then
         Me.lblManagementIDError.Caption = "관리번호 오류"
         Me.lblManagementIDError.Visible = True
@@ -74,12 +74,16 @@ Private Sub UserForm_Initialize()
         End If
     End If
     
-    Me.cboCategory.Value = order(3)     '분류
+    InitializeOrderCategory
+    InitializeCboUnit
+    InitializePayMethod
+    
+    Me.cboCategory.Value = Trim(order(3))     '분류
     Me.txtCustomer.Value = order(5)     '거래처
     Me.txtMaterial.Value = order(7)     '재질
     Me.txtSize.Value = order(8)             '규격
     Me.txtAmount.Value = Format(order(9), "#,##0")   '수량
-    Me.cboUnit.Value = order(10)            '단위
+    Me.cboUnit.Value = Trim(order(10))            '단위
     Me.txtUnitPrice.Value = Format(order(11), "#,##0")     '단가
     Me.txtOrderPrice.Value = Format(order(12), "#,##0")      '발주금액
     Me.txtWeight.Value = order(13)          '중량
@@ -89,16 +93,12 @@ Private Sub UserForm_Initialize()
     Me.txtSpecificationDate.Value = order(17)   '명세서
     Me.txtTaxInvoiceDate.Value = order(18)      '계산서
     Me.txtPaymentDate.Value = order(19)     '결제일자
-    Me.cboPayMethod.Value = order(21)       '결제수단
+    Me.cboPayMethod.Value = Trim(order(21))       '결제수단
     Me.txtVAT.Value = Format(order(22), "#,##0")             '부가세
     Me.chkVAT.Value = order(26)             '부가세 제외 여부
     
     Me.txtInsertDate.Value = order(23)    '등록일자
     Me.txtUpdateDate.Value = order(24)    '수정일자
-    
-    InitializeOrderCategory
-    InitializeCboUnit
-    InitializePayMethod
     
     '발주명 입력창에 포커스
     Me.txtOrderName.SetFocus
@@ -264,7 +264,7 @@ Private Sub txtManagementID_AfterUpdate()
     bMatchedEstimateID = False
     If Me.txtManagementID.Value <> "" Then
         db = Get_DB(shtEstimate)
-        db = Filtered_DB(db, Me.txtManagementID.Value, 2)
+        db = Filtered_DB(db, Me.txtManagementID.Value, 2, True)
         If IsEmpty(db) Then
             Me.lblManagementIDError.Caption = "관리번호 오류"
             Me.lblManagementIDError.Visible = True

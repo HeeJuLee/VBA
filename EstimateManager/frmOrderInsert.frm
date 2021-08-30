@@ -161,7 +161,7 @@ Private Sub txtManagementID_AfterUpdate()
     bMatchedEstimateID = False
     If Me.txtManagementID.Value <> "" Then
         db = Get_DB(shtEstimate)
-        db = Filtered_DB(db, Me.txtManagementID.Value, 2)
+        db = Filtered_DB(db, Me.txtManagementID.Value, 2, True)
         If IsEmpty(db) Then
             Me.lblManagementIDError.Caption = "관리번호 오류"
             Me.lblManagementIDError.Visible = True

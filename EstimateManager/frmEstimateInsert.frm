@@ -54,7 +54,7 @@ Sub InitializeCboManager()
     '담당자 DB를 읽어와서
     db = Get_DB(shtManager, True)
     '거래처명으로 필터링
-    db = Filtered_DB(db, Me.cboCustomer.Value, 1)
+    db = Filtered_DB(db, Me.cboCustomer.Value, 1, True)
     
     '기존 콤보박스 내용지우기
     Me.cboManager.Clear
