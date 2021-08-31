@@ -2,6 +2,7 @@
 
 Dim isKeyworldSearch As Boolean
 Dim searchResultCount As Long
+Dim isEnd As Boolean
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -12,6 +13,7 @@ Private Sub Worksheet_Activate()
     Me.txtToDate.Visible = False
     
     isKeyworldSearch = False
+    isEnd = False
 End Sub
 
 '발주 데이터를 검색해서 시트에 출력
@@ -68,6 +70,8 @@ Sub OrderSearch()
     If isKeyworldSearch = True Then
         Me.txtKeyword.Activate
     End If
+    
+    isEnd = False
     
 End Sub
 
@@ -129,8 +133,13 @@ Sub GoToEnd()
     
     With shtOrderAdmin
         .Activate
-        endRow = .Range("B5").End(xlDown).row
-        .Range("E" & endRow).Select
+        If isEnd = False Then
+            .Range("S" & .Range("D5").End(xlDown).row).Select
+            isEnd = True
+        Else
+            .Range("S6").Select
+            isEnd = False
+        End If
     End With
 End Sub
 
