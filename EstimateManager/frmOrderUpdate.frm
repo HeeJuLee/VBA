@@ -46,6 +46,13 @@ Private Sub UserForm_Initialize()
     End If
     Next
     
+    '폼 위치 수정
+    If orderUpdateFormX <> 0 Then
+        Me.StartUpPosition = 0
+        Me.Left = orderUpdateFormX
+        Me.top = orderUpdateFormY
+    End If
+    
     '발주 데이터 읽어오기
     order = Get_Record_Array(shtOrder, orderId)
     
@@ -224,28 +231,28 @@ Private Sub txtOrderName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal S
     If KeyCode = 27 Then Unload Me
 End Sub
 
-Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
     GetCalendarDate Me.txtOrderDate
 End Sub
 
-Private Sub imgDueDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgDueDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
     GetCalendarDate Me.txtDueDate
 End Sub
 
-Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
     GetCalendarDate Me.txtDeliveryDate
 End Sub
 
-Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
     GetCalendarDate Me.txtSpecificationDate
 End Sub
 
-Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
     GetCalendarDate Me.txtTaxInvoiceDate
     CalculateOrderUpdateCost
 End Sub
 
-Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
     GetCalendarDate Me.txtPaymentDate
 End Sub
 
@@ -326,5 +333,10 @@ End Sub
 
 Private Sub chkVAT_AfterUpdate()
     CalculateOrderUpdateCost
+End Sub
+
+Private Sub UserForm_Layout()
+    orderUpdateFormX = Me.Left
+    orderUpdateFormY = Me.top
 End Sub
 

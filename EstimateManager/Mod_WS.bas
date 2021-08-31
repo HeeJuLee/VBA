@@ -2,6 +2,8 @@ Attribute VB_Name = "Mod_WS"
 Option Explicit
 
 Public clickOrderId As Variant
+Public estimateUpdateFormX, estimateUpdateFormY As Long
+Public orderUpdateFormX, orderUpdateFormY As Long
 
 Sub GetCalendarDate(textBox As MSForms.textBox)
     Dim vDate As Date
@@ -76,4 +78,78 @@ Sub MoveToOrderAdmin()
     
     shtOrderAdmin.Activate
     
+End Sub
+
+Sub SetContentsLine(startRng As Range, endColNo, clearRowCount)
+    Dim WS As Worksheet
+    Dim lastRow As Long
+    Set WS = startRng.Parent
+        
+    If Not IsNumeric(endColNo) Then
+        endColNo = Range(endColNo & 1).Column
+    End If
+        
+    lastRow = startRng.row + clearRowCount - 1
+    If lastRow < startRng.row Then Exit Sub
+    
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo)).Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .ColorIndex = xlAutomatic
+        .TintAndShade = 0
+        .Weight = xlHairline
+    End With
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo)).Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .ColorIndex = xlAutomatic
+        .TintAndShade = 0
+        .Weight = xlHairline
+    End With
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo)).Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ColorIndex = xlAutomatic
+        .TintAndShade = 0
+        .Weight = xlHairline
+    End With
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo)).Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .ColorIndex = xlAutomatic
+        .TintAndShade = 0
+        .Weight = xlHairline
+    End With
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo)).Borders(xlInsideVertical)
+        .LineStyle = xlContinuous
+        .ColorIndex = xlAutomatic
+        .TintAndShade = 0
+        .Weight = xlHairline
+    End With
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo)).Borders(xlInsideHorizontal)
+        .LineStyle = xlContinuous
+        .ColorIndex = xlAutomatic
+        .TintAndShade = 0
+        .Weight = xlHairline
+    End With
+End Sub
+
+Sub ClearContentsLine(startRng As Range, endColNo, clearRowCount)
+    
+    Dim WS As Worksheet
+    Dim lastRow As Long
+    Set WS = startRng.Parent
+        
+    If Not IsNumeric(endColNo) Then
+        endColNo = Range(endColNo & 1).Column
+    End If
+        
+    lastRow = startRng.row + clearRowCount
+    If lastRow < startRng.row Then Exit Sub
+    
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo))
+        .Borders(xlEdgeLeft).LineStyle = xlNone
+        .Borders(xlEdgeTop).LineStyle = xlNone
+        .Borders(xlEdgeBottom).LineStyle = xlNone
+        .Borders(xlEdgeRight).LineStyle = xlNone
+        .Borders(xlInsideVertical).LineStyle = xlNone
+        .Borders(xlInsideHorizontal).LineStyle = xlNone
+    End With
+
 End Sub

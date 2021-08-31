@@ -1,6 +1,7 @@
 ﻿Option Explicit
 
 Dim isKeyworldSearch As Boolean
+Dim searchResultCount As Long
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -16,8 +17,7 @@ End Sub
 '발주 데이터를 검색해서 시트에 출력
 Sub OrderSearch()
     Dim db As Variant
-    Dim resultCount As Integer
-
+    
     '첫 행으로 이동
     shtOrderAdmin.Range("S6").Select
     
@@ -41,23 +41,29 @@ Sub OrderSearch()
         If Me.txtKeyword.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword.Value)     '모든 필드에서 키워드 검색
     End If
     
+    
     '기존 검색결과를 화면에서 지움
     ClearOrderSearchResult
     
     '검색결과를 화면에 출력
     If IsEmpty(db) Then
-        resultCount = 0     '검색결과 건수는 0
+        searchResultCount = 0     '검색결과 건수는 0
     Else
-        '순번 출력
+        '검색결과 건수를 저장
+        searchResultCount = UBound(db, 1)
+        
+        '검색결과 라인 서식 적용
+        SetContentsLine shtOrderAdmin.Range("B6"), "AA", searchResultCount
+        
+       '순번 출력
         SequenceToRng shtOrderAdmin.Range("D6"), UBound(db, 1)
         '검색결과 출력
         ArrayToRng shtOrderAdmin.Range("B6"), db, "1,25, ,4,28,29,30,3,5,6,7,8,9,10,11,12,14,15,16,17,18,19,21,22,23,24"
-        '검색결과 건수를 저장
-        resultCount = UBound(db, 1)
+
     End If
 
      '검색 결과 건수 출력
-    Me.lblSearchResult.Caption = "총 " & resultCount & "건 검색"
+    Me.lblSearchResult.Caption = "총 " & searchResultCount & "건 검색"
     
     If isKeyworldSearch = True Then
         Me.txtKeyword.Activate
@@ -69,178 +75,12 @@ End Sub
 Sub ClearOrderSearchResult()
     
     '3번 순번 열을 기준으로 B7~AI 열을 지움
-    ClearContentsBelow shtOrderAdmin.Range("B6"), "AC", 3
+    ClearContentsBelow shtOrderAdmin.Range("B6"), "AA"
     
+    '아래쪽 라인 서식 지움
+    ClearContentsLine shtOrderAdmin.Range("B6"), "AA", searchResultCount
 End Sub
 
-
-'키워드 검색 입력 시
-Private Sub txtKeyword_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    '엔터키 눌려질 경우에만 검색
-    If KeyCode = 13 Then
-        isKeyworldSearch = True
-        OrderSearch
-    End If
-End Sub
-
-''조회 기간', '검색어' 등 일반 텍스트 박스 클릭 시 Object 선택이 안되도록 클릭이벤트를 빈 매크로로 연결
-Sub EmptyProcedure()
-
-End Sub
-
-'년 선택
-Private Sub cboSelectYear_Change()
-    Dim Y As Long: Y = Year(Date)
-    Dim M As Long: M = Month(Date)
-    Dim pos As Long
-    
-    If Me.cboSelectYear.Value = "전체" Then
-        txtFromDate.Value = ""
-        txtToDate.Value = ""
-        
-        If Me.cboSelectMonth.Value = "전체" Then
-            '월 선택이 전체로 선택되어 있으면 바로 검색 실행
-            OrderSearch
-        Else
-            '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
-            Me.cboSelectMonth.Value = "전체"
-        End If
-    Else
-        '년도를 선택한 경우
-        pos = InStr(Me.cboSelectYear.Value, "년")
-        If pos <> 0 Then
-            Y = Left(Me.cboSelectYear.Value, pos - 1)
-        End If
-    
-        If Me.cboSelectMonth.Value = "전체" Then
-            txtFromDate.Value = DateSerial(Y, 1, 1)
-            txtToDate.Value = DateSerial(Y, 12, 31)
-        Else
-            pos = InStr(Me.cboSelectMonth.Value, "월")
-            If pos <> 0 Then
-                M = Left(Me.cboSelectMonth.Value, pos - 1)
-                
-                txtFromDate.Value = DateSerial(Y, M, 1)
-                txtToDate.Value = DateSerial(Y, M + 1, 0)
-            End If
-        End If
-        
-        OrderSearch
-    End If
-    
-End Sub
-
-'월 선택
-Private Sub cboSelectMonth_Change()
-    Dim Y As Long: Y = Year(Date)
-    Dim M As Long: M = Month(Date)
-    Dim pos As Long
-    
-    If Me.cboSelectYear.Value = "전체" Then
-        txtFromDate.Value = ""
-        txtToDate.Value.Value = ""
-        
-         If Me.cboSelectMonth.Value = "전체" Then
-             '월 선택이 전체로 선택되어 있으면 바로 검색 실행
-            OrderSearch
-        Else
-            '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
-            Me.cboSelectMonth.Value = "전체"
-        End If
-    Else
-        pos = InStr(Me.cboSelectYear.Value, "년")
-        If pos <> 0 Then
-            Y = Left(Me.cboSelectYear.Value, pos - 1)
-        End If
-    
-        If Me.cboSelectMonth.Value = "전체" Then
-            txtFromDate.Value = DateSerial(Y, 1, 1)
-            txtToDate.Value = DateSerial(Y, 12, 31)
-        Else
-            pos = InStr(Me.cboSelectMonth.Value, "월")
-            If pos <> 0 Then
-                M = Left(Me.cboSelectMonth.Value, pos - 1)
-                
-                txtFromDate.Value = DateSerial(Y, M, 1)
-                txtToDate.Value = DateSerial(Y, M + 1, 0)
-            End If
-        End If
-        OrderSearch
-    End If
-End Sub
-
-'전체 선택 시 '월'만 전체로 바꿈
-Private Sub optAll_Click()
-    If Me.cboSelectMonth.Value = "전체" Then
-        OrderSearch
-    Else
-        Me.cboSelectMonth.Value = "전체"
-    End If
-    
-End Sub
-
-'조회기간 - 이번달
-Private Sub optThisMonth_Click()
-    Dim Y As Long: Y = Year(Date)
-    Dim M As Long: M = Month(Date)
-    
-    txtFromDate.Value = DateSerial(Y, M, 1)
-    txtToDate.Value = DateSerial(Y, M + 1, 0)
-    
-    Me.cboSelectYear.Value = Y & "년"
-    Me.cboSelectMonth.Value = M & "월"      '실제 검색은 cboSelectMonth_change()에서 검색 됨
-    
-End Sub
-
-'조회기간 - 이전달
-Private Sub optLastMonth_Click()
-    Dim Y As Long: Y = Year(Date)
-    Dim M As Long: M = Month(Date)
-    
-    txtFromDate.Value = DateSerial(Y, M - 1, 1)
-    txtToDate.Value = DateSerial(Y, M, 0)
-    
-    If M = 1 Then
-        Me.cboSelectYear.Value = Y - 1 & "년"
-        Me.cboSelectMonth.Value = "12월"
-    Else
-        Me.cboSelectYear.Value = Y & "년"
-        Me.cboSelectMonth.Value = M - 1 & "월"
-    End If
-    
-End Sub
-
-
-'발주등록 폼 열기
-Sub OpenOrderInsertForm()
-    frmOrderInsert.Show (False)
-End Sub
-
-
-'발주수정 폼 열기
-Sub OpenOrderUpdateForm()
-    frmOrderUpdate.Show (False)
-End Sub
-
-
-'시트 더블클릭 시 발주수정 폼 열기
-Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
-    Dim cRow As Long
-    
-    '선택한 행 번호
-    cRow = Selection.row
-    
-    '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).Value = "" Then
-        End
-    End If
-    
-    '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
-    Range("E" & Selection.row).Select
-    
-    '수정 화면 띄움
-    frmOrderUpdate.Show (False)
-End Sub
 
 '발주삭제
 Sub OrderDelete()
@@ -266,6 +106,24 @@ Sub OrderDelete()
     OrderSearch
 End Sub
 
+'발주등록 폼 열기
+Sub OpenOrderInsertForm()
+    frmOrderInsert.Show (False)
+End Sub
+
+
+'발주수정 폼 열기
+Sub OpenOrderUpdateForm()
+    frmOrderUpdate.Show (False)
+End Sub
+
+
+''조회 기간', '검색어' 등 일반 텍스트 박스 클릭 시 Object 선택이 안되도록 클릭이벤트를 빈 매크로로 연결
+Sub EmptyProcedure()
+
+End Sub
+
+
 Sub GoToEnd()
     Dim endRow As Long
     
@@ -274,4 +132,173 @@ Sub GoToEnd()
         endRow = .Range("B5").End(xlDown).row
         .Range("E" & endRow).Select
     End With
+End Sub
+
+
+'전체 선택 시 '월'만 전체로 바꿈
+Private Sub optAll_Click()
+    If Me.cboSelectMonth.Value = "전체" Then
+        OrderSearch
+    Else
+        Me.cboSelectMonth.Value = "전체"
+    End If
+    
+End Sub
+
+'조회기간 - 이번달
+Private Sub optThisMonth_Click()
+    Dim y As Long: y = Year(Date)
+    Dim M As Long: M = Month(Date)
+    
+    txtFromDate.Value = DateSerial(y, M, 1)
+    txtToDate.Value = DateSerial(y, M + 1, 0)
+    
+    Me.cboSelectYear.Value = y & "년"
+    Me.cboSelectMonth.Value = M & "월"      '실제 검색은 cboSelectMonth_change()에서 검색 됨
+    
+End Sub
+
+'조회기간 - 이전달
+Private Sub optLastMonth_Click()
+    Dim y As Long: y = Year(Date)
+    Dim M As Long: M = Month(Date)
+    
+    txtFromDate.Value = DateSerial(y, M - 1, 1)
+    txtToDate.Value = DateSerial(y, M, 0)
+    
+    If M = 1 Then
+        Me.cboSelectYear.Value = y - 1 & "년"
+        Me.cboSelectMonth.Value = "12월"
+    Else
+        Me.cboSelectYear.Value = y & "년"
+        Me.cboSelectMonth.Value = M - 1 & "월"
+    End If
+    
+End Sub
+
+Private Sub cboSelectMonth_DropButtonClick()
+    If Me.cboSelectMonth.LineCount = 0 Then
+        Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
+    End If
+End Sub
+
+Private Sub cboSelectYear_DropButtonClick()
+    If Me.cboSelectYear.ListCount = 0 Then
+        Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+    End If
+End Sub
+
+
+
+'시트 더블클릭 시 발주수정 폼 열기
+Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
+    Dim cRow As Long
+    
+    '선택한 행 번호
+    cRow = Selection.row
+    
+    '데이터가 있는 행이 아닐 경우는 중지
+    If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).Value = "" Then
+        End
+    End If
+    
+    '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
+    Range("E" & Selection.row).Select
+    
+    '수정 화면 띄움
+    frmOrderUpdate.Show (False)
+End Sub
+
+'키워드 검색 입력 시
+Private Sub txtKeyword_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    '엔터키 눌려질 경우에만 검색
+    If KeyCode = 13 Then
+        isKeyworldSearch = True
+        OrderSearch
+        isKeyworldSearch = False
+    End If
+End Sub
+
+
+'년 선택
+Private Sub cboSelectYear_Change()
+    Dim y As Long: y = Year(Date)
+    Dim M As Long: M = Month(Date)
+    Dim pos As Long
+    
+    If Me.cboSelectYear.Value = "전체" Then
+        txtFromDate.Value = ""
+        txtToDate.Value = ""
+        
+        If Me.cboSelectMonth.Value = "전체" Then
+            '월 선택이 전체로 선택되어 있으면 바로 검색 실행
+            OrderSearch
+        Else
+            '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
+            Me.cboSelectMonth.Value = "전체"
+        End If
+    Else
+        '년도를 선택한 경우
+        pos = InStr(Me.cboSelectYear.Value, "년")
+        If pos <> 0 Then
+            y = Left(Me.cboSelectYear.Value, pos - 1)
+        End If
+    
+        If Me.cboSelectMonth.Value = "전체" Then
+            txtFromDate.Value = DateSerial(y, 1, 1)
+            txtToDate.Value = DateSerial(y, 12, 31)
+        Else
+            pos = InStr(Me.cboSelectMonth.Value, "월")
+            If pos <> 0 Then
+                M = Left(Me.cboSelectMonth.Value, pos - 1)
+                
+                txtFromDate.Value = DateSerial(y, M, 1)
+                txtToDate.Value = DateSerial(y, M + 1, 0)
+            End If
+        End If
+        
+        OrderSearch
+    End If
+    
+End Sub
+
+'월 선택
+Private Sub cboSelectMonth_Change()
+    Dim y As Long: y = Year(Date)
+    Dim M As Long: M = Month(Date)
+    Dim pos As Long
+    
+    If Me.cboSelectYear.Value = "전체" Then
+        txtFromDate.Value = ""
+        txtToDate.Value = ""
+        
+         If Me.cboSelectMonth.Value = "전체" Then
+             '월 선택이 전체로 선택되어 있으면 바로 검색 실행
+            OrderSearch
+        Else
+            Me.cboSelectMonth.Value = "전체"
+        End If
+    Else
+        pos = InStr(Me.cboSelectYear.Value, "년")
+        If pos <> 0 Then
+            y = Left(Me.cboSelectYear.Value, pos - 1)
+        End If
+    
+        If Me.cboSelectMonth.Value = "전체" Then
+            txtFromDate.Value = DateSerial(y, 1, 1)
+            txtToDate.Value = DateSerial(y, 12, 31)
+            
+            If Me.optAll.Value = False Then Me.optAll.Value = True Else OrderSearch
+        Else
+            pos = InStr(Me.cboSelectMonth.Value, "월")
+            If pos <> 0 Then
+                M = Left(Me.cboSelectMonth.Value, pos - 1)
+                
+                txtFromDate.Value = DateSerial(y, M, 1)
+                txtToDate.Value = DateSerial(y, M + 1, 0)
+            End If
+            
+            OrderSearch
+        End If
+    End If
 End Sub
