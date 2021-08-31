@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmOrderUpdate 
    Caption         =   "발주 수정"
-   ClientHeight    =   7935
+   ClientHeight    =   9435.001
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   10320
+   ClientWidth     =   10140
    OleObjectBlob   =   "frmOrderUpdate.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
@@ -23,6 +23,7 @@ Private Sub UserForm_Initialize()
     Dim db As Variant
     Dim contr As Control
     Dim orderId As Long
+    Dim pos As Long
     
     If clickOrderId <> "" Then              '견적수정 폼의 발주현황에서 더블클릭한 경우
         If IsNumeric(clickOrderId) Then
@@ -102,10 +103,12 @@ Private Sub UserForm_Initialize()
     Me.txtPaymentDate.Value = order(19)     '결제일자
     Me.cboPayMethod.Value = Trim(order(21))       '결제수단
     Me.txtVAT.Value = Format(order(22), "#,##0")             '부가세
-    Me.chkVAT.Value = order(26)             '부가세 제외 여부
     
     Me.txtInsertDate.Value = order(23)    '등록일자
     Me.txtUpdateDate.Value = order(24)    '수정일자
+    
+    Me.txtMemo.Value = order(26)            '메모
+    Me.chkVAT.Value = order(27)             '부가세 제외 여부
     
     '발주명 입력창에 포커스
     Me.txtOrderName.SetFocus
@@ -155,7 +158,7 @@ Sub UpdateOrder()
         Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
         , Me.cboPayMethod.Value, Me.txtVAT.Value, _
         Me.txtInsertDate, Date, _
-        Me.txtEstimateID.Value, Me.chkVAT.Value
+        Me.txtEstimateID.Value, Me.txtMemo.Value, Me.chkVAT.Value
 
     Unload Me
     

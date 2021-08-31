@@ -213,7 +213,9 @@ Private Sub txtUnitPrice_AfterUpdate()
     
     If Me.txtUnitPrice.Value <> "" Then
         '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtUnitPrice.Value) Then
+        If IsNumeric(Me.txtUnitPrice.Value) Then
+            Me.txtUnitPrice.Value = CLng(Me.txtUnitPrice.Value)
+        Else
             Me.txtUnitPrice.Value = ""
             Me.lblUnitPriceError.Visible = True
             Exit Sub

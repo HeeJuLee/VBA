@@ -4,7 +4,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate
    ClientHeight    =   13440
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   18195
+   ClientWidth     =   19125
    OleObjectBlob   =   "frmEstimateUpdate.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
@@ -91,6 +91,8 @@ Private Sub UserForm_Initialize()
     Me.txtExpectPaymentDate.Value = estimate(29)    '예상결제일자
     Me.txtVAT.Value = Format(estimate(30), "#,##0")    '부가세
     Me.chkVAT.Value = estimate(31)      '부가세 제외 여부
+    Me.txtMemo.Value = estimate(32)
+    
     
 '    Me.txtExpectPay.Value = Format(estimate(27), "#,##0")    '입금예상액
 '    Me.txtPaid.Value = Format(estimate(28), "#,##0")   '입금액
@@ -277,6 +279,7 @@ Sub InitializeLswOrderList()
         .ColumnHeaders.Add , , "명세서", 59, lvwColumnCenter
         .ColumnHeaders.Add , , "계산서", 59, lvwColumnCenter
         .ColumnHeaders.Add , , "결제일", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제수단", 59, lvwColumnCenter
         
         .ColumnHeaders(1).Position = 5
     
@@ -305,6 +308,7 @@ Sub InitializeLswOrderList()
                 li.ListSubItems.Add , , db(i, 17)       '명세서
                 li.ListSubItems.Add , , db(i, 18)       '계산서
                 li.ListSubItems.Add , , db(i, 19)       '결제일
+                li.ListSubItems.Add , , db(i, 21)      '결제수단
             Next
         End If
     End With
@@ -342,7 +346,7 @@ Sub UpdateEstimate()
         Me.txtInsertDate.Value, Date, _
         Me.cboCategory.Value, Me.txtSpecificationDate.Value, _
         Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
-        Me.txtExpectPaymentDate.Value, Me.txtVAT.Value, Me.chkVAT.Value
+        Me.txtExpectPaymentDate.Value, Me.txtVAT.Value, Me.chkVAT.Value, Me.txtMemo.Value
     
 End Sub
 
