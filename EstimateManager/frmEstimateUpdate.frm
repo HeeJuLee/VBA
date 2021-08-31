@@ -19,6 +19,8 @@ Dim orgManagementID As Variant
 Dim orgExecutionCost As String
 Dim totlalCheckCount As Long
 
+
+
 Private Sub UserForm_Initialize()
     Dim cRow As Long
     Dim estimate As Variant
@@ -102,6 +104,7 @@ Private Sub UserForm_Initialize()
     
     InitializeLswProductionList    '예상실행항목 목록
     InitializeCboProductonUnit  '예상실행항목 단위
+    InitializeLswCustomerAutoComplete   '거래처 자동완성
     
     InitializeLswOrderList      '발주 현황
     
@@ -109,7 +112,7 @@ End Sub
 
 Sub InitializeCboCustomer()
     Dim db As Variant
-    db = Get_DB(shtCustomer, True)
+    db = Get_DB(shtEstimateCustomer, True)
 
     Update_Cbo Me.cboCustomer, db
 End Sub
@@ -120,7 +123,7 @@ Sub InitializeCboManager()
     Dim i As Long
     
     '담당자 DB를 읽어와서
-    db = Get_DB(shtManager, True)
+    db = Get_DB(shtEstimateManager, True)
     '거래처명으로 필터링
     db = Filtered_DB(db, Me.cboCustomer.Value, 1, True)
     
@@ -211,6 +214,21 @@ Sub InitializeLswProductionList()
             Me.txtProductionTotalCost.Value = totalCost
             Me.txtProductionTotalCost.Text = Format(totalCost, "#,##0")
         End If
+    End With
+End Sub
+
+Sub InitializeLswCustomerAutoComplete()
+    
+    With Me.lswCustomerAutoComplete
+        .View = lvwList
+'        .Gridlines = True
+'        .FullRowSelect = True
+'        .HideColumnHeaders = False
+'        .HideSelection = True
+'        .FullRowSelect = True
+'        .MultiSelect = False
+'        .LabelEdit = lvwManual
+        .Visible = False
     End With
 End Sub
 
@@ -653,24 +671,32 @@ End Sub
 
 Private Sub lswProductionList_Click()
     With Me.lswProductionList
-        Me.txtProductionID.Value = .SelectedItem.ListSubItems(1)
-        Me.txtProductionItem.Value = .SelectedItem.Text
-        Me.txtProductionCustomer.Value = .SelectedItem.ListSubItems(4)
-        Me.txtProductionMaterial.Value = .SelectedItem.ListSubItems(5)
-        Me.txtProductionSize.Value = .SelectedItem.ListSubItems(6)
-        Me.txtProductionAmount.Value = .SelectedItem.ListSubItems(7)
-        Me.cboProductionUnit.Value = .SelectedItem.ListSubItems(8)
-        Me.txtProductionUnitPrice.Value = .SelectedItem.ListSubItems(9)
-        Me.txtProductionCost.Value = .SelectedItem.ListSubItems(10)
-        Me.txtProductionMemo.Value = .SelectedItem.ListSubItems(11)
+        If Not .SelectedItem Is Nothing Then
+            Me.txtProductionID.Value = .SelectedItem.ListSubItems(1)
+            Me.txtProductionItem.Value = .SelectedItem.Text
+            Me.txtProductionCustomer.Value = .SelectedItem.ListSubItems(4)
+            Me.txtProductionMaterial.Value = .SelectedItem.ListSubItems(5)
+            Me.txtProductionSize.Value = .SelectedItem.ListSubItems(6)
+            Me.txtProductionAmount.Value = .SelectedItem.ListSubItems(7)
+            Me.cboProductionUnit.Value = .SelectedItem.ListSubItems(8)
+            Me.txtProductionUnitPrice.Value = .SelectedItem.ListSubItems(9)
+            Me.txtProductionCost.Value = .SelectedItem.ListSubItems(10)
+            Me.txtProductionMemo.Value = .SelectedItem.ListSubItems(11)
+        End If
     End With
 End Sub
 
 Private Sub lswOrderList_DblClick()
     With Me.lswOrderList
-        clickOrderId = .SelectedItem.ListSubItems(1)
+        If Not .SelectedItem Is Nothing Then
+            clickOrderId = .SelectedItem.ListSubItems(1)
+            
+            If frmOrderUpdate.Visible = True Then
+                Unload frmOrderUpdate
+            End If
         
-        frmOrderUpdate.Show (False)
+            frmOrderUpdate.Show (False)
+        End If
     End With
 End Sub
 
@@ -734,6 +760,75 @@ Private Sub lswProductionList_ItemCheck(ByVal Item As MSComctlLib.ListItem)
         Me.btnProductionToOrder.Caption = "체크 항목 발주"
     Else
         Me.btnProductionToOrder.Caption = totlalCheckCount & "개 항목 발주"
+    End If
+End Sub
+
+
+Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 13 Then
+        '엔터키 - 다음 입력칸으로 이동
+        Me.lswCustomerAutoComplete.Visible = False
+        Me.txtProductionItem.SetFocus
+    ElseIf KeyCode = 9 Or KeyCode = 40 Then
+        '탭키, 아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
+        With Me.lswCustomerAutoComplete
+            If .ListItems.count > 0 And .Visible = True Then
+                .SelectedItem = .ListItems(1)
+                .SetFocus
+            End If
+        End With
+    End If
+End Sub
+
+Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Dim db As Variant
+    Dim i As Long
+    
+    '거래처 자동완성 처리
+    With Me.lswCustomerAutoComplete
+        If Me.txtProductionCustomer.Value = "" Then
+            .Visible = False
+        Else
+            .Visible = True
+            
+            '발주거래처 DB를 읽어와서 리스트뷰에 출력
+            .ListItems.Clear
+            db = Get_DB(shtOrderCustomer, True)
+            db = Filtered_DB(db, Me.txtProductionCustomer.Value, 1, False)
+            If IsEmpty(db) Then
+                .Visible = False
+            Else
+                For i = 1 To UBound(db)
+                    .ListItems.Add , , db(i, 1)
+                    If i = 8 Then Exit For
+                Next
+            End If
+            
+        End If
+    End With
+End Sub
+
+Private Sub lswCustomerAutoComplete_DblClick()
+    '거래처에 값을 넣어주고 포커스는 품명으로 이동
+    With Me.lswCustomerAutoComplete
+        If Not .SelectedItem Is Nothing Then
+            Me.txtProductionCustomer.Value = .SelectedItem.Text
+            .Visible = False
+            Me.txtProductionItem.SetFocus
+        End If
+    End With
+End Sub
+
+Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
+    '거래처에 값을 넣어주고 포커스는 품명으로 이동
+    If KeyCode = 13 Then
+        With Me.lswCustomerAutoComplete
+            If Not .SelectedItem Is Nothing Then
+                Me.txtProductionCustomer.Value = .SelectedItem.Text
+                .Visible = False
+                Me.txtProductionItem.SetFocus
+            End If
+        End With
     End If
 End Sub
 
@@ -913,6 +1008,7 @@ End Sub
 Private Sub chkVAT_AfterUpdate()
     CalculateEstimateUpdateCost
 End Sub
+
 
 Private Sub UserForm_Layout()
     estimateUpdateFormX = Me.Left

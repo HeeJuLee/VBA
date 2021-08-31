@@ -27,6 +27,13 @@ Private Sub UserForm_Initialize()
     End If
     Next
     
+    'Æû À§Ä¡ ¼öÁ¤
+    If orderInsertFormX <> 0 Then
+        Me.StartUpPosition = 0
+        Me.Left = orderInsertFormX
+        Me.top = orderInsertFormY
+    End If
+    
     InitializeOrderCategory
     InitializeCboUnit
     
@@ -218,4 +225,11 @@ Private Sub txtUnitPrice_AfterUpdate()
     
     CalculateOrderInsertCost
 End Sub
+
+
+Private Sub UserForm_Layout()
+    orderInsertFormX = Me.Left
+    orderInsertFormY = Me.top
+End Sub
+
 

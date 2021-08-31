@@ -215,6 +215,9 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     Range("E" & Selection.row).Select
     
     '수정 화면 띄움
+    If frmOrderUpdate.Visible = True Then
+        Unload frmOrderUpdate
+    End If
     frmOrderUpdate.Show (False)
 End Sub
 

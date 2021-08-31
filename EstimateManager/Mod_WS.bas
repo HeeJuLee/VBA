@@ -4,6 +4,8 @@ Option Explicit
 Public clickOrderId As Variant
 Public estimateUpdateFormX, estimateUpdateFormY As Long
 Public orderUpdateFormX, orderUpdateFormY As Long
+Public estimateInsertFormX, estimateInsertFormY As Long
+Public orderInsertFormX, orderInsertFormY As Long
 
 Sub GetCalendarDate(textBox As MSForms.textBox)
     Dim vDate As Date

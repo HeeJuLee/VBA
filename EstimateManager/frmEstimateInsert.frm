@@ -25,6 +25,13 @@ Private Sub UserForm_Initialize()
     End If
     Next
     
+    '폼 위치 수정
+    If estimateInsertFormX <> 0 Then
+        Me.StartUpPosition = 0
+        Me.Left = estimateInsertFormX
+        Me.top = estimateInsertFormY
+    End If
+    
     '거래처, 담당자 콤보박스 세팅
     InitializeCboCustomer
     InitializeCboUnit
@@ -43,7 +50,7 @@ End Sub
 
 Sub InitializeCboCustomer()
     Dim db As Variant
-    db = Get_DB(shtCustomer, True)
+    db = Get_DB(shtEstimateCustomer, True)
 
     Update_Cbo Me.cboCustomer, db, 1
 End Sub
@@ -52,7 +59,7 @@ Sub InitializeCboManager()
     Dim db As Variant
     
     '담당자 DB를 읽어와서
-    db = Get_DB(shtManager, True)
+    db = Get_DB(shtEstimateManager, True)
     '거래처명으로 필터링
     db = Filtered_DB(db, Me.cboCustomer.Value, 1, True)
     
@@ -99,7 +106,9 @@ Sub InsertEstimate()
             
     Unload Me
     
+    shtEstimateAdmin.Activate
     shtEstimateAdmin.EstimateSearch
+    shtEstimateAdmin.GoToEnd
     
 End Sub
 
@@ -145,8 +154,6 @@ End Sub
 
 Private Sub btnEstimateClose_Click()
     Unload Me
-    
-    shtEstimateAdmin.EstimateSearch
 End Sub
 
 Private Sub btnEstimateInsert_Click()
@@ -213,3 +220,7 @@ Private Sub txtUnitPrice_AfterUpdate()
     CalculateEstimateInsertCost
 End Sub
 
+Private Sub UserForm_Layout()
+    estimateInsertFormX = Me.Left
+    estimateInsertFormY = Me.top
+End Sub

@@ -24,8 +24,8 @@ Sub EstimateSearch()
     
     '견적 데이터를 읽어옴
     db = Get_DB(shtEstimate, False, False)
-    'db = Connect_DB(db, 2, shtManager, "ID_거래처, 담당자", False)
-    'db = Connect_DB(db, 32, shtCustomer, "거래처", False)
+    'db = Connect_DB(db, 2, shtEstimateManager, "ID_거래처, 담당자", False)
+    'db = Connect_DB(db, 32, shtEstimateCustomer, "거래처", False)
     
     If Not IsEmpty(db) Then
         If txtFromDate.Value <> "" Then db = Filtered_DB(db, ">=" & txtFromDate.Value, 23)
@@ -272,6 +272,9 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     Range("C" & Selection.row).Select
     
     '수정 화면 띄움
+    If frmEstimateUpdate.Visible = True Then
+        Unload frmEstimateUpdate
+    End If
     frmEstimateUpdate.Show (False)
 End Sub
 
