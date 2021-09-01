@@ -16,7 +16,10 @@ Sub JoinOrderEstimate()
         db = Get_DB(shtOrderData, False, False)
         db = Join_DB(db, 4, shtEstimateData, "관리번호", "ID", False)
         
-        ArrayToRng .Range("A2"), db, "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25"
+        '발주 테이블과 관리 메모 테이블을 JOIN해서 메모 필드 채움
+        db = Join_DB(db, 2, shtManageMemoData, "ID_관리", "메모", False)
+        
+        ArrayToRng .Range("A2"), db, "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26"
         
         endCol = .Cells(1, .Columns.Count).End(xlToLeft).Column
         endRow = .Cells(.Rows.Count, 1).End(xlUp).row

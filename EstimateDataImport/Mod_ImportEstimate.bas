@@ -57,123 +57,122 @@ Sub ImportEstimate()
     
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
-    
-    ClearEstimateData
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2005.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            importCount = ImportEstimateData_Type8(WS, WS.Name, 2005)
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2006.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            importCount = ImportEstimateData_Type7(WS, WS.Name, 2006)
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2006-2.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            importCount = ImportEstimateData_Type6(WS, WS.Name, 2006)
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2007.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            pos = InStr(WS.Name, "월")
-            If pos <> 0 Then
-                M = Left(WS.Name, pos - 1)
-                If M >= 1 And M <= 4 Then
-                    importCount = ImportEstimateData_Type6(WS, WS.Name, 2007)
-                Else
-                    importCount = ImportEstimateData_Type5(WS, WS.Name, 2007)
-                End If
-            End If
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2008.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            pos = InStr(WS.Name, "월")
-            If pos <> 0 Then
-                M = Left(WS.Name, pos - 1)
-                If M >= 1 And M <= 6 Then
-                    importCount = ImportEstimateData_Type5(WS, WS.Name, 2008)
-                Else
-                    importCount = ImportEstimateData_Type4(WS, WS.Name, 2008)
-                End If
-            End If
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2009.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            importCount = ImportEstimateData_Type4(WS, WS.Name, 2009)
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2010.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            importCount = ImportEstimateData_Type4(WS, WS.Name, 2010)
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2011.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            importCount = ImportEstimateData_Type4(WS, WS.Name, 2011)
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2012.xls")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            importCount = ImportEstimateData_Type4(WS, WS.Name, 2012)
-        End If
-    Next
-    WB.Close
-    
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2013.xlsx")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            importCount = ImportEstimateData_Type4(WS, WS.Name, 2013)
-        End If
-    Next
-    WB.Close
 
-    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\법인-견적관리2013.xlsx")
-    For Each WS In WB.Worksheets
-        If WS.Name Like "**월" Then
-            pos = InStr(WS.Name, "월")
-            If pos <> 0 Then
-                M = Left(WS.Name, pos - 1)
-                If M = 1 Or M = 2 Then
-                    importCount = ImportEstimateData_Type3(WS, WS.Name, 2013)
-                Else
-                    importCount = ImportEstimateData_Type2(WS, WS.Name, 2013)
-                End If
-            End If
-        End If
-    Next
-    WB.Close
     
-Exit Sub
-
+'    ClearEstimateData
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2005.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            importCount = ImportEstimateData_Type8(WS, WS.Name, 2005)
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2006.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            importCount = ImportEstimateData_Type7(WS, WS.Name, 2006)
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2006-2.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            importCount = ImportEstimateData_Type6(WS, WS.Name, 2006)
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2007.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            pos = InStr(WS.Name, "월")
+'            If pos <> 0 Then
+'                M = Left(WS.Name, pos - 1)
+'                If M >= 1 And M <= 4 Then
+'                    importCount = ImportEstimateData_Type6(WS, WS.Name, 2007)
+'                Else
+'                    importCount = ImportEstimateData_Type5(WS, WS.Name, 2007)
+'                End If
+'            End If
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2008.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            pos = InStr(WS.Name, "월")
+'            If pos <> 0 Then
+'                M = Left(WS.Name, pos - 1)
+'                If M >= 1 And M <= 6 Then
+'                    importCount = ImportEstimateData_Type5(WS, WS.Name, 2008)
+'                Else
+'                    importCount = ImportEstimateData_Type4(WS, WS.Name, 2008)
+'                End If
+'            End If
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2009.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            importCount = ImportEstimateData_Type4(WS, WS.Name, 2009)
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2010.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            importCount = ImportEstimateData_Type4(WS, WS.Name, 2010)
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2011.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            importCount = ImportEstimateData_Type4(WS, WS.Name, 2011)
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2012.xls")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            importCount = ImportEstimateData_Type4(WS, WS.Name, 2012)
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\견적관리2013.xlsx")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            importCount = ImportEstimateData_Type4(WS, WS.Name, 2013)
+'        End If
+'    Next
+'    WB.Close
+'
+'    Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\법인-견적관리2013.xlsx")
+'    For Each WS In WB.Worksheets
+'        If WS.Name Like "**월" Then
+'            pos = InStr(WS.Name, "월")
+'            If pos <> 0 Then
+'                M = Left(WS.Name, pos - 1)
+'                If M = 1 Or M = 2 Then
+'                    importCount = ImportEstimateData_Type3(WS, WS.Name, 2013)
+'                Else
+'                    importCount = ImportEstimateData_Type2(WS, WS.Name, 2013)
+'                End If
+'            End If
+'        End If
+'    Next
+'    WB.Close
+'
     Set WB = Application.Workbooks.Open("C:\Users\leehe\Downloads\현솔-견적관리문서\법인-견적관리2014.xlsx")
     For Each WS In WB.Worksheets
         If WS.Name Like "**월" Then

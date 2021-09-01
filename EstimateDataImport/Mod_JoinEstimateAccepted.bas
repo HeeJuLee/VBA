@@ -16,7 +16,10 @@ Sub JoinEstimateAccepted()
         db = Get_DB(shtEstimateData, False, False)
         db = Join_DB(db, 2, shtAcceptedData, "관리번호", "분류1, 명세서, 계산서, 결재, 결재월, 부가세", False)
         
-        ArrayToRng .Range("A2"), db, "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,28, 29, 30"
+        '견적 테이블과 견적 메모 테이블을 JOIN 해서 메모 필드 채움
+        db = Join_DB(db, 2, shtEstimateMemoData, "관리번호", "메모", False)
+        
+        ArrayToRng .Range("A2"), db, "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,28, 29, 30, 31"
         
         endCol = .Cells(1, .Columns.Count).End(xlToLeft).Column
         endRow = .Cells(.Rows.Count, 1).End(xlUp).row
