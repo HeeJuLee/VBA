@@ -88,7 +88,8 @@ Private Sub UserForm_Initialize()
     Me.txtSpecificationDate.Value = estimate(26)    '거래명세서
     Me.txtTaxInvoiceDate.Value = estimate(27)    '세금계산서
     Me.txtPaymentDate.Value = estimate(28)    '결제일자
-    Me.txtExpectPaymentDate.Value = estimate(29)    '예상결제일자
+    Me.txtExpectPaymentDate.Value = estimate(29)  '예상결제일
+    Me.txtExpectPaymentMonth.Value = Format(estimate(29), "mm" & "월")  '예상결제월
     Me.txtVAT.Value = Format(estimate(30), "#,##0")    '부가세
     Me.chkVAT.Value = estimate(31)      '부가세 제외 여부
     Me.txtMemo.Value = estimate(32)
@@ -711,6 +712,7 @@ Private Sub btnEstimateUpdate_Click()
     
     shtEstimateAdmin.Activate
     shtEstimateAdmin.EstimateSearch
+    shtEstimateAdmin.Range("H" & selectionRow).Select
 End Sub
 
 Private Sub btnEstimateClose_Click()
@@ -878,6 +880,7 @@ End Sub
 
 Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
     GetCalendarDate Me.txtExpectPaymentDate
+    Me.txtExpectPaymentMonth = Format(Me.txtExpectPaymentDate, "mm" & "월")
 End Sub
 
 Private Sub cboCustomer_Change()

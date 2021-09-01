@@ -262,6 +262,7 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     
     '선택한 행 번호
     cRow = Selection.row
+    selectionRow = cRow
     
     '데이터가 있는 행이 아닐 경우는 중지
     If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then

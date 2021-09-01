@@ -162,11 +162,12 @@ Sub UpdateOrder()
 
     Unload Me
     
-    If frmEstimateUpdate.Visible = True Then
+    If isFormLoaded("frmEstimateUpdate") Then
         frmEstimateUpdate.InitializeLswOrderList
     Else
         shtOrderAdmin.Activate
         shtOrderAdmin.OrderSearch
+        shtOrderAdmin.Range("K" & selectionRow).Select
     End If
     
 End Sub

@@ -6,6 +6,7 @@ Public estimateUpdateFormX, estimateUpdateFormY As Long
 Public orderUpdateFormX, orderUpdateFormY As Long
 Public estimateInsertFormX, estimateInsertFormY As Long
 Public orderInsertFormX, orderInsertFormY As Long
+Public selectionRow As Long
 
 Sub GetCalendarDate(textBox As MSForms.textBox)
     Dim vDate As Date
@@ -155,3 +156,15 @@ Sub ClearContentsLine(startRng As Range, endColNo, clearRowCount)
     End With
 
 End Sub
+
+Function isFormLoaded(ByVal strName As String) As Boolean
+    Dim i As Integer
+
+    isFormLoaded = True
+    strName = LCase(strName)
+    For i = 0 To VBA.UserForms.count - 1
+        If LCase(UserForms(i).Name) = strName Then Exit Function
+    Next
+    isFormLoaded = False
+End Function
+
