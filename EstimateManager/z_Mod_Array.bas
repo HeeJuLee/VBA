@@ -157,7 +157,7 @@ End If
 
 End Sub
 
-Function IsUniqueArray(arr As Variant, Optional ColNo As String = "") As Boolean
+Function IsUniqueArray(arr As Variant, Optional colNo As String = "") As Boolean
 
 '###############################################################
 '오빠두엑셀 VBA 사용자지정함수 (https://www.oppadu.com)
@@ -179,8 +179,8 @@ Dim sTemp As String
 
 D = ArrayDimension(arr)
 
-If ColNo = "" Then If D > 1 Then ColNo = LBound(arr, 2)
-vCols = Split(ColNo, ",")
+If colNo = "" Then If D > 1 Then colNo = LBound(arr, 2)
+vCols = Split(colNo, ",")
 
 If D = 1 Then
     c = arr(LBound(arr))
@@ -204,7 +204,7 @@ End If
 IsUniqueArray = True
 
 End Function
-Function IsDistinctArray(arr As Variant, Optional ColNo As String = "") As Boolean
+Function IsDistinctArray(arr As Variant, Optional colNo As String = "") As Boolean
 
 '###############################################################
 '오빠두엑셀 VBA 사용자지정함수 (https://www.oppadu.com)
@@ -225,9 +225,9 @@ Dim sTemp As String: Dim i As Long
 
 Set Dict = New Dictionary
 
-If ColNo = "" Then If ArrayDimension(arr) > 1 Then ColNo = LBound(arr, 2)
+If colNo = "" Then If ArrayDimension(arr) > 1 Then colNo = LBound(arr, 2)
 
-vCols = Split(ColNo, ",")
+vCols = Split(colNo, ",")
 
 On Error GoTo Duplicate:
 
@@ -254,7 +254,7 @@ Duplicate:
 
 End Function
 
-Sub ClearContentsBelow(startRng As Range, Optional ColNo, Optional BaseCol As Long = 0)
+Sub ClearContentsBelow(startRng As Range, Optional colNo, Optional BaseCol As Long = 0)
 
 '###############################################################
 '오빠두엑셀 VBA 사용자지정함수 (https://www.oppadu.com)
@@ -269,12 +269,12 @@ Sub ClearContentsBelow(startRng As Range, Optional ColNo, Optional BaseCol As Lo
 '##############################################################
 
 Dim WS As Worksheet: Dim lastRow As Long: Set WS = startRng.Parent
-If IsMissing(ColNo) Then ColNo = WS.Cells(startRng.row, WS.Columns.count).End(xlToLeft).Column
-If Not IsNumeric(ColNo) Then ColNo = Range(ColNo & 1).Column
+If IsMissing(colNo) Then colNo = WS.Cells(startRng.row, WS.Columns.count).End(xlToLeft).Column
+If Not IsNumeric(colNo) Then colNo = Range(colNo & 1).Column
 If BaseCol = 0 Then BaseCol = startRng.Column Else BaseCol = startRng.Column + BaseCol - 1
 lastRow = WS.Cells(WS.Rows.count, BaseCol).End(xlUp).row
 If lastRow < startRng.row Then Exit Sub
-WS.Range(startRng, WS.Cells(lastRow, ColNo)).ClearContents
+WS.Range(startRng, WS.Cells(lastRow, colNo)).ClearContents
 
 End Sub
 

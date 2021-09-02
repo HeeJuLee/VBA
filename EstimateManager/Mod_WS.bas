@@ -2,6 +2,7 @@ Attribute VB_Name = "Mod_WS"
 Option Explicit
 
 Public clickOrderId As Variant
+Public clickEstimateId As Variant
 Public estimateUpdateFormX, estimateUpdateFormY As Long
 Public orderUpdateFormX, orderUpdateFormY As Long
 Public estimateInsertFormX, estimateInsertFormY As Long
@@ -83,6 +84,12 @@ Sub MoveToOrderAdmin()
     
 End Sub
 
+Sub MoveToOperationAdmin()
+    
+    shtOperationAdmin.Activate
+    
+End Sub
+
 Sub SetContentsLine(startRng As Range, endColNo, clearRowCount)
     Dim WS As Worksheet
     Dim lastRow As Long
@@ -146,6 +153,7 @@ Sub ClearContentsLine(startRng As Range, endColNo, clearRowCount)
     lastRow = startRng.row + clearRowCount
     If lastRow < startRng.row Then Exit Sub
     
+    '라인 서식 지우기
     With WS.Range(startRng, WS.Cells(lastRow, endColNo))
         .Borders(xlEdgeLeft).LineStyle = xlNone
         .Borders(xlEdgeTop).LineStyle = xlNone
@@ -154,7 +162,41 @@ Sub ClearContentsLine(startRng As Range, endColNo, clearRowCount)
         .Borders(xlInsideVertical).LineStyle = xlNone
         .Borders(xlInsideHorizontal).LineStyle = xlNone
     End With
+    
+    '채우기 색상 지우기
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo)).Interior
+        .Pattern = xlNone
+        .TintAndShade = 0
+        .PatternTintAndShade = 0
+    End With
 
+End Sub
+
+Sub SetContentsColor(startRng As Range, endColNo, arr, colNo, strMatch, color)
+    Dim WS As Worksheet
+    Dim currentRow, startColNo As Long
+    Dim i As Long
+    Set WS = startRng.Parent
+        
+    currentRow = startRng.row
+    startColNo = startRng.Column
+    
+    If Not IsNumeric(endColNo) Then
+        endColNo = Range(endColNo & 1).Column
+    End If
+    
+    For i = 1 To UBound(arr)
+        If arr(i, colNo) = strMatch Then
+             With WS.Range(WS.Cells(currentRow, startColNo), WS.Cells(currentRow, endColNo)).Interior
+                .Pattern = xlSolid
+                .PatternColorIndex = xlAutomatic
+                .ThemeColor = color
+                .TintAndShade = 0.799981688894314
+                .PatternTintAndShade = 0
+            End With
+        End If
+        currentRow = currentRow + 1
+    Next
 End Sub
 
 Function isFormLoaded(ByVal strName As String) As Boolean

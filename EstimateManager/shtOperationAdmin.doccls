@@ -3,6 +3,34 @@
 Dim isKeyworldSearch As Boolean
 Dim searchResultCount As Long
 Dim isEnd As Boolean
+Dim isListInit As Boolean
+
+Private Sub lswOperationList_Click()
+    With Me.lswOperationList
+        If Not .SelectedItem Is Nothing Then
+            Me.txtOperationID.Value = .SelectedItem.Text
+            Range("E7") = Format(.SelectedItem.ListSubItems(2), "mm/dd")
+            Range("E8") = .SelectedItem.ListSubItems(3)
+            Range("E9") = .SelectedItem.ListSubItems(4)
+            Range("E10") = .SelectedItem.ListSubItems(5)
+            Range("E11") = .SelectedItem.ListSubItems(6)
+            Range("E12") = .SelectedItem.ListSubItems(7)
+            If IsNumeric(.SelectedItem.ListSubItems(8)) Then
+                Range("E13") = CLng(.SelectedItem.ListSubItems(8))
+            Else
+                Range("E13") = .SelectedItem.ListSubItems(8)
+            End If
+            Range("E14") = Format(.SelectedItem.ListSubItems(9), "mm/dd")
+            Range("E15") = Format(.SelectedItem.ListSubItems(10), "mm/dd")
+            Range("E16") = Format(.SelectedItem.ListSubItems(11), "mm/dd")
+            If IsNumeric(.SelectedItem.ListSubItems(12)) Then
+                Range("E17") = CLng(.SelectedItem.ListSubItems(12))
+            Else
+                Range("E17") = .SelectedItem.ListSubItems(12)
+            End If
+        End If
+    End With
+End Sub
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -14,35 +42,36 @@ Private Sub Worksheet_Activate()
     
     isKeyworldSearch = False
     isEnd = False
+    
+    If isListInit = False Then
+        InitializeLswOperationList
+        OperationSearch
+    End If
 End Sub
 
-'발주 데이터를 검색해서 시트에 출력
-Sub OrderSearch()
+'운영비 데이터를 검색해서 시트에 출력
+Sub OperationSearch()
     Dim db As Variant
+    Dim i As Long
+    Dim li As ListItem
+    Dim income, expense As Long
     
-    '발주 데이터를 읽어옴
-    db = Get_DB(shtOrder, False, False)
+    '운영비 데이터를 읽어옴
+    db = Get_DB(shtOperation, False, False)
       
     If Not IsEmpty(db) Then
-        If txtFromDate.Value <> "" Then db = Filtered_DB(db, ">=" & txtFromDate.Value, 26)    '등록일자 필드와 날짜 비교
+        If txtFromDate.Value <> "" Then db = Filtered_DB(db, ">=" & txtFromDate.Value, 14)    '등록일자 필드와 날짜 비교
     End If
     If Not IsEmpty(db) Then
-        If txtToDate.Value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.Value, 26)    '등록일자 필드와 날짜 비교
+        If txtToDate.Value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.Value, 14)    '등록일자 필드와 날짜 비교
     End If
     
-'    If Not IsEmpty(db) Then
-'        '견적테이블에서 견적정보를 추가로 읽어옴
-'        db = Join_DB(db, 25, shtEstimate, "ID", "거래처, 담당자, 견적명", False)
-'    End If
-    
     If Not IsEmpty(db) Then
-        'If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value, 5)
         If Me.txtKeyword.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword.Value)     '모든 필드에서 키워드 검색
     End If
     
-    
-    '기존 검색결과를 화면에서 지움
-    ClearOrderSearchResult
+    '기존 검색결과 지우기
+    ClearOperationSearchResult
     
     '검색결과를 화면에 출력
     If IsEmpty(db) Then
@@ -51,21 +80,40 @@ Sub OrderSearch()
         '검색결과 건수를 저장
         searchResultCount = UBound(db, 1)
         
-        '검색결과 라인 서식 적용
-        SetContentsLine shtOrderAdmin.Range("B6"), "AC", searchResultCount
-        
-       '순번 출력
-        SequenceToRng shtOrderAdmin.Range("D6"), UBound(db, 1)
-        '검색결과 출력
-        ArrayToRng shtOrderAdmin.Range("B6"), db, "1,28, ,5,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
-
+        income = 0
+        expense = 0
+        With Me.lswOperationList
+            For i = 1 To UBound(db)
+               
+                Set li = .ListItems.Add(, , db(i, 1))
+                li.ListSubItems.Add , , i
+                li.ListSubItems.Add , , db(i, 14)
+                li.ListSubItems.Add , , db(i, 15)
+                li.ListSubItems.Add , , db(i, 3)
+                li.ListSubItems.Add , , db(i, 5)
+                li.ListSubItems.Add , , db(i, 7)
+                li.ListSubItems.Add , , db(i, 8)
+                li.ListSubItems.Add , , Format(db(i, 9), "#,##0")
+                li.ListSubItems.Add , , db(i, 10)
+                li.ListSubItems.Add , , db(i, 11)
+                li.ListSubItems.Add , , db(i, 12)
+                li.ListSubItems.Add , , Format(db(i, 13), "#,##0")
+                
+                If db(i, 3) = "수입" Then
+                    income = income + db(i, 9)
+                ElseIf db(i, 3) = "지출" Then
+                    expense = expense + db(i, 9)
+                End If
+            Next
+        End With
     End If
-
-    '첫 행으로 이동
-    shtOrderAdmin.Range("K6").Select
     
-     '검색 결과 건수 출력
-    Me.lblSearchResult.Caption = "총 " & searchResultCount & "건 검색"
+    '합계 출력
+'    shtOperationAdmin.Range("S4").Value = income
+'    shtOperationAdmin.Range("V4").Value = expense
+    
+    '검색 결과 건수 출력
+    Me.lblSearchResult.Caption = searchResultCount & "건"
     
     If isKeyworldSearch = True Then
         Me.txtKeyword.Activate
@@ -75,19 +123,87 @@ Sub OrderSearch()
     
 End Sub
 
-'발주 검색결과를 화면에서 지움
-Sub ClearOrderSearchResult()
+Sub SetExpenseSummary(db)
+    Dim i As Long
+    Dim income, expense As Long
     
-    '3번 순번 열을 기준으로 지움
-    ClearContentsBelow shtOrderAdmin.Range("B6"), "AC"
+    income = 0
+    expense = 0
+    For i = 1 To UBound(db)
+        If db(i, 3) = "수입" Then
+            income = income + db(i, 9)
+        ElseIf db(i, 3) = "지출" Then
+            expense = expense + db(i, 9)
+        End If
+    Next
     
-    '아래쪽 라인 서식 지움
-    ClearContentsLine shtOrderAdmin.Range("B6"), "AC", searchResultCount
+    shtOperationAdmin.Range("Q5").Value = income
+    shtOperationAdmin.Range("T5").Value = expense
+    
 End Sub
 
+'발주 검색결과를 화면에서 지움
+Sub ClearOperationSearchResult()
+    
+    '리스트뷰 내용 삭제
+    Me.lswOperationList.ListItems.Clear
+    
+    '등록 셀 내용 지움
+    ClearInputData
+    
+End Sub
+
+Sub ClearInputData()
+    Me.txtOperationID.Value = ""
+    Range("E7:E17") = ""
+End Sub
+
+Sub InitializeLswOperationList()
+    Dim db As Variant
+    Dim i, j, totalCost As Long
+    Dim li As ListItem
+    Dim fullPath As String
+    
+    fullPath = getLocalFullName(ThisWorkbook.Path) & "\listview-1.jpg"
+    
+    With Me.ImageList1.ListImages
+        .Add , , LoadPicture(fullPath)
+    End With
+    
+     '리스트뷰 값 설정
+    With Me.lswOperationList
+        .View = lvwReport
+        .Gridlines = True
+        .FullRowSelect = True
+        .HideColumnHeaders = False
+        .HideSelection = True
+        .FullRowSelect = True
+        .MultiSelect = False
+        .LabelEdit = lvwManual
+        .SmallIcons = Me.ImageList1
+        
+        .ColumnHeaders.Clear
+
+        .ColumnHeaders.Add , , "ID", 0
+        .ColumnHeaders.Add , , "No", 40, lvwColumnCenter
+        .ColumnHeaders.Add , , "등록일자", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "고정비", 60, lvwColumnCenter
+        .ColumnHeaders.Add , , "수입지출", 70, lvwColumnCenter
+        .ColumnHeaders.Add , , "분류", 50, lvwColumnCenter
+        .ColumnHeaders.Add , , "거래처", 100
+        .ColumnHeaders.Add , , "품목", 250
+        .ColumnHeaders.Add , , "금액", 80, lvwColumnRight
+        .ColumnHeaders.Add , , "명세서", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "계산서", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "부가세", 80, lvwColumnRight
+    End With
+    
+    isListInit = True
+End Sub
 
 '발주삭제
-Sub OrderDelete()
+Sub OperationDelete()
     Dim cRow As Long
     Dim YN As VbMsgBoxResult
     
@@ -105,22 +221,10 @@ Sub OrderDelete()
     If YN = vbNo Then Exit Sub
     
     'DB에서 견적정보 삭제
-    Delete_Record shtOrder, Range("B" & cRow).Value
+    Delete_Record shtOperation, Range("B" & cRow).Value
 
-    OrderSearch
+    OperationSearch
 End Sub
-
-'발주등록 폼 열기
-Sub OpenOrderInsertForm()
-    frmOrderInsert.Show (False)
-End Sub
-
-
-'발주수정 폼 열기
-Sub OpenOrderUpdateForm()
-    frmOrderUpdate.Show (False)
-End Sub
-
 
 ''조회 기간', '검색어' 등 일반 텍스트 박스 클릭 시 Object 선택이 안되도록 클릭이벤트를 빈 매크로로 연결
 Sub EmptyProcedure()
@@ -129,25 +233,28 @@ End Sub
 
 
 Sub GoToEnd()
-    Dim endRow As Long
-    
-    With shtOrderAdmin
-        .Activate
-        If isEnd = False Then
-            .Range("K" & .Range("D5").End(xlDown).row).Select
-            isEnd = True
-        Else
-            .Range("K6").Select
-            isEnd = False
+    With Me.lswOperationList
+        If .ListItems.count > 0 Then
+            If isEnd = False Then
+                .SelectedItem = .ListItems(.ListItems.count)
+                .SelectedItem.EnsureVisible
+                isEnd = True
+            Else
+                .SelectedItem = .ListItems(1)
+                .SelectedItem.EnsureVisible
+                isEnd = False
+            End If
         End If
     End With
+    
+    lswOperationList_Click
 End Sub
 
 
 '전체 선택 시 '월'만 전체로 바꿈
 Private Sub optAll_Click()
     If Me.cboSelectMonth.Value = "전체" Then
-        OrderSearch
+        OperationSearch
     Else
         Me.cboSelectMonth.Value = "전체"
     End If
@@ -198,42 +305,12 @@ Private Sub cboSelectYear_DropButtonClick()
 End Sub
 
 
-
-'시트 더블클릭 시 발주수정 폼 열기
-Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
-    Dim cRow As Long
-    
-    '선택한 행 번호
-    cRow = Selection.row
-    selectionRow = cRow
-    
-    '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).Value = "" Then
-        End
-    End If
-    
-    '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
-    Range("E" & Selection.row).Select
-    
-    '수주 데이터를 클릭한 경우에는 EstimateUpdate 폼을 띄움
-    If shtOrderAdmin.Range("G" & cRow).Value = "수주" Then
-        clickEstimateId = shtOrderAdmin.Range("C" & cRow).Value
-        frmEstimateUpdate.Show (False)
-    Else
-        '발주 수정 화면 띄움
-        If frmOrderUpdate.Visible = True Then
-            Unload frmOrderUpdate
-        End If
-        frmOrderUpdate.Show (False)
-    End If
-End Sub
-
 '키워드 검색 입력 시
 Private Sub txtKeyword_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     '엔터키 눌려질 경우에만 검색
     If KeyCode = 13 Then
         isKeyworldSearch = True
-        OrderSearch
+        OperationSearch
         isKeyworldSearch = False
     End If
 End Sub
@@ -251,7 +328,7 @@ Private Sub cboSelectYear_Change()
         
         If Me.cboSelectMonth.Value = "전체" Then
             '월 선택이 전체로 선택되어 있으면 바로 검색 실행
-            OrderSearch
+            OperationSearch
         Else
             '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
             Me.cboSelectMonth.Value = "전체"
@@ -276,7 +353,7 @@ Private Sub cboSelectYear_Change()
             End If
         End If
         
-        OrderSearch
+        OperationSearch
     End If
     
 End Sub
@@ -293,7 +370,7 @@ Private Sub cboSelectMonth_Change()
         
          If Me.cboSelectMonth.Value = "전체" Then
              '월 선택이 전체로 선택되어 있으면 바로 검색 실행
-            OrderSearch
+            OperationSearch
         Else
             Me.cboSelectMonth.Value = "전체"
         End If
@@ -307,7 +384,7 @@ Private Sub cboSelectMonth_Change()
             txtFromDate.Value = DateSerial(y, 1, 1)
             txtToDate.Value = DateSerial(y, 12, 31)
             
-            If Me.optAll.Value = False Then Me.optAll.Value = True Else OrderSearch
+            If Me.optAll.Value = False Then Me.optAll.Value = True Else OperationSearch
         Else
             pos = InStr(Me.cboSelectMonth.Value, "월")
             If pos <> 0 Then
@@ -317,7 +394,7 @@ Private Sub cboSelectMonth_Change()
                 txtToDate.Value = DateSerial(y, M + 1, 0)
             End If
             
-            OrderSearch
+            OperationSearch
         End If
     End If
 End Sub

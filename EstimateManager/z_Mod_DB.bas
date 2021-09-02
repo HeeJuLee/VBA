@@ -684,13 +684,13 @@ End Function
 ' 시트의 특정 필드 내에서 추가되는 값이 고유값인지 확인. 고유값일 경우 TRUE를 반환
 ' boolean = IsUnique(Sheet1, "사과", 1)
 '########################
-Function IsUnique(db As Variant, uniqueVal, Optional ColNo As Long = 1, Optional Exclude) As Boolean
+Function IsUnique(db As Variant, uniqueVal, Optional colNo As Long = 1, Optional Exclude) As Boolean
 
 Dim endRow As Long
 Dim i As Long
 
 For i = LBound(db, 1) To UBound(db, 1)
-    If db(i, ColNo) = uniqueVal Then
+    If db(i, colNo) = uniqueVal Then
         If Not IsMissing(Exclude) Then
             If Exclude <> uniqueVal Then
                 IsUnique = False

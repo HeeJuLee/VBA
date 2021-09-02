@@ -24,14 +24,26 @@ Dim totlalCheckCount As Long
 Private Sub UserForm_Initialize()
     Dim cRow As Long
     Dim estimate As Variant
+    Dim estimateId As Variant
     Dim db As Variant
     Dim contr As Control
     
-    '선택한 행 번호
-    cRow = Selection.row
-
-    '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then End
+    If clickEstimateId <> "" Then              '발주관리에서 더블클릭한 경우
+        If IsNumeric(clickEstimateId) Then
+            estimateId = CLng(clickEstimateId)
+        Else
+            estimateId = clickEstimateId
+        End If
+        clickEstimateId = ""
+    Else
+        '선택한 행 번호
+        cRow = Selection.row
+    
+        '데이터가 있는 행이 아닐 경우는 중지
+        If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then End
+        
+        estimateId = shtEstimateAdmin.Cells(cRow, 2)
+    End If
     
     'Label 위치 맞추기
     For Each contr In Me.Controls
@@ -48,7 +60,7 @@ Private Sub UserForm_Initialize()
     End If
     
     '견적 데이터 읽어오기
-    estimate = Get_Record_Array(shtEstimate, shtEstimateAdmin.Cells(cRow, 2))
+    estimate = Get_Record_Array(shtEstimate, estimateId)
 
     Me.txtID.Value = estimate(1)    'ID
     Me.txtEstimateName.Value = estimate(6)  '견적명
@@ -61,11 +73,9 @@ Private Sub UserForm_Initialize()
     Select_CboItm Me.cboManager, Trim(estimate(5)), 2  '담당자
     
     Me.txtSize.Value = estimate(7)  '규격
-    
+    Me.txtAmount.Value = Format(estimate(8), "#,##0")   '수량
     InitializeCboUnit
     Me.cboUnit.Value = Trim(estimate(9))  '단위, ID가 없으므로 직접 value 넣으면 선택됨
-    
-    Me.txtAmount.Value = Format(estimate(8), "#,##0")   '수량
     Me.txtUnitPrice.Value = Format(estimate(10), "#,##0")     '견적단가
     Me.txtEstimatePrice.Value = Format(estimate(11), "#,##0")     '견적금액
     
@@ -83,24 +93,24 @@ Private Sub UserForm_Initialize()
     Me.txtAcceptedPrice.Value = Format(estimate(21), "#,##0")    '수주금액
     Me.txtAcceptedMargin.Value = Format(estimate(22), "#,##0")   '수주차액
     
+    Me.txtInsertDate.Value = estimate(23)    '등록일자
+    Me.txtUpdateDate.Value = estimate(24)    '수정일자
+    
     InitializeCboCategory
     Me.cboCategory.Value = Trim(estimate(25))   '분류
-    Me.txtSpecificationDate.Value = estimate(26)    '거래명세서
-    Me.txtTaxInvoiceDate.Value = estimate(27)    '세금계산서
-    Me.txtPaymentDate.Value = estimate(28)    '결제일자
-    Me.txtExpectPaymentDate.Value = estimate(29)  '예상결제일
-    Me.txtExpectPaymentMonth.Value = Format(estimate(29), "mm" & "월")  '예상결제월
-    Me.txtVAT.Value = Format(estimate(30), "#,##0")    '부가세
-    Me.chkVAT.Value = estimate(31)      '부가세 제외 여부
+    '26은 납기일
+    Me.txtSpecificationDate.Value = estimate(27)    '거래명세서
+    Me.txtTaxInvoiceDate.Value = estimate(28)    '세금계산서
+    Me.txtPaymentDate.Value = estimate(29)    '결제일자
+    Me.txtExpectPaymentDate.Value = estimate(30)  '예상결제일
+    Me.txtExpectPaymentMonth.Value = Format(estimate(30), "mm" & "월")  '예상결제월
+    Me.txtVAT.Value = Format(estimate(31), "#,##0")    '부가세
     Me.txtMemo.Value = estimate(32)
-    
+    Me.chkVAT.Value = estimate(33)      '부가세 제외 여부
     
 '    Me.txtExpectPay.Value = Format(estimate(27), "#,##0")    '입금예상액
 '    Me.txtPaid.Value = Format(estimate(28), "#,##0")   '입금액
 '    Me.txtUnpaid.Value = Format(estimate(29), "#,##0")   '미입금액
-    
-    Me.txtInsertDate.Value = estimate(23)    '등록일자
-    Me.txtUpdateDate.Value = estimate(24)    '수정일자
     
     '변경 전 관리번호
     orgManagementID = Me.txtManagementID
@@ -249,7 +259,7 @@ Sub InitializeLswOrderList()
     
     '견적ID에 해당하는 발주 정보를 읽어옴
     db = Get_DB(shtOrder)
-    db = Filtered_DB(db, Me.txtID.Value, 25, True)
+    db = Filtered_DB(db, Me.txtID.Value, 28, True)
     
      '리스트뷰 값 설정
     With Me.lswOrderList
@@ -292,24 +302,24 @@ Sub InitializeLswOrderList()
                     totalCost = totalCost + CLng(db(i, 11))
                 End If
                 
-                Set li = .ListItems.Add(, , db(i, 6))   '품명
+                Set li = .ListItems.Add(, , db(i, 7))   '품명
                 li.ListSubItems.Add , , db(i, 1)        'ID
-                li.ListSubItems.Add , , db(i, 25)       'ID_견적
-                li.ListSubItems.Add , , db(i, 4)        '관리번호
-                li.ListSubItems.Add , , db(i, 5)        '거래처
-                li.ListSubItems.Add , , db(i, 7)        '재질
-                li.ListSubItems.Add , , db(i, 8)        '규격
-                li.ListSubItems.Add , , db(i, 9)        '수량
-                li.ListSubItems.Add , , db(i, 10)       '단위
-                li.ListSubItems.Add , , Format(db(i, 11), "#,##0")      '단가
-                li.ListSubItems.Add , , Format(db(i, 12), "#,##0")      '금액
-                li.ListSubItems.Add , , db(i, 14)       '발주일
-                li.ListSubItems.Add , , db(i, 15)       '납기일
-                li.ListSubItems.Add , , db(i, 16)       '입고일
-                li.ListSubItems.Add , , db(i, 17)       '명세서
-                li.ListSubItems.Add , , db(i, 18)       '계산서
-                li.ListSubItems.Add , , db(i, 19)       '결제일
-                li.ListSubItems.Add , , db(i, 21)      '결제수단
+                li.ListSubItems.Add , , db(i, 28)       'ID_견적
+                li.ListSubItems.Add , , db(i, 5)        '관리번호
+                li.ListSubItems.Add , , db(i, 6)        '거래처
+                li.ListSubItems.Add , , db(i, 8)        '재질
+                li.ListSubItems.Add , , db(i, 9)        '규격
+                li.ListSubItems.Add , , db(i, 10)        '수량
+                li.ListSubItems.Add , , db(i, 11)       '단위
+                li.ListSubItems.Add , , Format(db(i, 12), "#,##0")      '단가
+                li.ListSubItems.Add , , Format(db(i, 13), "#,##0")      '금액
+                li.ListSubItems.Add , , db(i, 16)       '발주일
+                li.ListSubItems.Add , , db(i, 17)       '납기일
+                li.ListSubItems.Add , , db(i, 18)       '입고일
+                li.ListSubItems.Add , , db(i, 20)       '명세서
+                li.ListSubItems.Add , , db(i, 21)       '계산서
+                li.ListSubItems.Add , , db(i, 22)       '결제일
+                li.ListSubItems.Add , , db(i, 24)      '결제수단
             Next
         End If
     End With
@@ -345,9 +355,9 @@ Sub UpdateEstimate()
         Me.txtBidMarginRate.Value, Me.txtAcceptedPrice.Value, _
         Me.txtAcceptedMargin.Value, _
         Me.txtInsertDate.Value, Date, _
-        Me.cboCategory.Value, Me.txtSpecificationDate.Value, _
-        Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
-        Me.txtExpectPaymentDate.Value, Me.txtVAT.Value, Me.chkVAT.Value, Me.txtMemo.Value
+        Me.cboCategory.Value, , _
+        Me.txtSpecificationDate.Value, Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, Me.txtExpectPaymentDate.Value, _
+        Me.txtVAT.Value, Me.txtMemo.Value, Me.chkVAT.Value
     
 End Sub
 

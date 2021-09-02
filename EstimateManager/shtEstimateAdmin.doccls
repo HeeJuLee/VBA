@@ -19,9 +19,6 @@ End Sub
 Sub EstimateSearch()
     Dim db As Variant
 
-    '첫 행으로 이동
-    shtEstimateAdmin.Range("S6").Select
-    
     '견적 데이터를 읽어옴
     db = Get_DB(shtEstimate, False, False)
     'db = Connect_DB(db, 2, shtEstimateManager, "ID_거래처, 담당자", False)
@@ -49,18 +46,21 @@ Sub EstimateSearch()
         searchResultCount = UBound(db, 1)
         
         '검색결과 라인 서식 적용
-        SetContentsLine shtEstimateAdmin.Range("B6"), "AE", searchResultCount
+        SetContentsLine shtEstimateAdmin.Range("B6"), "AF", searchResultCount
         
         '순번 출력
         SequenceToRng shtEstimateAdmin.Range("C6"), UBound(db, 1)
         '검색결과 출력
-        ArrayToRng shtEstimateAdmin.Range("B6"), db, "1, , 25, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 26, 27, 28, 29, 30, 23, 24"
+        ArrayToRng shtEstimateAdmin.Range("B6"), db, "1, , 2, 4, 5, 25, 6, 7, 8, 9, 10, 11, 12, 13, 14, 26, 15, 16, 17, 18, 19, 20, 21, 22, 27, 28, 29, 30, 31, 23, 24"
         
         '배열을 화면 Range에 출력하는 것이 더 빠름
         '검색결과 DB에서 출력할 필드만 다시 DB로 만듦
         'shtEstimateAdmin.Range("C6").Resize(UBound(db, 1), UBound(db, 2)) = db
     End If
 
+    '첫 행으로 이동
+    shtEstimateAdmin.Range("H6").Select
+    
     '검색 결과 건수 출력
     Me.lblSearchResult.Caption = "총 " & searchResultCount & "건 검색"
     
@@ -76,10 +76,10 @@ End Sub
 Sub ClearEstimateSearchResult()
     
     '3번 순번 열을 기준으로 B7~AI 열을 지움
-    ClearContentsBelow shtEstimateAdmin.Range("B6"), "AE"
+    ClearContentsBelow shtEstimateAdmin.Range("B6"), "AF"
     
     '아래쪽 라인 서식 지움
-    ClearContentsLine shtEstimateAdmin.Range("B6"), "AE", searchResultCount
+    ClearContentsLine shtEstimateAdmin.Range("B6"), "AF", searchResultCount
 End Sub
 
 
@@ -307,10 +307,10 @@ Sub GoToEnd()
     With shtEstimateAdmin
         .Activate
         If isEnd = False Then
-            .Range("S" & .Range("C5").End(xlDown).row).Select
+            .Range("H" & .Range("C5").End(xlDown).row).Select
             isEnd = True
         Else
-            .Range("S6").Select
+            .Range("H6").Select
             isEnd = False
         End If
     End With

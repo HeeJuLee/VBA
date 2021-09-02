@@ -24,6 +24,7 @@ Private Sub UserForm_Initialize()
     Dim contr As Control
     Dim orderId As Long
     Dim pos As Long
+    Dim count As Long
     
     If clickOrderId <> "" Then              '견적수정 폼의 발주현황에서 더블클릭한 경우
         If IsNumeric(clickOrderId) Then
@@ -58,8 +59,7 @@ Private Sub UserForm_Initialize()
     order = Get_Record_Array(shtOrder, orderId)
     
     Me.txtID.Value = order(1)   'ID
-    Me.txtOrderName.Value = order(6)    '발주 품명
-    Me.txtManagementID.Value = order(4) '관리번호
+    Me.txtManagementID.Value = order(5) '관리번호
     
     '관리번호로 견적정보 가져오기
     bMatchedEstimateID = False
@@ -69,46 +69,44 @@ Private Sub UserForm_Initialize()
         Me.lblManagementIDError.Caption = "관리번호 오류"
         Me.lblManagementIDError.Visible = True
     Else
-        If UBound(db, 1) = 1 Then
-            Me.txtEstimateID.Value = db(1, 1)
-            Me.txtEstimateCustomer.Value = db(1, 4)
-            Me.txtEstimateManager.Value = db(1, 5)
-            Me.txtEstimateName.Value = db(1, 6)
-        
-            bMatchedEstimateID = True
-        Else
-            Me.lblManagementIDError.Caption = "관리번호 중복"
-            Me.lblManagementIDError.Visible = True
-        End If
+        '여러개 있을 경우에는 맨 마지막 견적정보 사용
+        count = UBound(db, 1)
+        Me.txtEstimateID.Value = db(count, 1)
+        Me.txtEstimateCustomer.Value = db(count, 4)
+        Me.txtEstimateManager.Value = db(count, 5)
+        Me.txtEstimateName.Value = db(count, 6)
+    
+        bMatchedEstimateID = True
     End If
     
     InitializeOrderCategory
     InitializeCboUnit
     InitializePayMethod
     
-    Me.cboCategory.Value = Trim(order(3))     '분류
-    Me.txtCustomer.Value = order(5)     '거래처
-    Me.txtMaterial.Value = order(7)     '재질
-    Me.txtSize.Value = order(8)             '규격
-    Me.txtAmount.Value = Format(order(9), "#,##0")   '수량
-    Me.cboUnit.Value = Trim(order(10))            '단위
-    Me.txtUnitPrice.Value = Format(order(11), "#,##0")     '단가
-    Me.txtOrderPrice.Value = Format(order(12), "#,##0")      '발주금액
-    Me.txtWeight.Value = order(13)          '중량
-    Me.txtOrderDate.Value = order(14)       '발주일자
-    Me.txtDueDate.Value = order(15)         '납기일자
-    Me.txtDeliveryDate.Value = order(16)       '입고일자
-    Me.txtSpecificationDate.Value = order(17)   '명세서
-    Me.txtTaxInvoiceDate.Value = order(18)      '계산서
-    Me.txtPaymentDate.Value = order(19)     '결제일자
-    Me.cboPayMethod.Value = Trim(order(21))       '결제수단
-    Me.txtVAT.Value = Format(order(22), "#,##0")             '부가세
+    Me.cboCategory.Value = Trim(order(4))     '분류
+    Me.txtCustomer.Value = order(6)     '거래처
+    Me.txtOrderName.Value = order(7)    '발주 품명
+    Me.txtMaterial.Value = order(8)     '재질
+    Me.txtSize.Value = order(9)             '규격
+    Me.txtAmount.Value = Format(order(10), "#,##0")   '수량
+    Me.cboUnit.Value = Trim(order(11))            '단위
+    Me.txtUnitPrice.Value = Format(order(12), "#,##0")     '단가
+    Me.txtOrderPrice.Value = Format(order(13), "#,##0")      '발주금액
+    Me.txtWeight.Value = order(14)          '중량
+    Me.txtOrderDate.Value = order(16)       '발주일자
+    Me.txtDueDate.Value = order(17)         '납기일자
+    Me.txtDeliveryDate.Value = order(18)       '입고일자
+    Me.txtSpecificationDate.Value = order(20)   '명세서
+    Me.txtTaxInvoiceDate.Value = order(21)      '계산서
+    Me.txtPaymentDate.Value = order(22)     '결제일자
+    Me.cboPayMethod.Value = Trim(order(24))       '결제수단
+    Me.txtVAT.Value = Format(order(25), "#,##0")             '부가세
     
-    Me.txtInsertDate.Value = order(23)    '등록일자
-    Me.txtUpdateDate.Value = order(24)    '수정일자
+    Me.txtInsertDate.Value = order(26)    '등록일자
+    Me.txtUpdateDate.Value = order(27)    '수정일자
     
-    Me.txtMemo.Value = order(26)            '메모
-    Me.chkVAT.Value = order(27)             '부가세 제외 여부
+    Me.txtMemo.Value = order(29)            '메모
+    Me.chkVAT.Value = order(30)             '부가세 제외 여부
     
     '발주명 입력창에 포커스
     Me.txtOrderName.SetFocus
@@ -147,16 +145,16 @@ Sub UpdateOrder()
 
     '데이터 업데이트
     Update_Record shtOrder, Me.txtID.Value, _
-        , Me.cboCategory.Value, _
+        , , Me.cboCategory.Value, _
         Me.txtManagementID.Value, Me.txtCustomer.Value, _
         Me.txtOrderName.Value, Me.txtMaterial.Value, _
         Me.txtSize.Value, Me.txtAmount.Value, _
         Me.cboUnit.Value, Me.txtUnitPrice, _
         Me.txtOrderPrice.Value, Me.txtWeight.Value, _
-        Me.txtOrderDate.Value, Me.txtDueDate.Value, _
-        Me.txtDeliveryDate.Value, Me.txtSpecificationDate.Value, _
-        Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, _
-        , Me.cboPayMethod.Value, Me.txtVAT.Value, _
+        , Me.txtOrderDate.Value, Me.txtDueDate.Value, _
+        Me.txtDeliveryDate.Value, , _
+        Me.txtSpecificationDate.Value, Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, , _
+        Me.cboPayMethod.Value, Me.txtVAT.Value, _
         Me.txtInsertDate, Date, _
         Me.txtEstimateID.Value, Me.txtMemo.Value, Me.chkVAT.Value
 

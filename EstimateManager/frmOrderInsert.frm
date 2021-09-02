@@ -68,7 +68,7 @@ Sub InsertOrder()
     End If
 
     Insert_Record shtOrder, _
-            , Me.cboCategory.Value, Me.txtManagementID.Value, _
+            , , Me.cboCategory.Value, Me.txtManagementID.Value, _
             Me.txtCustomer.Value, _
             Me.txtOrderName.Value, _
             Me.txtMaterial.Value, _
@@ -78,10 +78,11 @@ Sub InsertOrder()
             Me.txtUnitPrice.Value, _
             Me.txtOrderPrice.Value, _
             Me.txtWeight.Value, _
-            Me.txtOrderDate.Value, _
-            , , , _
-            , , , , , _
-            Date, , Me.txtEstimateID, False
+            , Me.txtOrderDate.Value, , , , _
+            , , , , _
+            , , _
+            Date, , _
+            , , False
             
     Unload Me
     

@@ -102,7 +102,8 @@ Sub InsertEstimate()
             Me.txtEstimateDate.Value, _
             , , , , _
             , , , , , , _
-            Date
+            Date, , _
+            , , , , , , , , False
             
     Unload Me
     
