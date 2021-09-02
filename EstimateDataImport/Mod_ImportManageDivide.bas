@@ -13,6 +13,8 @@ Sub DivideManage()
     Dim Y, M, D As String
     Dim currentId As Long
     
+    Application.ScreenUpdating = False
+    
     ClearManageDivide
     
     With shtManageData
@@ -21,9 +23,9 @@ Sub DivideManage()
     
         For i = 2 To endRow
             man.ID = .Cells(i, 1)
-            man.수입지출 = .Cells(i, 2)
-            man.분류1 = .Cells(i, 3)
-            man.분류2 = .Cells(i, 4)
+            man.수입지출 = Trim(.Cells(i, 2))
+            man.분류1 = Trim(.Cells(i, 3))
+            man.분류2 = Trim(.Cells(i, 4))
             man.관리번호 = .Cells(i, 5)
             man.거래처 = .Cells(i, 6)
             man.품목 = .Cells(i, 7)
@@ -46,18 +48,22 @@ Sub DivideManage()
             man.부가세 = .Cells(i, 24)
             man.등록일자 = .Cells(i, 25)
             
-            If man.수입지출 = "수입" And man.분류2 = "수주" Then
-                '수입이면서 수주이면 수주 테이블에 등록
-                Insert_Record shtAcceptedData, man.ID, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.명세서, man.계산서, man.결재, man.결재월, man.부가세, man.등록일자
-                
+            If man.분류2 = "수주" Then
+                '수주이면 수주 테이블에 등록
+                Insert_Record shtAcceptedData, man.ID, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.납기, man.명세서, man.계산서, man.결재, man.결재월, man.부가세, man.등록일자
+                '수주발주 테이블에도 등록
+                Insert_Record shtOrderData, man.ID, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.재질, man.규격, man.수량, man.단위, man.단가, man.금액, man.중량, _
+                              man.수주, man.발주, man.납기, man.입고, man.납품, man.명세서, man.계산서, man.결재, man.결재월, , man.부가세, man.등록일자
+
             ElseIf man.수입지출 = "지출" And Len(man.관리번호) >= 10 Then
-                '지출이면서 관리번호가 있으면 발주 테이블에 등록
-                Insert_Record shtOrderData, man.ID, man.분류2, man.관리번호, man.거래처, man.품목, man.재질, man.규격, man.수량, man.단위, man.단가, man.금액, man.중량, _
-                              man.발주, man.납기, man.입고, man.명세서, man.계산서, man.결재, man.결재월, man.분류1, man.부가세, man.등록일자
+                '지출이면서 관리번호가 있으면 수주발주 테이블에 등록
+                '발주인 경우에는 분류1을 결제수단 필드에 넣음
+                Insert_Record shtOrderData, man.ID, , man.분류2, man.관리번호, man.거래처, man.품목, man.재질, man.규격, man.수량, man.단위, man.단가, man.금액, man.중량, _
+                              man.수주, man.발주, man.납기, man.입고, man.납품, man.명세서, man.계산서, man.결재, man.결재월, man.분류1, man.부가세, man.등록일자
                               
             Else
                 '그 외 남는 것은 운영비 테이블에 등록
-                Insert_Record shtOperatingData, man.ID, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.금액, man.명세서, man.결재, man.부가세, man.등록일자
+                Insert_Record shtOperatingData, man.ID, man.수입지출, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.금액, man.명세서, man.계산서, man.결재, man.부가세, man.등록일자
             End If
             
         Next
