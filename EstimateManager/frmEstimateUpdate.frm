@@ -260,6 +260,7 @@ Sub InitializeLswOrderList()
     '견적ID에 해당하는 발주 정보를 읽어옴
     db = Get_DB(shtOrder)
     db = Filtered_DB(db, Me.txtID.Value, 28, True)
+    db = Filtered_DB(db, "<>" & "수주", 4)
     
      '리스트뷰 값 설정
     With Me.lswOrderList

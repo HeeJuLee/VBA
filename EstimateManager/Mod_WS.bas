@@ -190,7 +190,8 @@ Sub SetContentsColor(startRng As Range, endColNo, arr, colNo, strMatch, color)
              With WS.Range(WS.Cells(currentRow, startColNo), WS.Cells(currentRow, endColNo)).Interior
                 .Pattern = xlSolid
                 .PatternColorIndex = xlAutomatic
-                .ThemeColor = color
+                '.ThemeColor = color
+                .color = color
                 .TintAndShade = 0.799981688894314
                 .PatternTintAndShade = 0
             End With

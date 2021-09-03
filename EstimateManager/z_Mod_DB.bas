@@ -415,7 +415,9 @@ If Value <> "" Then
         Next
     End If
     
-    If Left(Value, 2) = ">=" Or Left(Value, 2) = "<=" Or Left(Value, 2) = "=>" Or Left(Value, 2) = "=<" Then
+    '2021.09.03 hjlee 수정
+    'If Left(Value, 2) = ">=" Or Left(Value, 2) = "<=" Or Left(Value, 2) = "=>" Or Left(Value, 2) = "=<" Then
+    If Left(Value, 2) = ">=" Or Left(Value, 2) = "<=" Or Left(Value, 2) = "=>" Or Left(Value, 2) = "=<" Or Left(Value, 2) = "<>" Then
         Operator = Left(Value, 2)
         If IsDate(Right(Value, Len(Value) - 2)) Then isDateVal = True
     ElseIf Left(Value, 1) = ">" Or Left(Value, 1) = "<" Then
@@ -442,6 +444,11 @@ If Value <> "" Then
                     For i = 1 To cRow
                         If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDbl(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
+                   '2021.09.03 hjlee 추가
+                  Case "<>"
+                    For i = 1 To cRow
+                        If Left(filterArr(i), Len(filterArr(i)) - 2) <> Right(Value, Len(Value) - 2) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                    Next
             End Select
         Else
             Select Case Operator
@@ -461,6 +468,7 @@ If Value <> "" Then
                     For i = 1 To cRow
                         If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDate(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
+                
             End Select
         End If
     Else

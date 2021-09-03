@@ -1,8 +1,11 @@
 ﻿Option Explicit
 
 Dim isKeyworldSearch As Boolean
+Dim isKeyworldSearch2 As Boolean
 Dim searchResultCount As Long
 Dim isEnd As Boolean
+Dim dueDate As String
+Dim isFilterOn As Boolean
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -13,12 +16,18 @@ Private Sub Worksheet_Activate()
     Me.txtToDate.Visible = False
     
     isKeyworldSearch = False
+    isKeyworldSearch2 = False
     isEnd = False
 End Sub
 
 '발주 데이터를 검색해서 시트에 출력
 Sub OrderSearch()
     Dim db As Variant
+    
+    '필터가 걸려있으면 지움
+    If isFilterOn Then
+        ToggleFilter
+    End If
     
     '발주 데이터를 읽어옴
     db = Get_DB(shtOrder, False, False)
@@ -29,6 +38,9 @@ Sub OrderSearch()
     If Not IsEmpty(db) Then
         If txtToDate.Value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.Value, 26)    '등록일자 필드와 날짜 비교
     End If
+    If Not IsEmpty(db) Then
+        If dueDate <> "" Then db = Filtered_DB(db, dueDate, 17, True)
+    End If
     
 '    If Not IsEmpty(db) Then
 '        '견적테이블에서 견적정보를 추가로 읽어옴
@@ -38,6 +50,7 @@ Sub OrderSearch()
     If Not IsEmpty(db) Then
         'If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value, 5)
         If Me.txtKeyword.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword.Value)     '모든 필드에서 키워드 검색
+        If Me.txtKeyword2.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword2.Value)     '모든 필드에서 키워드 검색
     End If
     
     
@@ -58,17 +71,22 @@ Sub OrderSearch()
         SequenceToRng shtOrderAdmin.Range("D6"), UBound(db, 1)
         '검색결과 출력
         ArrayToRng shtOrderAdmin.Range("B6"), db, "1,28, ,5,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
+        
+        '수주 색상 적용
+        SetContentsColor shtOrderAdmin.Range("D6"), "AC", db, 4, "수주", shtOrderAdmin.Range("AC3").Interior.color
 
     End If
 
     '첫 행으로 이동
-    shtOrderAdmin.Range("K6").Select
+    shtOrderAdmin.Range("I6").Select
     
      '검색 결과 건수 출력
-    Me.lblSearchResult.Caption = "총 " & searchResultCount & "건 검색"
+    Me.lblSearchResult.Caption = "(" & searchResultCount & "건)"
     
     If isKeyworldSearch = True Then
         Me.txtKeyword.Activate
+    ElseIf isKeyworldSearch2 = True Then
+        Me.txtKeyword2.Activate
     End If
     
     isEnd = False
@@ -134,13 +152,24 @@ Sub GoToEnd()
     With shtOrderAdmin
         .Activate
         If isEnd = False Then
-            .Range("K" & .Range("D5").End(xlDown).row).Select
+            .Range("I" & .Range("D5").End(xlDown).row).Select
             isEnd = True
         Else
-            .Range("K6").Select
+            .Range("I6").Select
             isEnd = False
         End If
     End With
+End Sub
+
+
+Sub ToggleFilter()
+    With shtOrderAdmin
+        Range("Q5:U" & .Range("D5").End(xlDown).row).Select
+        Selection.AutoFilter
+        Range("Q6").Select
+    End With
+        
+    If isFilterOn = True Then isFilterOn = False Else isFilterOn = True
 End Sub
 
 
@@ -215,13 +244,16 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
     Range("E" & Selection.row).Select
     
-    '수주 데이터를 클릭한 경우에는 EstimateUpdate 폼을 띄움
+    '수주 데이터를 클릭한 경우에는 EstimateUpdate 폼을 띄움, 그렇지 않은 경우는 발주 수정 화면 띄움
     If shtOrderAdmin.Range("G" & cRow).Value = "수주" Then
         clickEstimateId = shtOrderAdmin.Range("C" & cRow).Value
+        
+        If isFormLoaded("frmEstimateUpdate") Then
+            Unload frmEstimateUpdate
+        End If
         frmEstimateUpdate.Show (False)
     Else
-        '발주 수정 화면 띄움
-        If frmOrderUpdate.Visible = True Then
+        If isFormLoaded("frmOrderUpdate") Then
             Unload frmOrderUpdate
         End If
         frmOrderUpdate.Show (False)
@@ -235,9 +267,20 @@ Private Sub txtKeyword_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shi
         isKeyworldSearch = True
         OrderSearch
         isKeyworldSearch = False
+    ElseIf KeyCode = 9 Then
+        Me.txtKeyword2.Activate
     End If
 End Sub
 
+'재검색 입력 시
+Private Sub txtKeyword2_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    '엔터키 눌려질 경우에만 검색
+If KeyCode = 13 Then
+        isKeyworldSearch2 = True
+        OrderSearch
+        isKeyworldSearch2 = False
+    End If
+End Sub
 
 '년 선택
 Private Sub cboSelectYear_Change()
@@ -319,5 +362,13 @@ Private Sub cboSelectMonth_Change()
             
             OrderSearch
         End If
+    End If
+End Sub
+
+Private Sub Worksheet_Change(ByVal Target As Range)
+    If Target.Address = "$S$4" Then
+        dueDate = Target.Value
+        
+        OrderSearch
     End If
 End Sub

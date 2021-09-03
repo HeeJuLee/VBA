@@ -56,6 +56,7 @@ Sub OperationSearch()
     Dim li As ListItem
     Dim income, expense As Long
     
+    
     '운영비 데이터를 읽어옴
     db = Get_DB(shtOperation, False, False)
       
@@ -250,7 +251,6 @@ Sub GoToEnd()
     lswOperationList_Click
 End Sub
 
-
 '전체 선택 시 '월'만 전체로 바꿈
 Private Sub optAll_Click()
     If Me.cboSelectMonth.Value = "전체" Then
@@ -398,3 +398,4 @@ Private Sub cboSelectMonth_Change()
         End If
     End If
 End Sub
+

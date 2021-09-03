@@ -1,8 +1,11 @@
 ﻿Option Explicit
 
 Dim isKeyworldSearch As Boolean
+Dim isKeyworldSearch2 As Boolean
 Dim searchResultCount As Long
 Dim isEnd As Boolean
+Dim dueDate As String
+Dim isFilterOn As Boolean
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -13,12 +16,18 @@ Private Sub Worksheet_Activate()
     Me.txtToDate.Visible = False
 
     isKeyworldSearch = False
+    isKeyworldSearch2 = False
     isEnd = False
 End Sub
 
 Sub EstimateSearch()
     Dim db As Variant
 
+    '현재 필터가 걸려있으면 지움
+    If isFilterOn Then
+        ToggleFilter
+    End If
+    
     '견적 데이터를 읽어옴
     db = Get_DB(shtEstimate, False, False)
     'db = Connect_DB(db, 2, shtEstimateManager, "ID_거래처, 담당자", False)
@@ -31,8 +40,12 @@ Sub EstimateSearch()
         If txtToDate.Value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.Value, 23)
     End If
     If Not IsEmpty(db) Then
+        If dueDate <> "" Then db = Filtered_DB(db, dueDate, 26, True)
+    End If
+    If Not IsEmpty(db) Then
         'If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value, 5)
         If Me.txtKeyword.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword.Value)
+        If Me.txtKeyword2.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword2.Value)
     End If
     
     '기존 검색결과를 화면에서 지움
@@ -62,10 +75,12 @@ Sub EstimateSearch()
     shtEstimateAdmin.Range("H6").Select
     
     '검색 결과 건수 출력
-    Me.lblSearchResult.Caption = "총 " & searchResultCount & "건 검색"
+    Me.lblSearchResult.Caption = "(" & searchResultCount & "건)"
     
     If isKeyworldSearch = True Then
         Me.txtKeyword.Activate
+    ElseIf isKeyworldSearch2 = True Then
+        Me.txtKeyword2.Activate
     End If
     
     isEnd = False
@@ -144,6 +159,18 @@ Private Sub txtKeyword_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shi
         isKeyworldSearch = True
         EstimateSearch
         isKeyworldSearch = False
+    ElseIf KeyCode = 9 Then
+        Me.txtKeyword2.Activate
+    End If
+End Sub
+
+'추가 검색 입력 시
+Private Sub txtKeyword2_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    '엔터키 눌려질 경우에만 검색
+    If KeyCode = 13 Then
+        isKeyworldSearch2 = True
+        EstimateSearch
+        isKeyworldSearch2 = False
     End If
 End Sub
 
@@ -235,6 +262,13 @@ Private Sub cboSelectMonth_Change()
     End If
 End Sub
 
+Private Sub Worksheet_Change(ByVal Target As Range)
+    If Target.Address = "$Q$4" Then
+        dueDate = Target.Value
+        
+        EstimateSearch
+    End If
+End Sub
 
 
 ''조회 기간', '검색어' 등 일반 텍스트 박스 클릭 시 Object 선택이 안되도록 클릭이벤트를 빈 매크로로 연결
@@ -273,7 +307,7 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     Range("C" & Selection.row).Select
     
     '수정 화면 띄움
-    If frmEstimateUpdate.Visible = True Then
+    If isFormLoaded("frmEstimateUpdate") Then
         Unload frmEstimateUpdate
     End If
     frmEstimateUpdate.Show (False)
@@ -316,3 +350,12 @@ Sub GoToEnd()
     End With
 End Sub
 
+Sub ToggleFilter()
+    With shtEstimateAdmin
+        Range("N5:S" & .Range("C5").End(xlDown).row).Select
+        Selection.AutoFilter
+        Range("N6").Select
+    End With
+        
+    If isFilterOn = True Then isFilterOn = False Else isFilterOn = True
+End Sub
