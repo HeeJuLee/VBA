@@ -211,3 +211,29 @@ Function isFormLoaded(ByVal strName As String) As Boolean
     isFormLoaded = False
 End Function
 
+
+'==========================================================================================
+
+Sub InitializeCboCustomer()
+    Dim db As Variant
+    db = Get_DB(shtEstimateCustomer, True)
+
+    Update_Cbo Me.cboCustomer, db, 1
+End Sub
+
+Sub InitializeCboManager()
+    Dim db As Variant
+    
+    '담당자 DB를 읽어와서
+    db = Get_DB(shtEstimateManager, True)
+    '거래처명으로 필터링
+    db = Filtered_DB(db, Me.cboCustomer.Value, 1, True)
+    
+    '기존 콤보박스 내용지우기
+    Me.cboManager.Clear
+    
+    '담당자가 있으면 콤보박스에 추가함
+    If Not IsEmpty(db) Then
+        Update_Cbo Me.cboManager, db, 2
+    End If
+End Sub

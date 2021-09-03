@@ -40,7 +40,10 @@ Private Sub UserForm_Initialize()
         cRow = Selection.row
     
         '데이터가 있는 행이 아닐 경우는 중지
-        If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then End
+        If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).Value = "" Then
+            MsgBox "수정할 견적 행을 먼저 선택한 후 견적수정 버튼을 클릭하세요."
+            End
+        End If
         
         estimateId = shtEstimateAdmin.Cells(cRow, 2)
     End If
@@ -67,10 +70,8 @@ Private Sub UserForm_Initialize()
     Me.txtManagementID.Value = estimate(2)    '관리번호
     Me.txtLinkedID.Value = estimate(3)  '자재번호
     
-    InitializeCboCustomer
-    Select_CboItm Me.cboCustomer, Trim(estimate(4)), 1    '거래처
-    InitializeCboManager
-    Select_CboItm Me.cboManager, Trim(estimate(5)), 2  '담당자
+    Me.txtCustomer = estimate(4)   '거래처
+    Me.txtManager = estimate(5)   '담당자
     
     Me.txtSize.Value = estimate(7)  '규격
     Me.txtAmount.Value = Format(estimate(8), "#,##0")   '수량
@@ -117,7 +118,7 @@ Private Sub UserForm_Initialize()
     
     InitializeLswProductionList    '예상실행항목 목록
     InitializeCboProductonUnit  '예상실행항목 단위
-    InitializeLswCustomerAutoComplete   '거래처 자동완성
+    InitializeLswOrderCustomerAutoComplete   '발주거래처 자동완성
     
     InitializeLswOrderList      '발주 현황
     
@@ -230,9 +231,9 @@ Sub InitializeLswProductionList()
     End With
 End Sub
 
-Sub InitializeLswCustomerAutoComplete()
+Sub InitializeLswOrderCustomerAutoComplete()
     
-    With Me.lswCustomerAutoComplete
+    With Me.lswOrderCustomerAutoComplete
         .View = lvwList
 '        .Gridlines = True
 '        .FullRowSelect = True
@@ -241,6 +242,7 @@ Sub InitializeLswCustomerAutoComplete()
 '        .FullRowSelect = True
 '        .MultiSelect = False
 '        .LabelEdit = lvwManual
+        .Height = 126
         .Visible = False
     End With
 End Sub
@@ -259,8 +261,12 @@ Sub InitializeLswOrderList()
     
     '견적ID에 해당하는 발주 정보를 읽어옴
     db = Get_DB(shtOrder)
-    db = Filtered_DB(db, Me.txtID.Value, 28, True)
-    db = Filtered_DB(db, "<>" & "수주", 4)
+    If Not IsEmpty(db) Then
+        db = Filtered_DB(db, Me.txtID.Value, 28, True)
+    End If
+    If Not IsEmpty(db) Then
+        db = Filtered_DB(db, "<>" & "수주", 4)
+    End If
     
      '리스트뷰 값 설정
     With Me.lswOrderList
@@ -345,7 +351,7 @@ Sub UpdateEstimate()
     '데이터 업데이트
     Update_Record shtEstimate, Me.txtID.Value, _
         Me.txtManagementID.Value, Me.txtLinkedID.Value, _
-        Me.cboCustomer.Value, Me.cboManager.Value, _
+        Me.txtCustomer.Value, Me.txtManager.Value, _
         Me.txtEstimateName.Value, Me.txtSize.Value, _
         Me.txtAmount.Value, Me.cboUnit.Value, _
         Me.txtUnitPrice.Value, Me.txtEstimatePrice.Value, _
@@ -784,11 +790,11 @@ End Sub
 Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     If KeyCode = 13 Then
         '엔터키 - 다음 입력칸으로 이동
-        Me.lswCustomerAutoComplete.Visible = False
+        Me.lswOrderCustomerAutoComplete.Visible = False
         Me.txtProductionItem.SetFocus
     ElseIf KeyCode = 9 Or KeyCode = 40 Then
         '탭키, 아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
-        With Me.lswCustomerAutoComplete
+        With Me.lswOrderCustomerAutoComplete
             If .ListItems.count > 0 And .Visible = True Then
                 .SelectedItem = .ListItems(1)
                 .SetFocus
@@ -802,7 +808,7 @@ Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, 
     Dim i As Long
     
     '거래처 자동완성 처리
-    With Me.lswCustomerAutoComplete
+    With Me.lswOrderCustomerAutoComplete
         If Me.txtProductionCustomer.Value = "" Then
             .Visible = False
         Else
@@ -825,9 +831,9 @@ Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, 
     End With
 End Sub
 
-Private Sub lswCustomerAutoComplete_DblClick()
+Private Sub lswOrderCustomerAutoComplete_DblClick()
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
-    With Me.lswCustomerAutoComplete
+    With Me.lswOrderCustomerAutoComplete
         If Not .SelectedItem Is Nothing Then
             Me.txtProductionCustomer.Value = .SelectedItem.Text
             .Visible = False
@@ -836,10 +842,10 @@ Private Sub lswCustomerAutoComplete_DblClick()
     End With
 End Sub
 
-Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
+Private Sub lswOrderCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
     If KeyCode = 13 Then
-        With Me.lswCustomerAutoComplete
+        With Me.lswOrderCustomerAutoComplete
             If Not .SelectedItem Is Nothing Then
                 Me.txtProductionCustomer.Value = .SelectedItem.Text
                 .Visible = False
