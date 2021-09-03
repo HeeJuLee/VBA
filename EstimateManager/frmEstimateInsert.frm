@@ -28,20 +28,45 @@ Private Sub UserForm_Initialize()
 '        contr.top = contr.top + 2
 '    End If
 '    Next
+
+    '컨트롤 초기화
+    InitializeCboUnit
+    InitializeLswCustomerAutoComplete
+    InitializeLswManagerAutoComplete
     
-    '폼 위치 수정
+    Me.txtEstimateDate.Value = Date
+    
+    '폼 위치값 조정
     If estimateInsertFormX <> 0 Then
         Me.StartUpPosition = 0
         Me.Left = estimateInsertFormX
         Me.top = estimateInsertFormY
     End If
     
+    '텍스트박스 레이블 배경색 및 글자색 변경
+    Me.lblEstimateName.BackColor = RGB(84, 130, 53)
+    Me.lblManagementID.BackColor = RGB(84, 130, 53)
+    Me.lblLinkedID.BackColor = RGB(48, 84, 150)
+    Me.lblCustomer.BackColor = RGB(48, 84, 150)
+    Me.lblManager.BackColor = RGB(48, 84, 150)
+    Me.lblSize.BackColor = RGB(48, 84, 150)
+    Me.lblAmount.BackColor = RGB(48, 84, 150)
+    Me.lblUnit.BackColor = RGB(48, 84, 150)
+    Me.lblUnitPrice.BackColor = RGB(48, 84, 150)
+    Me.lblEstimatePrice.BackColor = RGB(48, 84, 150)
+    Me.lblEstimateDate.BackColor = RGB(48, 84, 150)
     
-    InitializeCboUnit
-    InitializeLswCustomerAutoComplete
-    InitializeLswManagerAutoComplete
-    
-    Me.txtEstimateDate.Value = Date
+    Me.lblEstimateName.ForeColor = RGB(255, 255, 255)
+    Me.lblManagementID.ForeColor = RGB(255, 255, 255)
+    Me.lblLinkedID.ForeColor = RGB(255, 255, 255)
+    Me.lblCustomer.ForeColor = RGB(255, 255, 255)
+    Me.lblManager.ForeColor = RGB(255, 255, 255)
+    Me.lblSize.ForeColor = RGB(255, 255, 255)
+    Me.lblAmount.ForeColor = RGB(255, 255, 255)
+    Me.lblUnit.ForeColor = RGB(255, 255, 255)
+    Me.lblUnitPrice.ForeColor = RGB(255, 255, 255)
+    Me.lblEstimatePrice.ForeColor = RGB(255, 255, 255)
+    Me.lblEstimateDate.ForeColor = RGB(255, 255, 255)
     
 End Sub
 
