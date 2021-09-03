@@ -4,7 +4,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateInsert
    ClientHeight    =   4950
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   13620
+   ClientWidth     =   11775
    OleObjectBlob   =   "frmEstimateInsert.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
@@ -22,12 +22,16 @@ End Sub
 Private Sub UserForm_Initialize()
     Dim contr As Control
     
-    'Label 위치 맞추기
-'    For Each contr In Me.Controls
-'    If contr.Name Like "Label*" Then
-'        contr.top = contr.top + 2
-'    End If
-'    Next
+    '텍스트박스 라벨 컨트롤 색상 조정
+    For Each contr In Me.Controls
+    If contr.Name Like "lbl*" Then
+        'contr.top = contr.top + 2
+        If contr.Name Like "lbl2*" Then
+        Else
+            contr.BackColor = RGB(242, 242, 242)
+        End If
+    End If
+    Next
 
     '컨트롤 초기화
     InitializeCboUnit
@@ -42,31 +46,6 @@ Private Sub UserForm_Initialize()
         Me.Left = estimateInsertFormX
         Me.top = estimateInsertFormY
     End If
-    
-    '텍스트박스 레이블 배경색 및 글자색 변경
-    Me.lblEstimateName.BackColor = RGB(84, 130, 53)
-    Me.lblManagementID.BackColor = RGB(84, 130, 53)
-    Me.lblLinkedID.BackColor = RGB(48, 84, 150)
-    Me.lblCustomer.BackColor = RGB(48, 84, 150)
-    Me.lblManager.BackColor = RGB(48, 84, 150)
-    Me.lblSize.BackColor = RGB(48, 84, 150)
-    Me.lblAmount.BackColor = RGB(48, 84, 150)
-    Me.lblUnit.BackColor = RGB(48, 84, 150)
-    Me.lblUnitPrice.BackColor = RGB(48, 84, 150)
-    Me.lblEstimatePrice.BackColor = RGB(48, 84, 150)
-    Me.lblEstimateDate.BackColor = RGB(48, 84, 150)
-    
-    Me.lblEstimateName.ForeColor = RGB(255, 255, 255)
-    Me.lblManagementID.ForeColor = RGB(255, 255, 255)
-    Me.lblLinkedID.ForeColor = RGB(255, 255, 255)
-    Me.lblCustomer.ForeColor = RGB(255, 255, 255)
-    Me.lblManager.ForeColor = RGB(255, 255, 255)
-    Me.lblSize.ForeColor = RGB(255, 255, 255)
-    Me.lblAmount.ForeColor = RGB(255, 255, 255)
-    Me.lblUnit.ForeColor = RGB(255, 255, 255)
-    Me.lblUnitPrice.ForeColor = RGB(255, 255, 255)
-    Me.lblEstimatePrice.ForeColor = RGB(255, 255, 255)
-    Me.lblEstimateDate.ForeColor = RGB(255, 255, 255)
     
 End Sub
 
@@ -113,7 +92,7 @@ Sub InsertEstimate()
     
     Insert_Record shtEstimate, _
             Trim(Me.txtManagementID.Value), _
-            Trim(Me.txtLinkedID.Value), _
+            , _
             Trim(Me.txtCustomer.Value), _
             Trim(Me.txtManager.Value), _
             Trim(Me.txtEstimateName.Value), _

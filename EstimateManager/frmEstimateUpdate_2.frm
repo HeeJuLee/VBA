@@ -1,19 +1,18 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate_2 
    Caption         =   "견적 수정"
-   ClientHeight    =   12195
+   ClientHeight    =   13440
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   19125
-   OleObjectBlob   =   "frmEstimateUpdate.frx":0000
+   OleObjectBlob   =   "frmEstimateUpdate_2.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
-Attribute VB_Name = "frmEstimateUpdate"
+Attribute VB_Name = "frmEstimateUpdate_2"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 Option Explicit
 
 Dim orgManagementID As Variant
@@ -21,25 +20,6 @@ Dim orgExecutionCost As String
 Dim totlalCheckCount As Long
 
 
-Private Sub btnPayHistoryInsert_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
-        Me.btnEstimateUpdate.SetFocus
-    End If
-End Sub
-
-
-
-Private Sub btnProduction_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
-        Me.txtAcceptedDate.SetFocus
-    End If
-End Sub
-
-Private Sub txtMemo_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
-        Me.txtAcceptedDate.SetFocus
-    End If
-End Sub
 
 Private Sub UserForm_Initialize()
     Dim cRow As Long
@@ -68,15 +48,10 @@ Private Sub UserForm_Initialize()
         estimateId = shtEstimateAdmin.Cells(cRow, 2)
     End If
     
-     '텍스트박스 라벨 컨트롤 색상 조정
+    'Label 위치 맞추기
     For Each contr In Me.Controls
-    If contr.Name Like "lbl*" Then
-        'contr.top = contr.top + 2
-        If contr.Name Like "lbl2*" Then
-            
-        Else
-            contr.BackColor = RGB(242, 242, 242)
-        End If
+    If contr.Name Like "Label*" Then
+        contr.top = contr.top + 2
     End If
     Next
     
@@ -114,10 +89,8 @@ Private Sub UserForm_Initialize()
     Me.txtExecutionCost.Value = Format(estimate(17), "#,##0")   '실행가
     orgExecutionCost = Me.txtExecutionCost.Value
     Me.txtBidPrice.Value = Format(estimate(18), "#,##0")    '입찰가
-    'Me.txtBidMargin.Value = Format(estimate(19), "#,##0")    '차액
-    'Me.txtBidMarginRate.Value = Format(estimate(20), "0.0%")    '마진율
-    Me.txtAcceptedMargin.Value = Format(estimate(19), "#,##0")    '차액
-    Me.txtAcceptedMarginRate.Value = Format(estimate(20), "0.0%")    '마진율
+    Me.txtBidMargin.Value = Format(estimate(19), "#,##0")    '차액
+    Me.txtBidMarginRate.Value = Format(estimate(20), "0.0%")    '마진율
     Me.txtAcceptedPrice.Value = Format(estimate(21), "#,##0")    '수주금액
     Me.txtAcceptedMargin.Value = Format(estimate(22), "#,##0")   '수주차액
     
@@ -143,9 +116,9 @@ Private Sub UserForm_Initialize()
     '변경 전 관리번호
     orgManagementID = Me.txtManagementID
     
-'    InitializeLswProductionList    '예상실행항목 목록
-'    InitializeCboProductonUnit  '예상실행항목 단위
-'    InitializeLswOrderCustomerAutoComplete   '발주거래처 자동완성
+    InitializeLswProductionList    '예상실행항목 목록
+    InitializeCboProductonUnit  '예상실행항목 단위
+    InitializeLswOrderCustomerAutoComplete   '발주거래처 자동완성
     
     InitializeLswOrderList      '발주 현황
     
@@ -216,7 +189,7 @@ Sub InitializeLswProductionList()
         .ColumnHeaders.Add , , "ID", 0
         .ColumnHeaders.Add , , "ID_견적", 0
         .ColumnHeaders.Add , , "관리번호", 0
-        .ColumnHeaders.Add , , "거래처", 55
+        .ColumnHeaders.Add , , "거래처", 50
         .ColumnHeaders.Add , , "재질", 60
         .ColumnHeaders.Add , , "규격", 60
         .ColumnHeaders.Add , , "수량", 30, lvwColumnRight
@@ -751,6 +724,8 @@ End Sub
 
 Private Sub btnEstimateUpdate_Click()
     UpdateEstimate
+    
+    Unload Me
     
     shtEstimateAdmin.Activate
     shtEstimateAdmin.EstimateSearch
