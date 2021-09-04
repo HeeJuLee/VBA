@@ -27,6 +27,7 @@ Private Sub cboUnit_AfterUpdate()
 End Sub
 
 
+
 Private Sub txtBidDate_AfterUpdate()
     Me.txtBidDate.Value = Trim(Me.txtBidDate.Value)
 End Sub
@@ -144,7 +145,7 @@ Private Sub UserForm_Initialize()
     
     InitializeCboCategory
     Me.cboCategory.Value = Trim(estimate(25))   '분류
-    '26은 납기일
+    Me.txtDueDate.Value = estimate(26)              '납기일
     Me.txtSpecificationDate.Value = estimate(27)    '거래명세서
     Me.txtTaxInvoiceDate.Value = estimate(28)    '세금계산서
     Me.txtPaymentDate.Value = estimate(29)    '결제일자
@@ -348,29 +349,22 @@ Sub UpdateEstimate()
 End Sub
 
 Function CheckEstimateUpdateValidation()
-    Dim bCorrect As Boolean
-    
-    bCorrect = True
     
     '견적명이 입력되었는지 체크
     If Me.txtEstimateName.Value = "" Then
-        bCorrect = False
-        Me.lblErrorMessage.Caption = "견적명을 입력하세요."
+        MsgBox "견적명을 입력하세요.", vbExclamation
+        CheckEstimateUpdateValidation = False
+        Exit Function
     End If
     
     '관리번호가 입력되었는지 체크
     If Me.txtManagementID.Value = "" Then
-        bCorrect = False
-        Me.lblErrorMessage.Caption = "관리번호를 입력하세요."
+        MsgBox "관리번호를 입력하세요.", vbExclamation
+        CheckEstimateUpdateValidation = False
+        Exit Function
     End If
     
-    If bCorrect = False Then
-        Me.lblErrorMessage.Visible = True
-    Else
-        Me.lblErrorMessage.Visible = False
-    End If
-    
-    CheckEstimateUpdateValidation = bCorrect
+    CheckEstimateUpdateValidation = True
 End Function
 
 Sub CalculateEstimateUpdateCost()
@@ -487,6 +481,21 @@ Private Sub lswOrderList_DblClick()
         End If
     End With
 End Sub
+
+Private Sub lswOrderList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    
+    With Me.lswOrderList
+        .SortKey = ColumnHeader.Index - 1
+        If .SortOrder = lvwAscending Then
+            .SortOrder = lvwDescending
+        Else
+            .SortOrder = lvwAscending
+        End If
+        .Sorted = True
+    End With
+    
+End Sub
+
 
 Private Sub btnEstimateUpdate_Click()
     UpdateEstimate
@@ -781,4 +790,5 @@ Private Sub UserForm_Layout()
     estimateUpdateFormX = Me.Left
     estimateUpdateFormY = Me.top
 End Sub
+
 

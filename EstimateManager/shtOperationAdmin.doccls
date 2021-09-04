@@ -168,7 +168,7 @@ Sub InitializeLswOperationList()
     fullPath = getLocalFullName(ThisWorkbook.Path) & "\listview-1.jpg"
     
     With Me.ImageList1.ListImages
-        .Add , , LoadPicture(fullPath)
+        .Add , , Me.Image1.Picture
     End With
     
      '리스트뷰 값 설정

@@ -31,7 +31,6 @@ Private Sub cboCategory_AfterUpdate()
     Me.cboCategory.Value = Trim(Me.cboCategory.Value)
 End Sub
 
-
 Private Sub lswProductionList_Click()
     With Me.lswProductionList
         If Not .SelectedItem Is Nothing Then
@@ -50,8 +49,17 @@ Private Sub lswProductionList_Click()
     End With
 End Sub
 
-
-
+Private Sub lswProductionList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    With Me.lswProductionList
+        .SortKey = ColumnHeader.Index - 1
+        If .SortOrder = lvwAscending Then
+            .SortOrder = lvwDescending
+        Else
+            .SortOrder = lvwAscending
+        End If
+        .Sorted = True
+    End With
+End Sub
 
 Private Sub txtProductionCustomer_AfterUpdate()
     Me.txtProductionCustomer.Value = Trim(Me.txtProductionCustomer.Value)
@@ -62,8 +70,22 @@ Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger
         '엔터키 - 다음 입력칸으로 이동
         Me.lswOrderCustomerAutoComplete.Visible = False
         Me.txtProductionItem.SetFocus
-    ElseIf KeyCode = 9 Or KeyCode = 40 Then
-        '탭키, 아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
+    ElseIf KeyCode = 9 Then
+        '탭키 자동완성이 하나이면 다음으로 이동
+        With Me.lswOrderCustomerAutoComplete
+            If .ListItems.count = 1 Then
+                Me.lswOrderCustomerAutoComplete.Visible = False
+                Me.txtProductionItem.SetFocus
+                KeyCode = 0
+            Else
+                If .ListItems.count > 0 And .Visible = True Then
+                .SelectedItem = .ListItems(1)
+                .SetFocus
+            End If
+            End If
+        End With
+    ElseIf KeyCode = 40 Then
+        '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
         With Me.lswOrderCustomerAutoComplete
             If .ListItems.count > 0 And .Visible = True Then
                 .SelectedItem = .ListItems(1)
@@ -149,10 +171,19 @@ Private Sub txtProductionAmount_AfterUpdate()
     End If
 End Sub
 
+Private Sub txtProductionItem_Enter()
+    If Me.lswOrderCustomerAutoComplete.Visible = True Then
+        With Me.lswOrderCustomerAutoComplete
+            Me.txtProductionCustomer.Value = .SelectedItem.Text
+            .Visible = False
+        End With
+    End If
+End Sub
+
+
 Private Sub txtProductionItem_AfterUpdate()
     Me.txtProductionItem.Value = Trim(Me.txtProductionItem.Value)
 End Sub
-
 
 Private Sub txtProductionMaterial_AfterUpdate()
     Me.txtProductionMaterial.Value = Trim(Me.txtProductionMaterial.Value)

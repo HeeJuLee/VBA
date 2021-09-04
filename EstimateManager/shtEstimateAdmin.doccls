@@ -95,11 +95,13 @@ End Sub
 '견적 검색결과를 화면에서 지움
 Sub ClearEstimateSearchResult()
     
+    '아래쪽 라인 서식 지움
+    ClearContentsLine shtEstimateAdmin.Range("B6"), "AF"
+    
     '3번 순번 열을 기준으로 B7~AI 열을 지움
     ClearContentsBelow shtEstimateAdmin.Range("B6"), "AF"
     
-    '아래쪽 라인 서식 지움
-    ClearContentsLine shtEstimateAdmin.Range("B6"), "AF", searchResultCount
+
 End Sub
 
 

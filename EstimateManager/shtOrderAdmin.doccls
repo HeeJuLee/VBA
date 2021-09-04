@@ -39,6 +39,7 @@ Sub OrderSearch()
         If txtToDate.Value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.Value, 26)    '등록일자 필드와 날짜 비교
     End If
     If Not IsEmpty(db) Then
+        dueDate = shtOrderAdmin.Range("S4").Value
         If dueDate <> "" Then db = Filtered_DB(db, dueDate, 17, True)
     End If
     
@@ -73,7 +74,7 @@ Sub OrderSearch()
         ArrayToRng shtOrderAdmin.Range("B6"), db, "1,28, ,5,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
         
         '수주 색상 적용
-        SetContentsColor shtOrderAdmin.Range("D6"), "AC", db, 4, "수주", shtOrderAdmin.Range("AC3").Interior.color
+        SetContentsColor shtOrderAdmin.Range("B6"), "AC", db, 4, "수주", shtOrderAdmin.Range("AC3").Interior.color
 
     End If
 
@@ -102,11 +103,12 @@ End Sub
 '발주 검색결과를 화면에서 지움
 Sub ClearOrderSearchResult()
     
+    '아래쪽 라인 서식 지움
+    ClearContentsLine shtOrderAdmin.Range("B6"), "AC"
+    
     '3번 순번 열을 기준으로 지움
     ClearContentsBelow shtOrderAdmin.Range("B6"), "AC"
     
-    '아래쪽 라인 서식 지움
-    ClearContentsLine shtOrderAdmin.Range("B6"), "AC", searchResultCount
 End Sub
 
 

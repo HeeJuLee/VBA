@@ -17,6 +17,7 @@ Option Explicit
 
 
 
+
 Private Sub UserForm_Activate()
     Me.txtManagementID.SetFocus
 End Sub
@@ -161,6 +162,26 @@ End Sub
 
 Private Sub btnEstimateInsert_Click()
     InsertEstimate
+End Sub
+
+Private Sub txtEstimateName_Enter()
+    '자동완성 리스트에서 탭해서 넘어오는 경우
+    With Me.lswManagerAutoComplete
+        If .Visible = True Then
+            Me.txtManager.Value = .SelectedItem.Text
+            .Visible = False
+        End If
+    End With
+End Sub
+
+Private Sub txtManager_Enter()
+    '자동완성 리스트에서 탭해서 넘어오는 경우
+    With Me.lswCustomerAutoComplete
+        If .Visible = True Then
+            Me.txtCustomer.Value = .SelectedItem.Text
+            .Visible = False
+        End If
+    End With
 End Sub
 
 Private Sub txtManagementID_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)

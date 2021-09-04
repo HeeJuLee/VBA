@@ -141,7 +141,8 @@ Sub SetContentsLine(startRng As Range, endColNo, clearRowCount)
     End With
 End Sub
 
-Sub ClearContentsLine(startRng As Range, endColNo, clearRowCount)
+'Sub ClearContentsLine(startRng As Range, endColNo, clearRowCount)
+Sub ClearContentsLine(startRng As Range, endColNo)
     
     Dim WS As Worksheet
     Dim lastRow As Long
@@ -151,7 +152,8 @@ Sub ClearContentsLine(startRng As Range, endColNo, clearRowCount)
         endColNo = Range(endColNo & 1).Column
     End If
         
-    lastRow = startRng.row + clearRowCount
+    'lastRow = startRng.row + clearRowCount
+    lastRow = startRng.End(xlDown).row
     If lastRow < startRng.row Then Exit Sub
     
     '라인 서식 지우기
