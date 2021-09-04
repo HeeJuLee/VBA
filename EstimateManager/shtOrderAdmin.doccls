@@ -77,8 +77,14 @@ Sub OrderSearch()
 
     End If
 
-    '첫 행으로 이동
-    shtOrderAdmin.Range("I6").Select
+    If dueDate <> "" Then
+        shtOrderAdmin.Range("S6").Select
+        shtOrderAdmin.Range("S4").Select
+    Else
+        '첫 행으로 이동
+        shtOrderAdmin.Range("I6").Select
+    End If
+    
     
      '검색 결과 건수 출력
     Me.lblSearchResult.Caption = "(" & searchResultCount & "건)"

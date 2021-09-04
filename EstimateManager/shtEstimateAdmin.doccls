@@ -71,8 +71,13 @@ Sub EstimateSearch()
         'shtEstimateAdmin.Range("C6").Resize(UBound(db, 1), UBound(db, 2)) = db
     End If
 
-    '첫 행으로 이동
-    shtEstimateAdmin.Range("H6").Select
+    If dueDate <> "" Then
+        shtEstimateAdmin.Range("Q6").Select
+        shtEstimateAdmin.Range("Q4").Select
+    Else
+        '첫 행으로 이동
+        shtEstimateAdmin.Range("H6").Select
+    End If
     
     '검색 결과 건수 출력
     Me.lblSearchResult.Caption = "(" & searchResultCount & "건)"

@@ -15,8 +15,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+
+
 Private Sub UserForm_Activate()
-    Me.txtEstimateName.SetFocus
+    Me.txtManagementID.SetFocus
 End Sub
 
 Private Sub UserForm_Initialize()
@@ -24,13 +26,13 @@ Private Sub UserForm_Initialize()
     
     '텍스트박스 라벨 컨트롤 색상 조정
     For Each contr In Me.Controls
-    If contr.Name Like "lbl*" Then
-        'contr.top = contr.top + 2
-        If contr.Name Like "lbl2*" Then
-        Else
-            contr.BackColor = RGB(242, 242, 242)
+        If contr.Name Like "lbl*" Then
+            'contr.top = contr.top + 2
+            If contr.Name Like "lbl2*" Then
+            Else
+                contr.BackColor = RGB(242, 242, 242)
+            End If
         End If
-    End If
     Next
 
     '컨트롤 초기화
@@ -60,6 +62,7 @@ Sub InitializeLswCustomerAutoComplete()
     
     With Me.lswCustomerAutoComplete
         .View = lvwList
+        .LabelEdit = lvwManual
         .Height = 126
         .Visible = False
     End With
@@ -87,25 +90,25 @@ Sub InsertEstimate()
     db = Get_DB(shtEstimate)
     
     '동일한 관리번호가 있는지 체크
-    blnUnique = IsUnique(db, Me.txtManagementID.Value, 3)
+    blnUnique = IsUnique(db, Me.txtManagementID.Value, 2)
     If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
     
     Insert_Record shtEstimate, _
-            Trim(Me.txtManagementID.Value), _
-            , _
-            Trim(Me.txtCustomer.Value), _
-            Trim(Me.txtManager.Value), _
-            Trim(Me.txtEstimateName.Value), _
-            Trim(Me.txtSize.Value), _
-            Trim(Me.txtAmount.Value), _
-            Trim(Me.cboUnit.Value), _
-            Trim(Me.txtUnitPrice.Value), _
-            Trim(Me.txtEstimatePrice.Value), _
-            Trim(Me.txtEstimateDate.Value), _
-            , , , , _
-            , , , , , , _
-            Date, , _
-            , , , , , , , , False
+                  Trim(Me.txtManagementID.Value), _
+                  , _
+                  Trim(Me.txtCustomer.Value), _
+                  Trim(Me.txtManager.Value), _
+                  Trim(Me.txtEstimateName.Value), _
+                  Trim(Me.txtSize.Value), _
+                  Trim(Me.txtAmount.Value), _
+                  Trim(Me.cboUnit.Value), _
+                  Trim(Me.txtUnitPrice.Value), _
+                  Trim(Me.txtEstimatePrice.Value), _
+                  Trim(Me.txtEstimateDate.Value), _
+                  , , , , _
+                  , , , , , , _
+                  Date, , _
+                  , , , , , , , , False
             
     Unload Me
     
@@ -160,7 +163,7 @@ Private Sub btnEstimateInsert_Click()
     InsertEstimate
 End Sub
 
-Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Private Sub txtManagementID_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     If KeyCode = 27 Then Unload Me
 End Sub
 
@@ -171,19 +174,29 @@ Private Sub txtEstimateDate_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVa
 End Sub
 
 Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 13 Then
-        '엔터키 - 다음 입력칸으로 이동
-        Me.lswCustomerAutoComplete.Visible = False
-        Me.txtManager.SetFocus
-    ElseIf KeyCode = 9 Or KeyCode = 40 Then
-        '탭키, 아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
-        With Me.lswCustomerAutoComplete
+    With Me.lswCustomerAutoComplete
+        If KeyCode = 13 Then
+            '엔터키 - 다음 입력칸으로 이동
+            .Visible = False
+            Me.txtManager.SetFocus
+        ElseIf KeyCode = 9 Then
+            '탭키일 경우에 자동완성 결과가 하나이면 다음 입력칸으로 이동
+            If .ListItems.count = 1 Then
+                .Visible = False
+                Me.txtManager.SetFocus
+                KeyCode = 0
+            ElseIf .ListItems.count > 0 And .Visible = True Then
+                .SelectedItem = .ListItems(1)
+                .SetFocus
+            End If
+        ElseIf KeyCode = 40 Then
+            '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
             If .ListItems.count > 0 And .Visible = True Then
                 .SelectedItem = .ListItems(1)
                 .SetFocus
             End If
-        End With
-    End If
+        End If
+    End With
 End Sub
 
 Private Sub txtCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
@@ -239,19 +252,30 @@ Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As I
 End Sub
 
 Private Sub txtManager_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 13 Then
-        '엔터키 - 다음 입력칸으로 이동
-        Me.lswManagerAutoComplete.Visible = False
-        Me.txtSize.SetFocus
-    ElseIf KeyCode = 9 Or KeyCode = 40 Then
-        '탭키, 아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
-        With Me.lswManagerAutoComplete
+    With Me.lswManagerAutoComplete
+        If KeyCode = 13 Then
+            '엔터키 - 다음 입력칸으로 이동
+            .Visible = False
+            Me.txtEstimateName.SetFocus
+        ElseIf KeyCode = 9 Then
+            '탭키일 경우에 자동완성 결과가 하나이면 다음 입력칸으로 이동
+            If .ListItems.count = 1 Then
+                .Visible = False
+                Me.txtEstimateName.SetFocus
+                KeyCode = 0
+            ElseIf .ListItems.count > 0 And .Visible = True Then
+                .SelectedItem = .ListItems(1)
+                .SetFocus
+            End If
+        ElseIf KeyCode = 40 Then
+            '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
             If .ListItems.count > 0 And .Visible = True Then
                 .SelectedItem = .ListItems(1)
                 .SetFocus
             End If
-        End With
-    End If
+        End If
+    End With
+    
 End Sub
 
 Private Sub txtManager_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
@@ -288,7 +312,7 @@ Private Sub lswManagerAutoComplete_DblClick()
         If Not .SelectedItem Is Nothing Then
             Me.txtManager.Value = .SelectedItem.Text
             .Visible = False
-            Me.txtSize.SetFocus
+            Me.txtEstimateName.SetFocus
         End If
     End With
 End Sub
@@ -300,7 +324,7 @@ Private Sub lswManagerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As In
             If Not .SelectedItem Is Nothing Then
                 Me.txtManager.Value = .SelectedItem.Text
                 .Visible = False
-                Me.txtSize.SetFocus
+                Me.txtEstimateName.SetFocus
             End If
         End With
     End If
@@ -313,7 +337,7 @@ End Sub
 Private Sub txtAmount_AfterUpdate()
     
     If Me.txtAmount.Value <> "" Then
-         '수량값이 숫자가 아닐 경우 오류메시지 출력
+        '수량값이 숫자가 아닐 경우 오류메시지 출력
         If Not IsNumeric(Me.txtAmount.Value) Then
             MsgBox "숫자를 입력하세요."
             Me.txtAmount.Value = ""
@@ -344,7 +368,40 @@ Private Sub txtUnitPrice_AfterUpdate()
     CalculateEstimateInsertCost
 End Sub
 
+
+Private Sub cboUnit_AfterUpdate()
+    Me.cboUnit.Value = Trim(Me.cboUnit.Value)
+End Sub
+
+
+Private Sub txtCustomer_AfterUpdate()
+    Me.txtCustomer.Value = Trim(Me.txtCustomer.Value)
+End Sub
+
+Private Sub txtEstimateDate_AfterUpdate()
+    Me.txtEstimateDate.Value = Trim(Me.txtEstimateDate.Value)
+End Sub
+
+Private Sub txtEstimateName_AfterUpdate()
+    Me.txtEstimateName.Value = Trim(Me.txtEstimateName.Value)
+End Sub
+
+
+Private Sub txtManagementID_AfterUpdate()
+    Me.txtManagementID.Value = Trim(Me.txtManagementID.Value)
+End Sub
+
+Private Sub txtManager_AfterUpdate()
+    Me.txtManager.Value = Trim(Me.txtManager.Value)
+End Sub
+
+Private Sub txtSize_AfterUpdate()
+    Me.txtSize.Value = Trim(Me.txtSize.Value)
+End Sub
+
 Private Sub UserForm_Layout()
     estimateInsertFormX = Me.Left
     estimateInsertFormY = Me.top
 End Sub
+
+
