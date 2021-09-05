@@ -20,54 +20,6 @@ Dim orgManagementID As Variant
 Dim totlalCheckCount As Long
 
 
-
-
-Private Sub cboUnit_AfterUpdate()
-    Me.cboUnit.Value = Trim(Me.cboUnit.Value)
-End Sub
-
-
-
-Private Sub txtBidDate_AfterUpdate()
-    Me.txtBidDate.Value = Trim(Me.txtBidDate.Value)
-End Sub
-
-Private Sub txtCustomer_AfterUpdate()
-    Me.txtCustomer.Value = Trim(Me.txtCustomer.Value)
-End Sub
-
-
-Private Sub txtDeliveryDate_AfterUpdate()
-    Me.txtDeliveryDate.Value = Trim(Me.txtDeliveryDate.Value)
-End Sub
-
-Private Sub txtDueDate_AfterUpdate()
-    Me.txtDueDate.Value = Trim(Me.txtDueDate.Value)
-End Sub
-
-
-Private Sub txtEstimateDate_AfterUpdate()
-    Me.txtEstimateDate.Value = Trim(Me.txtEstimateDate.Value)
-End Sub
-
-Private Sub txtInsuranceDate_AfterUpdate()
-    Me.txtInsuranceDate.Value = Trim(Me.txtInsuranceDate.Value)
-End Sub
-
-Private Sub txtManager_AfterUpdate()
-    Me.txtManager.Value = Trim(Me.txtManager.Value)
-End Sub
-
-
-Private Sub txtSize_AfterUpdate()
-    Me.txtSize.Value = Trim(Me.txtSize.Value)
-End Sub
-
-
-Private Sub txtSpecificationDate_AfterUpdate()
-    Me.txtSpecificationDate.Value = Trim(Me.txtSpecificationDate.Value)
-End Sub
-
 Private Sub UserForm_Initialize()
     Dim cRow As Long
     Dim estimate As Variant
@@ -152,12 +104,19 @@ Private Sub UserForm_Initialize()
     Me.txtExpectPaymentDate.Value = estimate(30)  '예상결제일
     Me.txtExpectPaymentMonth.Value = Format(estimate(30), "mm" & "월")  '예상결제월
     Me.txtVAT.Value = Format(estimate(31), "#,##0")    '부가세
-    Me.txtMemo.Value = estimate(32)
+    Me.txtMemo.Value = estimate(32)     '견적메모
     Me.chkVAT.Value = estimate(33)      '부가세 제외 여부
     
     Me.txtPaid.Value = Format(estimate(34), "#,##0")      '입금액
     Me.txtRemaining.Value = Format(estimate(35), "#,##0")      '미입금액
     Me.chkDividePay.Value = estimate(36)      '분할결제 여부
+    
+    '견적메모+수주메모
+    If Me.txtMemo.Value <> "" Then
+        Me.txtMemo.Value = Me.txtMemo.Value & vbCrLf & estimate(37)
+    Else
+        Me.txtMemo.Value = Me.txtMemo.Value & estimate(37)
+    End If
     
     '변경 전 관리번호
     orgManagementID = Me.txtManagementID
@@ -341,7 +300,7 @@ Sub UpdateEstimate()
         Me.cboCategory.Value, Me.txtDueDate.Value, _
         Me.txtSpecificationDate.Value, Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, Me.txtExpectPaymentDate.Value, _
         Me.txtVAT.Value, Me.txtMemo.Value, Me.chkVAT.Value, _
-        Me.txtPaid.Value, Me.txtRemaining.Value, Me.chkDividePay
+        Me.txtPaid.Value, Me.txtRemaining.Value, Me.chkDividePay, ""
     
     shtEstimateAdmin.Activate
     shtEstimateAdmin.EstimateSearch
@@ -779,6 +738,50 @@ Private Sub txtExpectPaymentMonth_AfterUpdate()
     Me.txtExpectPaymentDate.Value = Me.txtExpectPaymentMonth
     Me.txtExpectPaymentMonth.Value = Format(Me.txtExpectPaymentDate.Value, "mm" & "월")
      
+End Sub
+
+
+Private Sub cboUnit_AfterUpdate()
+    Me.cboUnit.Value = Trim(Me.cboUnit.Value)
+End Sub
+
+Private Sub txtBidDate_AfterUpdate()
+    Me.txtBidDate.Value = Trim(Me.txtBidDate.Value)
+End Sub
+
+Private Sub txtCustomer_AfterUpdate()
+    Me.txtCustomer.Value = Trim(Me.txtCustomer.Value)
+End Sub
+
+
+Private Sub txtDeliveryDate_AfterUpdate()
+    Me.txtDeliveryDate.Value = Trim(Me.txtDeliveryDate.Value)
+End Sub
+
+Private Sub txtDueDate_AfterUpdate()
+    Me.txtDueDate.Value = Trim(Me.txtDueDate.Value)
+End Sub
+
+Private Sub txtEstimateDate_AfterUpdate()
+    Me.txtEstimateDate.Value = Trim(Me.txtEstimateDate.Value)
+End Sub
+
+Private Sub txtInsuranceDate_AfterUpdate()
+    Me.txtInsuranceDate.Value = Trim(Me.txtInsuranceDate.Value)
+End Sub
+
+Private Sub txtManager_AfterUpdate()
+    Me.txtManager.Value = Trim(Me.txtManager.Value)
+End Sub
+
+
+Private Sub txtSize_AfterUpdate()
+    Me.txtSize.Value = Trim(Me.txtSize.Value)
+End Sub
+
+
+Private Sub txtSpecificationDate_AfterUpdate()
+    Me.txtSpecificationDate.Value = Trim(Me.txtSpecificationDate.Value)
 End Sub
 
 Private Sub chkVAT_AfterUpdate()

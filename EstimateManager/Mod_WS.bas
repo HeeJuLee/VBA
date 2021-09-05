@@ -173,6 +173,11 @@ Sub ClearContentsLine(startRng As Range, endColNo)
         .PatternTintAndShade = 0
     End With
 
+    '메모 지우기
+    With WS.Range(startRng, WS.Cells(lastRow, endColNo))
+        .ClearComments
+    End With
+
 End Sub
 
 Sub SetContentsColor(startRng As Range, endColNo, arr, colNo, strMatch, color)
@@ -203,6 +208,25 @@ Sub SetContentsColor(startRng As Range, endColNo, arr, colNo, strMatch, color)
     Next
 End Sub
 
+
+Sub SetComment(db, memoColNo As Long, startRng As Range)
+    Dim WS As Worksheet
+    Dim i As Long
+    Dim currentRow As Long
+    Set WS = startRng.Parent
+    
+    currentRow = startRng.row
+    
+    For i = 1 To UBound(db)
+        If db(i, memoColNo) <> "" Then
+            WS.Cells(currentRow, startRng.Column).AddComment db(i, memoColNo)
+        End If
+        currentRow = currentRow + 1
+    Next
+
+End Sub
+
+
 Function isFormLoaded(ByVal strName As String) As Boolean
     Dim i As Integer
 
@@ -213,8 +237,6 @@ Function isFormLoaded(ByVal strName As String) As Boolean
     Next
     isFormLoaded = False
 End Function
-
-
 '==========================================================================================
 
 Sub InitializeCboCustomer()

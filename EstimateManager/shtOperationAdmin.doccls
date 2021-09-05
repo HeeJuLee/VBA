@@ -39,6 +39,9 @@ Private Sub Worksheet_Activate()
     
     Me.txtFromDate.Visible = False
     Me.txtToDate.Visible = False
+    Me.Image1.Visible = False
+    Me.ImageList1.Visible = False
+    Me.txtOperationID.Visible = False
     
     isKeyworldSearch = False
     isEnd = False
