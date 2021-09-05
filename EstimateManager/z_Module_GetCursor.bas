@@ -29,8 +29,8 @@ Declare Function ReleaseDC Lib "user32" (ByVal hwnd As Long, ByVal hDC As Long) 
 #End If
 
 Type POINTAPI
-    x As Long
-    y As Long
+    X As Long
+    Y As Long
 End Type
 
 Const LOGPIXELSX = 88
@@ -59,7 +59,7 @@ End Function
 Public Function convertMouseToForm() As POINTAPI
     Dim mPos As POINTAPI
     mPos = WhereIsTheMouseAt
-    mPos.x = pointsPerPixelY * mPos.x
-    mPos.y = pointsPerPixelX * mPos.y
+    mPos.X = pointsPerPixelY * mPos.X
+    mPos.Y = pointsPerPixelX * mPos.Y
     convertMouseToForm = mPos
 End Function

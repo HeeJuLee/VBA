@@ -142,30 +142,30 @@ End Sub
 
 '조회기간 - 이번달
 Private Sub optThisMonth_Click()
-    Dim y As Long: y = Year(Date)
+    Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
     
-    txtFromDate.Value = DateSerial(y, M, 1)
-    txtToDate.Value = DateSerial(y, M + 1, 0)
+    txtFromDate.Value = DateSerial(Y, M, 1)
+    txtToDate.Value = DateSerial(Y, M + 1, 0)
     
-    Me.cboSelectYear.Value = y & "년"
+    Me.cboSelectYear.Value = Y & "년"
     Me.cboSelectMonth.Value = M & "월"      '실제 검색은 cboSelectMonth_change()에서 검색 됨
     
 End Sub
 
 '조회기간 - 이전달
 Private Sub optLastMonth_Click()
-    Dim y As Long: y = Year(Date)
+    Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
     
-    txtFromDate.Value = DateSerial(y, M - 1, 1)
-    txtToDate.Value = DateSerial(y, M, 0)
+    txtFromDate.Value = DateSerial(Y, M - 1, 1)
+    txtToDate.Value = DateSerial(Y, M, 0)
     
     If M = 1 Then
-        Me.cboSelectYear.Value = y - 1 & "년"
+        Me.cboSelectYear.Value = Y - 1 & "년"
         Me.cboSelectMonth.Value = "12월"
     Else
-        Me.cboSelectYear.Value = y & "년"
+        Me.cboSelectYear.Value = Y & "년"
         Me.cboSelectMonth.Value = M - 1 & "월"
     End If
     
@@ -195,7 +195,7 @@ End Sub
 
 '년 선택
 Private Sub cboSelectYear_Change()
-    Dim y As Long: y = Year(Date)
+    Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
     Dim pos As Long
     
@@ -215,19 +215,19 @@ Private Sub cboSelectYear_Change()
         '년도를 선택한 경우
         pos = InStr(Me.cboSelectYear.Value, "년")
         If pos <> 0 Then
-            y = Left(Me.cboSelectYear.Value, pos - 1)
+            Y = Left(Me.cboSelectYear.Value, pos - 1)
         End If
     
         If Me.cboSelectMonth.Value = "전체" Then
-            txtFromDate.Value = DateSerial(y, 1, 1)
-            txtToDate.Value = DateSerial(y, 12, 31)
+            txtFromDate.Value = DateSerial(Y, 1, 1)
+            txtToDate.Value = DateSerial(Y, 12, 31)
         Else
             pos = InStr(Me.cboSelectMonth.Value, "월")
             If pos <> 0 Then
                 M = Left(Me.cboSelectMonth.Value, pos - 1)
                 
-                txtFromDate.Value = DateSerial(y, M, 1)
-                txtToDate.Value = DateSerial(y, M + 1, 0)
+                txtFromDate.Value = DateSerial(Y, M, 1)
+                txtToDate.Value = DateSerial(Y, M + 1, 0)
             End If
         End If
         
@@ -238,7 +238,7 @@ End Sub
 
 '월 선택
 Private Sub cboSelectMonth_Change()
-    Dim y As Long: y = Year(Date)
+    Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
     Dim pos As Long
     
@@ -255,12 +255,12 @@ Private Sub cboSelectMonth_Change()
     Else
         pos = InStr(Me.cboSelectYear.Value, "년")
         If pos <> 0 Then
-            y = Left(Me.cboSelectYear.Value, pos - 1)
+            Y = Left(Me.cboSelectYear.Value, pos - 1)
         End If
     
         If Me.cboSelectMonth.Value = "전체" Then
-            txtFromDate.Value = DateSerial(y, 1, 1)
-            txtToDate.Value = DateSerial(y, 12, 31)
+            txtFromDate.Value = DateSerial(Y, 1, 1)
+            txtToDate.Value = DateSerial(Y, 12, 31)
             
             If Me.optAll.Value = False Then
                 Me.optAll.Value = True
@@ -272,8 +272,8 @@ Private Sub cboSelectMonth_Change()
             If pos <> 0 Then
                 M = Left(Me.cboSelectMonth.Value, pos - 1)
                 
-                txtFromDate.Value = DateSerial(y, M, 1)
-                txtToDate.Value = DateSerial(y, M + 1, 0)
+                txtFromDate.Value = DateSerial(Y, M, 1)
+                txtToDate.Value = DateSerial(Y, M + 1, 0)
             End If
             
             EstimateSearch

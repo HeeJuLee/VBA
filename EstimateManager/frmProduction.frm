@@ -13,6 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
 
@@ -29,6 +30,12 @@ End Sub
 
 Private Sub cboCategory_AfterUpdate()
     Me.cboCategory.Value = Trim(Me.cboCategory.Value)
+End Sub
+
+Private Sub cboCategory_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then
+        Unload Me
+    End If
 End Sub
 
 Private Sub lswProductionList_Click()

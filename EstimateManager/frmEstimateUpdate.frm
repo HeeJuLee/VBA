@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
    Caption         =   "견적 수정"
-   ClientHeight    =   12195
+   ClientHeight    =   12240
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   19200
@@ -18,7 +18,26 @@ Option Explicit
 
 Dim orgManagementID As Variant
 Dim totlalCheckCount As Long
+Dim formHight As Long
 
+Private Sub btnAcceptedInsert_Click()
+    InsertAccepted
+End Sub
+
+Private Sub btnPayment_Click()
+    If isFormLoaded("frmPayment") Then
+        Unload frmPayment
+    End If
+    frmPayment.Show (False)
+End Sub
+
+Private Sub chkDividePay_Click()
+    If chkDividePay.Value = True Then
+        Me.btnPayment.Enabled = True
+    Else
+        Me.btnPayment.Enabled = False
+    End If
+End Sub
 
 Private Sub UserForm_Initialize()
     Dim cRow As Long
@@ -110,12 +129,30 @@ Private Sub UserForm_Initialize()
     Me.txtPaid.Value = Format(estimate(34), "#,##0")      '입금액
     Me.txtRemaining.Value = Format(estimate(35), "#,##0")      '미입금액
     Me.chkDividePay.Value = estimate(36)      '분할결제 여부
+    If chkDividePay.Value = True Then
+        Me.btnPayment.Enabled = True
+    Else
+        Me.btnPayment.Enabled = False
+    End If
     
     '견적메모+수주메모
     If Me.txtMemo.Value <> "" Then
         Me.txtMemo.Value = Me.txtMemo.Value & vbCrLf & estimate(37)
     Else
         Me.txtMemo.Value = Me.txtMemo.Value & estimate(37)
+    End If
+    
+    '수주 ID (ID_관리)
+    Me.txtAcceptedID.Value = estimate(38)
+    If Me.txtAcceptedID.Value = "" Then
+        '수주ID가 없으면 수주관련 컨트롤 unable 시킴
+        frmOrder.Visible = False
+        btnAcceptedInsert.Visible = True
+        formHight = frmEstimateUpdate.Height
+        frmEstimateUpdate.Height = 280
+    Else
+        frmOrder.Visible = True
+        btnAcceptedInsert.Visible = False
     End If
     
     '변경 전 관리번호
@@ -426,6 +463,34 @@ Function GetProductionTotalCost()
     GetProductionTotalCost = totalCost
 End Function
 
+Sub InsertAccepted()
+
+    '수주발주 테이블에 수주 등록
+    Insert_Record shtOrder, _
+            , Me.cboCategory.Value, "수주", Me.txtManagementID.Value, _
+            Me.txtCustomer.Value, _
+            Me.txtEstimateName.Value, _
+            Me.txtManager.Value, _
+            Me.txtSize.Value, _
+            Me.txtAmount.Value, _
+            Me.cboUnit.Value, _
+            Me.txtUnitPrice.Value, _
+            Me.txtEstimatePrice.Value, _
+            , _
+            , , , , , _
+            , , , , _
+            , , _
+            Date, , _
+            CLng(Me.txtID.Value), , False
+
+    '등록한 수주ID를 견적 테이블에 업데이트
+    Update_Record_Column shtEstimate, Me.txtID, "ID_수주", Get_LastID(shtOrder)
+    
+    '폼을 새로 띄움
+    Unload frmEstimateUpdate
+    frmEstimateUpdate.Show (False)
+    
+End Sub
 
 Private Sub lswOrderList_DblClick()
     With Me.lswOrderList
@@ -552,47 +617,47 @@ Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVa
     If KeyCode = 27 Then Unload Me
 End Sub
 
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtEstimateDate
 End Sub
 
-Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtBidDate
 End Sub
 
-Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtInsuranceDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtAcceptedDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgDueDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgDueDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtDueDate
 End Sub
 
-Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtDeliveryDate
 End Sub
 
-Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtSpecificationDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtTaxInvoiceDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtPaymentDate
 End Sub
 
-Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal y As Single)
+Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtExpectPaymentDate
     Me.txtExpectPaymentMonth = Format(Me.txtExpectPaymentDate, "mm" & "월")
 End Sub
@@ -793,5 +858,6 @@ Private Sub UserForm_Layout()
     estimateUpdateFormX = Me.Left
     estimateUpdateFormY = Me.top
 End Sub
+
 
 

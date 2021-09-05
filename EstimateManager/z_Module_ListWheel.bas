@@ -23,8 +23,8 @@ Option Explicit
 '###############################################################
 
 Private Type POINTAPI
-        x As Long
-        y As Long
+        X As Long
+        Y As Long
 End Type
 
 Private Type MOUSEHOOKSTRUCT
@@ -68,7 +68,7 @@ Dim lngAppInst As LongPtr
 Dim hwndUnderCursor As LongPtr
 Dim tPT As POINTAPI
      GetCursorPos tPT
-     hwndUnderCursor = WindowFromPoint(tPT.x, tPT.y)
+     hwndUnderCursor = WindowFromPoint(tPT.X, tPT.Y)
      If Not frm.ActiveControl Is ctl Then
              ctl.SetFocus
      End If
@@ -99,7 +99,7 @@ Private Function MouseProc(ByVal nCode As Long, ByVal wParam As LongPtr, ByRef l
 Dim idx As LongPtr
         On Error GoTo errH
      If (nCode = HC_ACTION) Then
-             If WindowFromPoint(lParam.pt.x, lParam.pt.y) = mListBoxHwnd Then
+             If WindowFromPoint(lParam.pt.X, lParam.pt.Y) = mListBoxHwnd Then
                      If wParam = WM_MOUSEWHEEL Then
                                 MouseProc = True
                                 If lParam.hwnd > 0 Then idx = -1 Else idx = 1
