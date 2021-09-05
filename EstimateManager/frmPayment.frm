@@ -17,69 +17,6 @@ Option Explicit
 
 Private acceptedPrice As String
 
-Private Sub btnPaymentClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
-        Me.btnPaymentClose.SetFocus
-    End If
-End Sub
-
-Private Sub btnPaymentClose_Click()
-    Unload Me
-End Sub
-
-Private Sub imgPayDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtPayDate
-End Sub
-
-Private Sub lswPaymentList_Click()
-    With Me.lswPaymentList
-        If Not .SelectedItem Is Nothing Then
-            Me.txtPayID.Value = .SelectedItem.Text
-            Me.txtPayDate.Value = .SelectedItem.ListSubItems(1)
-            Me.txtPayAmount.Value = .SelectedItem.ListSubItems(2)
-            Me.txtPayMemo.Value = .SelectedItem.ListSubItems(3)
-        End If
-    End With
-End Sub
-
-Private Sub lswProductionList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
-    With Me.lswProductionList
-        .SortKey = ColumnHeader.Index - 1
-        If .SortOrder = lvwAscending Then
-            .SortOrder = lvwDescending
-        Else
-            .SortOrder = lvwAscending
-        End If
-        .Sorted = True
-    End With
-End Sub
-
-Private Sub txtPayAmount_AfterUpdate()
-    Me.txtPayAmount.Value = Trim(Me.txtPayAmount.Value)
-    
-    If Not IsNumeric(Me.txtPayAmount.Value) Then
-        MsgBox "숫자를 입력하세요.", vbExclamation
-        Exit Sub
-    End If
-    
-    Me.txtPayAmount.Value = Format(Me.txtPayAmount.Value, "#,##0")
-End Sub
-
-Private Sub txtPayDate_AfterUpdate()
-    Me.txtPayDate.Value = Trim(Me.txtPayDate.Value)
-End Sub
-
-Private Sub txtPayDate_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then
-        Unload Me
-    End If
-End Sub
-
-Private Sub txtPayMemo_AfterUpdate()
-    Me.txtPayMemo.Value = Trim(Me.txtPayMemo.Value)
-End Sub
-
-
 Private Sub UserForm_Initialize()
     Dim contr As Control
     Dim estimate As Variant
@@ -267,7 +204,7 @@ Sub DeletePayment()
     For Each li In Me.lswPaymentList.ListItems
         If li.Selected = True Then
             '결제이력 테이블에서 삭제
-            Delete_Record shtPayment, li.SubItems(1)
+            Delete_Record shtPayment, li.Text
         End If
     Next
     
@@ -295,63 +232,6 @@ Sub DeletePayment()
     ClearPaymentInput
     
 End Sub
-
-Sub ProductionToOrder()
-    Dim li As ListItem
-    Dim count As Long
-    Dim managementID, category, customer, Item, material, size, amount, unit, unitPrice, cost, memo As Variant
-    Dim YN As VbMsgBoxResult
-    
-    count = 0
-    For Each li In Me.lswProductionList.ListItems
-        If li.Selected = True Then count = count + 1
-    Next
-    If count = 0 Then MsgBox "발주할 항목을 선택하세요.": Exit Sub
-    
-    YN = MsgBox("선택한 " & count & "개 항목을 발주합니다.", vbYesNo)
-    If YN = vbNo Then Exit Sub
-    
-    count = 0
-    For Each li In Me.lswProductionList.ListItems
-        If li.Selected = True Then
-            Item = li.Text
-            managementID = li.SubItems(3)
-            category = li.SubItems(4)
-            customer = li.SubItems(5)
-            material = li.SubItems(6)
-            size = li.SubItems(7)
-            amount = li.SubItems(8)
-            unit = li.SubItems(9)
-            unitPrice = li.SubItems(10)
-            cost = li.SubItems(11)
-            memo = li.SubItems(12)
-            
-            '선택한 예상실행항목을 발주 테이블에 등록
-            Insert_Record shtOrder, _
-                , , category, managementID, customer, Item, material, size, amount, unit, unitPrice, cost, , _
-                , , , , , _
-                , , , , _
-                , , _
-                Date, , currentEstimateId, memo, False
-                
-            count = count + 1
-        End If
-    Next
-    
-    'frmEstimateUpdate 폼의 발주목록을 업데이트
-    If isFormLoaded("frmEstimateUpdate") Then
-        frmEstimateUpdate.InitializeLswOrderList
-        frmEstimateUpdate.CalculateEstimateUpdateCost
-    End If
-    
-    MsgBox "총 " & count & "개 항목을 발주하였습니다.", vbInformation
-    
-    shtOrderAdmin.Activate
-    shtOrderAdmin.OrderSearch
-    shtOrderAdmin.GoToEnd
-
-End Sub
-
 Function GetPaymentTotalCost()
     Dim i As Long
     Dim totalCost As Long
@@ -414,6 +294,71 @@ End Sub
 Private Sub btnPaymentUpdate_Click()
     UpdatePayment
 End Sub
+
+
+Private Sub btnPaymentClose_Click()
+    Unload Me
+End Sub
+
+Private Sub lswPaymentList_Click()
+    With Me.lswPaymentList
+        If Not .SelectedItem Is Nothing Then
+            Me.txtPayID.Value = .SelectedItem.Text
+            Me.txtPayDate.Value = .SelectedItem.ListSubItems(1)
+            Me.txtPayAmount.Value = .SelectedItem.ListSubItems(2)
+            Me.txtPayMemo.Value = .SelectedItem.ListSubItems(3)
+        End If
+    End With
+End Sub
+
+Private Sub lswProductionList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    With Me.lswProductionList
+        .SortKey = ColumnHeader.Index - 1
+        If .SortOrder = lvwAscending Then
+            .SortOrder = lvwDescending
+        Else
+            .SortOrder = lvwAscending
+        End If
+        .Sorted = True
+    End With
+End Sub
+
+Private Sub btnPaymentClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 9 Then
+        Me.btnPaymentClose.SetFocus
+    End If
+End Sub
+
+Private Sub imgPayDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtPayDate
+End Sub
+
+
+Private Sub txtPayAmount_AfterUpdate()
+    Me.txtPayAmount.Value = Trim(Me.txtPayAmount.Value)
+    
+    If Not IsNumeric(Me.txtPayAmount.Value) Then
+        MsgBox "숫자를 입력하세요.", vbExclamation
+        Exit Sub
+    End If
+    
+    Me.txtPayAmount.Value = Format(Me.txtPayAmount.Value, "#,##0")
+End Sub
+
+Private Sub txtPayDate_AfterUpdate()
+    Me.txtPayDate.Value = Trim(Me.txtPayDate.Value)
+End Sub
+
+Private Sub txtPayDate_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then
+        Unload Me
+    End If
+End Sub
+
+Private Sub txtPayMemo_AfterUpdate()
+    Me.txtPayMemo.Value = Trim(Me.txtPayMemo.Value)
+End Sub
+
 
 Private Sub UserForm_Layout()
     paymentFormX = Me.Left

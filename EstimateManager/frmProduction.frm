@@ -17,225 +17,6 @@ Attribute VB_Exposed = False
 Option Explicit
 
 
-
-Private Sub btnProductionClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
-        Me.btnProductionClose.SetFocus
-    End If
-End Sub
-
-Private Sub btnProductionClose_Click()
-    Unload Me
-End Sub
-
-Private Sub cboCategory_AfterUpdate()
-    Me.cboCategory.Value = Trim(Me.cboCategory.Value)
-End Sub
-
-Private Sub cboCategory_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then
-        Unload Me
-    End If
-End Sub
-
-Private Sub lswProductionList_Click()
-    With Me.lswProductionList
-        If Not .SelectedItem Is Nothing Then
-            Me.txtProductionItem.Value = .SelectedItem.Text
-            Me.txtProductionID.Value = .SelectedItem.ListSubItems(1)
-            Me.cboCategory.Value = .SelectedItem.ListSubItems(4)
-            Me.txtProductionCustomer.Value = .SelectedItem.ListSubItems(5)
-            Me.txtProductionMaterial.Value = .SelectedItem.ListSubItems(6)
-            Me.txtProductionSize.Value = .SelectedItem.ListSubItems(7)
-            Me.txtProductionAmount.Value = .SelectedItem.ListSubItems(8)
-            Me.cboProductionUnit.Value = .SelectedItem.ListSubItems(9)
-            Me.txtProductionUnitPrice.Value = .SelectedItem.ListSubItems(10)
-            Me.txtProductionCost.Value = .SelectedItem.ListSubItems(11)
-            Me.txtProductionMemo.Value = .SelectedItem.ListSubItems(12)
-        End If
-    End With
-End Sub
-
-Private Sub lswProductionList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
-    With Me.lswProductionList
-        .SortKey = ColumnHeader.Index - 1
-        If .SortOrder = lvwAscending Then
-            .SortOrder = lvwDescending
-        Else
-            .SortOrder = lvwAscending
-        End If
-        .Sorted = True
-    End With
-End Sub
-
-Private Sub txtProductionCustomer_AfterUpdate()
-    Me.txtProductionCustomer.Value = Trim(Me.txtProductionCustomer.Value)
-End Sub
-
-Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 13 Then
-        '엔터키 - 다음 입력칸으로 이동
-        Me.lswOrderCustomerAutoComplete.Visible = False
-        Me.txtProductionItem.SetFocus
-    ElseIf KeyCode = 9 Then
-        '탭키 자동완성이 하나이면 다음으로 이동
-        With Me.lswOrderCustomerAutoComplete
-            If .ListItems.count = 1 Then
-                Me.lswOrderCustomerAutoComplete.Visible = False
-                Me.txtProductionItem.SetFocus
-                KeyCode = 0
-            Else
-                If .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
-                .SetFocus
-            End If
-            End If
-        End With
-    ElseIf KeyCode = 40 Then
-        '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
-        With Me.lswOrderCustomerAutoComplete
-            If .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
-                .SetFocus
-            End If
-        End With
-    ElseIf KeyCode = 27 Then
-        'ESC키 닫기
-        Unload Me
-    End If
-End Sub
-
-Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    Dim db As Variant
-    Dim i As Long
-    
-    '거래처 자동완성 처리
-    With Me.lswOrderCustomerAutoComplete
-        If Me.txtProductionCustomer.Value = "" Then
-            .Visible = False
-        Else
-            .Visible = True
-            
-            '발주거래처 DB를 읽어와서 리스트뷰에 출력
-            .ListItems.Clear
-            db = Get_DB(shtOrderCustomer, True)
-            db = Filtered_DB(db, Me.txtProductionCustomer.Value, 1, False)
-            If IsEmpty(db) Then
-                .Visible = False
-            Else
-                For i = 1 To UBound(db)
-                    .ListItems.Add , , db(i, 1)
-                    If i = 8 Then Exit For
-                Next
-            End If
-            
-        End If
-    End With
-End Sub
-
-Private Sub lswOrderCustomerAutoComplete_DblClick()
-    '거래처에 값을 넣어주고 포커스는 품명으로 이동
-    With Me.lswOrderCustomerAutoComplete
-        If Not .SelectedItem Is Nothing Then
-            Me.txtProductionCustomer.Value = .SelectedItem.Text
-            .Visible = False
-            Me.txtProductionItem.SetFocus
-        End If
-    End With
-End Sub
-
-Private Sub lswOrderCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
-    '거래처에 값을 넣어주고 포커스는 품명으로 이동
-    If KeyCode = 13 Then
-        With Me.lswOrderCustomerAutoComplete
-            If Not .SelectedItem Is Nothing Then
-                Me.txtProductionCustomer.Value = .SelectedItem.Text
-                .Visible = False
-                Me.txtProductionItem.SetFocus
-            End If
-        End With
-    End If
-End Sub
-
-Private Sub txtProductionAmount_AfterUpdate()
-    If Me.txtProductionAmount.Value = "" Then
-        Me.txtProductionCost.Value = Me.txtProductionUnitPrice.Value
-        Exit Sub
-    End If
-    
-    If Not IsNumeric(Me.txtProductionAmount.Value) Then
-        MsgBox "숫자를 입력하세요."
-        Me.txtProductionAmount.Value = ""
-        Me.txtProductionCost.Value = Me.txtProductionUnitPrice.Value
-        Exit Sub
-    End If
-        
-    Me.txtProductionAmount.Value = Format(Me.txtProductionAmount.Value, "#,##0")
-        
-    '금액 = 수량 * 단가
-    If IsNumeric(Me.txtProductionUnitPrice.Value) Then
-        Me.txtProductionCost.Value = Format(CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value), "#,##0")
-    End If
-End Sub
-
-Private Sub txtProductionItem_Enter()
-    If Me.lswOrderCustomerAutoComplete.Visible = True Then
-        With Me.lswOrderCustomerAutoComplete
-            Me.txtProductionCustomer.Value = .SelectedItem.Text
-            .Visible = False
-        End With
-    End If
-End Sub
-
-
-Private Sub txtProductionItem_AfterUpdate()
-    Me.txtProductionItem.Value = Trim(Me.txtProductionItem.Value)
-End Sub
-
-Private Sub txtProductionMaterial_AfterUpdate()
-    Me.txtProductionMaterial.Value = Trim(Me.txtProductionMaterial.Value)
-End Sub
-
-
-Private Sub txtProductionMemo_AfterUpdate()
-    Me.txtProductionMemo.Value = Trim(Me.txtProductionMemo.Value)
-End Sub
-
-
-Private Sub txtProductionSize_AfterUpdate()
-    Me.txtProductionSize.Value = Trim(Me.txtProductionSize.Value)
-End Sub
-
-
-Private Sub txtProductionUnitPrice_AfterUpdate()
-    If Me.txtProductionUnitPrice.Value = "" Then
-        Me.txtProductionCost.Value = ""
-        Exit Sub
-    End If
-    
-    If Not IsNumeric(Me.txtProductionUnitPrice.Value) Then
-        MsgBox "숫자를 입력하세요."
-        Me.txtProductionUnitPrice.Value = ""
-        Me.txtProductionCost.Value = ""
-        Exit Sub
-    End If
-    
-    Me.txtProductionUnitPrice.Value = Format(Me.txtProductionUnitPrice.Value, "#,##0")
-    
-    If IsNumeric(Me.txtProductionUnitPrice.Value) Then
-        If Me.txtProductionAmount.Value = "" Then
-            Me.txtProductionCost.Value = Format(Me.txtProductionCost.Value, "#,##0")
-        Else
-            If IsNumeric(Me.txtProductionAmount.Value) Then
-                '금액 = 수량 * 단가
-                Me.txtProductionCost.Value = Format(CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value), "#,##0")
-            End If
-        End If
-    End If
-    
-End Sub
-
-
 Private Sub UserForm_Initialize()
     Dim contr As Control
     Dim estimate As Variant
@@ -487,14 +268,22 @@ End Sub
 Sub ProductionToOrder()
     Dim li As ListItem
     Dim count As Long
-    Dim managementID, category, customer, Item, material, size, amount, unit, unitPrice, cost, memo As Variant
+    Dim managementId, category, customer, Item, material, size, amount, unit, unitPrice, cost, memo As Variant
     Dim YN As VbMsgBoxResult
+    Dim estimate As Variant
     
     count = 0
     For Each li In Me.lswProductionList.ListItems
         If li.Selected = True Then count = count + 1
     Next
     If count = 0 Then MsgBox "발주할 항목을 선택하세요.": Exit Sub
+    
+    '수주 확정이 아닌 견적의 경우는 발주를 할 수 없음
+    estimate = Get_Record_Array(shtEstimate, currentEstimateId)
+    If estimate(38) = "" Then
+        MsgBox "수주 확정을 진행해야 발주할 수 있습니다.", vbInformation
+        Exit Sub
+    End If
     
     YN = MsgBox("선택한 " & count & "개 항목을 발주합니다.", vbYesNo)
     If YN = vbNo Then Exit Sub
@@ -503,7 +292,7 @@ Sub ProductionToOrder()
     For Each li In Me.lswProductionList.ListItems
         If li.Selected = True Then
             Item = li.Text
-            managementID = li.SubItems(3)
+            managementId = li.SubItems(3)
             category = li.SubItems(4)
             customer = li.SubItems(5)
             material = li.SubItems(6)
@@ -516,7 +305,7 @@ Sub ProductionToOrder()
             
             '선택한 예상실행항목을 발주 테이블에 등록
             Insert_Record shtOrder, _
-                , , category, managementID, customer, Item, material, size, amount, unit, unitPrice, cost, , _
+                , , category, managementId, customer, Item, material, size, amount, unit, unitPrice, cost, , _
                 , , , , , _
                 , , , , _
                 , , _
@@ -611,6 +400,229 @@ End Sub
 
 Private Sub btnProductionToOrder_Click()
     ProductionToOrder
+End Sub
+
+
+Private Sub btnProductionClose_Click()
+    Unload Me
+End Sub
+
+Private Sub lswProductionList_Click()
+    With Me.lswProductionList
+        If Not .SelectedItem Is Nothing Then
+            Me.txtProductionItem.Value = .SelectedItem.Text
+            Me.txtProductionID.Value = .SelectedItem.ListSubItems(1)
+            Me.cboCategory.Value = .SelectedItem.ListSubItems(4)
+            Me.txtProductionCustomer.Value = .SelectedItem.ListSubItems(5)
+            Me.txtProductionMaterial.Value = .SelectedItem.ListSubItems(6)
+            Me.txtProductionSize.Value = .SelectedItem.ListSubItems(7)
+            Me.txtProductionAmount.Value = .SelectedItem.ListSubItems(8)
+            Me.cboProductionUnit.Value = .SelectedItem.ListSubItems(9)
+            Me.txtProductionUnitPrice.Value = .SelectedItem.ListSubItems(10)
+            Me.txtProductionCost.Value = .SelectedItem.ListSubItems(11)
+            Me.txtProductionMemo.Value = .SelectedItem.ListSubItems(12)
+        End If
+    End With
+End Sub
+
+Private Sub lswProductionList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    With Me.lswProductionList
+        .SortKey = ColumnHeader.Index - 1
+        If .SortOrder = lvwAscending Then
+            .SortOrder = lvwDescending
+        Else
+            .SortOrder = lvwAscending
+        End If
+        .Sorted = True
+    End With
+End Sub
+
+
+Private Sub btnProductionClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 9 Then
+        Me.btnProductionClose.SetFocus
+    End If
+End Sub
+
+Private Sub cboCategory_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then
+        Unload Me
+    End If
+End Sub
+
+Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 13 Then
+        '엔터키 - 다음 입력칸으로 이동
+        Me.lswOrderCustomerAutoComplete.Visible = False
+        Me.txtProductionItem.SetFocus
+    ElseIf KeyCode = 9 Then
+        '탭키 자동완성이 하나이면 다음으로 이동
+        With Me.lswOrderCustomerAutoComplete
+            If .ListItems.count = 1 Then
+                Me.lswOrderCustomerAutoComplete.Visible = False
+                Me.txtProductionItem.SetFocus
+                KeyCode = 0
+            Else
+                If .ListItems.count > 0 And .Visible = True Then
+                .SelectedItem = .ListItems(1)
+                .SetFocus
+            End If
+            End If
+        End With
+    ElseIf KeyCode = 40 Then
+        '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
+        With Me.lswOrderCustomerAutoComplete
+            If .ListItems.count > 0 And .Visible = True Then
+                .SelectedItem = .ListItems(1)
+                .SetFocus
+            End If
+        End With
+    ElseIf KeyCode = 27 Then
+        'ESC키 닫기
+        Unload Me
+    End If
+End Sub
+
+Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Dim db As Variant
+    Dim i As Long
+    
+    '거래처 자동완성 처리
+    With Me.lswOrderCustomerAutoComplete
+        If Me.txtProductionCustomer.Value = "" Then
+            .Visible = False
+        Else
+            .Visible = True
+            
+            '발주거래처 DB를 읽어와서 리스트뷰에 출력
+            .ListItems.Clear
+            db = Get_DB(shtOrderCustomer, True)
+            db = Filtered_DB(db, Me.txtProductionCustomer.Value, 1, False)
+            If IsEmpty(db) Then
+                .Visible = False
+            Else
+                For i = 1 To UBound(db)
+                    .ListItems.Add , , db(i, 1)
+                    If i = 8 Then Exit For
+                Next
+            End If
+            
+        End If
+    End With
+End Sub
+
+Private Sub lswOrderCustomerAutoComplete_DblClick()
+    '거래처에 값을 넣어주고 포커스는 품명으로 이동
+    With Me.lswOrderCustomerAutoComplete
+        If Not .SelectedItem Is Nothing Then
+            Me.txtProductionCustomer.Value = .SelectedItem.Text
+            .Visible = False
+            Me.txtProductionItem.SetFocus
+        End If
+    End With
+End Sub
+
+Private Sub lswOrderCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
+    '거래처에 값을 넣어주고 포커스는 품명으로 이동
+    If KeyCode = 13 Then
+        With Me.lswOrderCustomerAutoComplete
+            If Not .SelectedItem Is Nothing Then
+                Me.txtProductionCustomer.Value = .SelectedItem.Text
+                .Visible = False
+                Me.txtProductionItem.SetFocus
+            End If
+        End With
+    End If
+End Sub
+
+
+Private Sub txtProductionItem_Enter()
+    If Me.lswOrderCustomerAutoComplete.Visible = True Then
+        With Me.lswOrderCustomerAutoComplete
+            Me.txtProductionCustomer.Value = .SelectedItem.Text
+            .Visible = False
+        End With
+    End If
+End Sub
+
+
+Private Sub txtProductionCustomer_AfterUpdate()
+    Me.txtProductionCustomer.Value = Trim(Me.txtProductionCustomer.Value)
+End Sub
+
+
+Private Sub cboCategory_AfterUpdate()
+    Me.cboCategory.Value = Trim(Me.cboCategory.Value)
+End Sub
+
+
+Private Sub txtProductionAmount_AfterUpdate()
+    If Me.txtProductionAmount.Value = "" Then
+        Me.txtProductionCost.Value = Me.txtProductionUnitPrice.Value
+        Exit Sub
+    End If
+    
+    If Not IsNumeric(Me.txtProductionAmount.Value) Then
+        MsgBox "숫자를 입력하세요."
+        Me.txtProductionAmount.Value = ""
+        Me.txtProductionCost.Value = Me.txtProductionUnitPrice.Value
+        Exit Sub
+    End If
+        
+    Me.txtProductionAmount.Value = Format(Me.txtProductionAmount.Value, "#,##0")
+        
+    '금액 = 수량 * 단가
+    If IsNumeric(Me.txtProductionUnitPrice.Value) Then
+        Me.txtProductionCost.Value = Format(CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value), "#,##0")
+    End If
+End Sub
+
+
+Private Sub txtProductionItem_AfterUpdate()
+    Me.txtProductionItem.Value = Trim(Me.txtProductionItem.Value)
+End Sub
+
+Private Sub txtProductionMaterial_AfterUpdate()
+    Me.txtProductionMaterial.Value = Trim(Me.txtProductionMaterial.Value)
+End Sub
+
+
+Private Sub txtProductionMemo_AfterUpdate()
+    Me.txtProductionMemo.Value = Trim(Me.txtProductionMemo.Value)
+End Sub
+
+
+Private Sub txtProductionSize_AfterUpdate()
+    Me.txtProductionSize.Value = Trim(Me.txtProductionSize.Value)
+End Sub
+
+
+Private Sub txtProductionUnitPrice_AfterUpdate()
+    If Me.txtProductionUnitPrice.Value = "" Then
+        Me.txtProductionCost.Value = ""
+        Exit Sub
+    End If
+    
+    If Not IsNumeric(Me.txtProductionUnitPrice.Value) Then
+        MsgBox "숫자를 입력하세요."
+        Me.txtProductionUnitPrice.Value = ""
+        Me.txtProductionCost.Value = ""
+        Exit Sub
+    End If
+    
+    Me.txtProductionUnitPrice.Value = Format(Me.txtProductionUnitPrice.Value, "#,##0")
+    
+    If IsNumeric(Me.txtProductionUnitPrice.Value) Then
+        If Me.txtProductionAmount.Value = "" Then
+            Me.txtProductionCost.Value = Format(Me.txtProductionCost.Value, "#,##0")
+        Else
+            If IsNumeric(Me.txtProductionAmount.Value) Then
+                '금액 = 수량 * 단가
+                Me.txtProductionCost.Value = Format(CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value), "#,##0")
+            End If
+        End If
+    End If
+    
 End Sub
 
 Private Sub UserForm_Layout()

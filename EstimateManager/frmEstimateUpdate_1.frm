@@ -602,7 +602,7 @@ End Sub
 Sub ProductionToOrder()
     Dim li As ListItem
     Dim count As Long
-    Dim managementID, customer, Item, material, size, amount, unit, unitPrice, cost, memo As Variant
+    Dim managementId, customer, Item, material, size, amount, unit, unitPrice, cost, memo As Variant
     
     count = 0
     For Each li In Me.lswProductionList.ListItems
@@ -614,7 +614,7 @@ Sub ProductionToOrder()
     For Each li In Me.lswProductionList.ListItems
         If li.Checked = True Then
             Item = li.Text
-            managementID = li.SubItems(3)
+            managementId = li.SubItems(3)
             customer = li.SubItems(4)
             material = li.SubItems(5)
             size = li.SubItems(6)
@@ -626,7 +626,7 @@ Sub ProductionToOrder()
             
             '선택한 예상실행항목을 발주 테이블에 등록
             Insert_Record shtOrder, _
-                , , managementID, customer, Item, material, size, amount, unit, unitPrice, cost, _
+                , , managementId, customer, Item, material, size, amount, unit, unitPrice, cost, _
                 , , , , , _
                 , , , , , _
                 Date, , Me.txtID, False, memo

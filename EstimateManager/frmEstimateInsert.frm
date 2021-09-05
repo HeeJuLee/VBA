@@ -16,8 +16,6 @@ Attribute VB_Exposed = False
 Option Explicit
 
 
-
-
 Private Sub UserForm_Activate()
     Me.txtManagementID.SetFocus
 End Sub
