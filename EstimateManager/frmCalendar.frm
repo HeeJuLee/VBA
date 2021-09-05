@@ -114,25 +114,25 @@ Dim vLists As Variant
 Dim YearBetween As Long
 
 Private Sub cboMonth_Click()
-Me.lblMonth.Caption = Me.cboMonth.Value
-Me.scrlMonth.Value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
+Me.lblMonth.Caption = Me.cboMonth.value
+Me.scrlMonth.value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
 End Sub
 
 Private Sub cboYear_Click()
-Me.lblYear.Caption = Me.cboYear.Value
+Me.lblYear.Caption = Me.cboYear.value
 resetDate
 End Sub
 
 Private Sub bgNow_Click()
 Me.lblMonth.Caption = Month(Date) & "월"
 Me.lblYear.Caption = Year(Date) & "년"
-Me.scrlMonth.Value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
+Me.scrlMonth.value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
 End Sub
 
 Private Sub lblNow_Click()
 Me.lblMonth.Caption = Month(Date) & "월"
 Me.lblYear.Caption = Year(Date) & "년"
-Me.scrlMonth.Value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
+Me.scrlMonth.value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
 End Sub
 
 Private Sub lblMonth_Click()
@@ -145,12 +145,12 @@ End Sub
 
 Private Sub scrlMonth_Change()
 
-If scrlMonth.Value > 0 And scrlMonth.Value < 13 Then
-Me.lblMonth.Caption = Me.scrlMonth.Value & "월"
-ElseIf scrlMonth.Value <= 0 Then
-    scrlMonth.Value = 12: Me.lblMonth.Caption = Me.scrlMonth.Value & "월": Me.lblYear.Caption = Left(Me.lblYear.Caption, 4) - 1 & "년"
+If scrlMonth.value > 0 And scrlMonth.value < 13 Then
+Me.lblMonth.Caption = Me.scrlMonth.value & "월"
+ElseIf scrlMonth.value <= 0 Then
+    scrlMonth.value = 12: Me.lblMonth.Caption = Me.scrlMonth.value & "월": Me.lblYear.Caption = Left(Me.lblYear.Caption, 4) - 1 & "년"
 Else
-    scrlMonth.Value = 1: Me.lblMonth.Caption = Me.scrlMonth.Value & "월": Me.lblYear.Caption = Left(Me.lblYear.Caption, 4) + 1 & "년"
+    scrlMonth.value = 1: Me.lblMonth.Caption = Me.scrlMonth.value & "월": Me.lblYear.Caption = Left(Me.lblYear.Caption, 4) + 1 & "년"
 End If
 
 resetDate
@@ -192,7 +192,7 @@ resetYear
 
 Me.lblYear.Caption = Year(Date) & "년"
 Me.lblMonth.Caption = Month(Date) & "월"
-Me.scrlMonth.Value = Month(Date)
+Me.scrlMonth.value = Month(Date)
 
 End Sub
 

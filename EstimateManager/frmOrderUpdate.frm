@@ -36,7 +36,7 @@ Private Sub UserForm_Initialize()
     Else
         cRow = Selection.row                '발주관리화면에서 더블클릭으로 선택한 행 번호
 
-        If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).Value = "" Then End         '데이터가 있는 행이 아닐 경우는 중지
+        If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).value = "" Then End         '데이터가 있는 행이 아닐 경우는 중지
         
         orderId = shtOrderAdmin.Cells(cRow, 2)
     End If
@@ -58,23 +58,23 @@ Private Sub UserForm_Initialize()
     '발주 데이터 읽어오기
     order = Get_Record_Array(shtOrder, orderId)
     
-    Me.txtID.Value = order(1)   'ID
-    Me.txtManagementID.Value = order(5) '관리번호
+    Me.txtID.value = order(1)   'ID
+    Me.txtManagementID.value = order(5) '관리번호
     
     '관리번호로 견적정보 가져오기
     bMatchedEstimateID = False
     db = Get_DB(shtEstimate)
-    db = Filtered_DB(db, Me.txtManagementID.Value, 2, True)
+    db = Filtered_DB(db, Me.txtManagementID.value, 2, True)
     If IsEmpty(db) Then
         Me.lblManagementIDError.Caption = "관리번호 오류"
         Me.lblManagementIDError.Visible = True
     Else
         '여러개 있을 경우에는 맨 마지막 견적정보 사용
         count = UBound(db, 1)
-        Me.txtEstimateID.Value = db(count, 1)
-        Me.txtEstimateCustomer.Value = db(count, 4)
-        Me.txtEstimateManager.Value = db(count, 5)
-        Me.txtEstimateName.Value = db(count, 6)
+        Me.txtEstimateID.value = db(count, 1)
+        Me.txtEstimateCustomer.value = db(count, 4)
+        Me.txtEstimateManager.value = db(count, 5)
+        Me.txtEstimateName.value = db(count, 6)
     
         bMatchedEstimateID = True
     End If
@@ -83,30 +83,30 @@ Private Sub UserForm_Initialize()
     InitializeCboUnit
     InitializePayMethod
     
-    Me.cboCategory.Value = Trim(order(4))     '분류
-    Me.txtCustomer.Value = order(6)     '거래처
-    Me.txtOrderName.Value = order(7)    '발주 품명
-    Me.txtMaterial.Value = order(8)     '재질
-    Me.txtSize.Value = order(9)             '규격
-    Me.txtAmount.Value = Format(order(10), "#,##0")   '수량
-    Me.cboUnit.Value = Trim(order(11))            '단위
-    Me.txtUnitPrice.Value = Format(order(12), "#,##0")     '단가
-    Me.txtOrderPrice.Value = Format(order(13), "#,##0")      '발주금액
-    Me.txtWeight.Value = order(14)          '중량
-    Me.txtOrderDate.Value = order(16)       '발주일자
-    Me.txtDueDate.Value = order(17)         '납기일자
-    Me.txtDeliveryDate.Value = order(18)       '입고일자
-    Me.txtSpecificationDate.Value = order(20)   '명세서
-    Me.txtTaxInvoiceDate.Value = order(21)      '계산서
-    Me.txtPaymentDate.Value = order(22)     '결제일자
-    Me.cboPayMethod.Value = Trim(order(24))       '결제수단
-    Me.txtVAT.Value = Format(order(25), "#,##0")             '부가세
+    Me.cboCategory.value = Trim(order(4))     '분류
+    Me.txtCustomer.value = order(6)     '거래처
+    Me.txtOrderName.value = order(7)    '발주 품명
+    Me.txtMaterial.value = order(8)     '재질
+    Me.txtSize.value = order(9)             '규격
+    Me.txtAmount.value = Format(order(10), "#,##0")   '수량
+    Me.cboUnit.value = Trim(order(11))            '단위
+    Me.txtUnitPrice.value = Format(order(12), "#,##0")     '단가
+    Me.txtOrderPrice.value = Format(order(13), "#,##0")      '발주금액
+    Me.txtWeight.value = order(14)          '중량
+    Me.txtOrderDate.value = order(16)       '발주일자
+    Me.txtDueDate.value = order(17)         '납기일자
+    Me.txtDeliveryDate.value = order(18)       '입고일자
+    Me.txtSpecificationDate.value = order(20)   '명세서
+    Me.txtTaxInvoiceDate.value = order(21)      '계산서
+    Me.txtPaymentDate.value = order(22)     '결제일자
+    Me.cboPayMethod.value = Trim(order(24))       '결제수단
+    Me.txtVAT.value = Format(order(25), "#,##0")             '부가세
     
-    Me.txtInsertDate.Value = order(26)    '등록일자
-    Me.txtUpdateDate.Value = order(27)    '수정일자
+    Me.txtInsertDate.value = order(26)    '등록일자
+    Me.txtUpdateDate.value = order(27)    '수정일자
     
-    Me.txtMemo.Value = order(29)            '메모
-    Me.chkVAT.Value = order(30)             '부가세 제외 여부
+    Me.txtMemo.value = order(29)            '메모
+    Me.chkVAT.value = order(30)             '부가세 제외 여부
     
     '발주명 입력창에 포커스
     Me.txtOrderName.SetFocus
@@ -144,19 +144,19 @@ Sub UpdateOrder()
     End If
 
     '데이터 업데이트
-    Update_Record shtOrder, Me.txtID.Value, _
-        , , Me.cboCategory.Value, _
-        Me.txtManagementID.Value, Me.txtCustomer.Value, _
-        Me.txtOrderName.Value, Me.txtMaterial.Value, _
-        Me.txtSize.Value, Me.txtAmount.Value, _
-        Me.cboUnit.Value, Me.txtUnitPrice, _
-        Me.txtOrderPrice.Value, Me.txtWeight.Value, _
-        , Me.txtOrderDate.Value, Me.txtDueDate.Value, _
-        Me.txtDeliveryDate.Value, , _
-        Me.txtSpecificationDate.Value, Me.txtTaxInvoiceDate.Value, Me.txtPaymentDate.Value, , _
-        Me.cboPayMethod.Value, Me.txtVAT.Value, _
+    Update_Record shtOrder, Me.txtID.value, _
+        , , Me.cboCategory.value, _
+        Me.txtManagementID.value, Me.txtCustomer.value, _
+        Me.txtOrderName.value, Me.txtMaterial.value, _
+        Me.txtSize.value, Me.txtAmount.value, _
+        Me.cboUnit.value, Me.txtUnitPrice, _
+        Me.txtOrderPrice.value, Me.txtWeight.value, _
+        , Me.txtOrderDate.value, Me.txtDueDate.value, _
+        Me.txtDeliveryDate.value, , _
+        Me.txtSpecificationDate.value, Me.txtTaxInvoiceDate.value, Me.txtPaymentDate.value, , _
+        Me.cboPayMethod.value, Me.txtVAT.value, _
         Me.txtInsertDate, Date, _
-        Me.txtEstimateID.Value, Me.txtMemo.Value, Me.chkVAT.Value
+        Me.txtEstimateID.value, Me.txtMemo.value, Me.chkVAT.value
 
     Unload Me
     
@@ -177,7 +177,7 @@ Function CheckOrderUpdateValidation()
     bCorrect = True
     
     '발주명이 입력되었는지 체크
-    If Trim(Me.txtOrderName.Value) = "" Then
+    If Trim(Me.txtOrderName.value) = "" Then
         bCorrect = False
         Me.lblOrderNameEmpty.Visible = True
     Else
@@ -185,7 +185,7 @@ Function CheckOrderUpdateValidation()
     End If
     
     '관리번호가 입력되었고 유효한 관리번호인지 체크
-    If Trim(Me.txtManagementID.Value) = "" Or bMatchedEstimateID = False Then
+    If Trim(Me.txtManagementID.value) = "" Or bMatchedEstimateID = False Then
         bCorrect = False
         Me.lblManagementIDEmpty.Visible = True
     Else
@@ -198,24 +198,24 @@ End Function
 Sub CalculateOrderUpdateCost()
 
     '발주금액 계산
-    If Me.txtUnitPrice.Value <> "" Then
-        If Me.txtAmount.Value = "" Then
-            Me.txtOrderPrice.Value = Me.txtUnitPrice.Value
+    If Me.txtUnitPrice.value <> "" Then
+        If Me.txtAmount.value = "" Then
+            Me.txtOrderPrice.value = Me.txtUnitPrice.value
         Else
-            Me.txtOrderPrice.Value = CLng(Me.txtUnitPrice.Value) * CLng(Me.txtAmount.Value)
+            Me.txtOrderPrice.value = CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value)
         End If
     End If
-    Me.txtOrderPrice.Text = Format(Me.txtOrderPrice.Value, "#,##0")
+    Me.txtOrderPrice.Text = Format(Me.txtOrderPrice.value, "#,##0")
     
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxInvoiceDate.Value = "" Or chkVAT.Value = True Then
-        Me.txtVAT.Value = 0
+    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
+        Me.txtVAT.value = 0
     Else
         '부가세는 금액의 10%
-        If Me.txtOrderPrice.Value <> "" And Me.txtOrderPrice.Value <> 0 Then
-            Me.txtVAT.Value = CLng(Me.txtOrderPrice.Value) * 0.1
-            Me.txtVAT.Text = Format(Me.txtVAT.Value, "#,##0")
+        If Me.txtOrderPrice.value <> "" And Me.txtOrderPrice.value <> 0 Then
+            Me.txtVAT.value = CLng(Me.txtOrderPrice.value) * 0.1
+            Me.txtVAT.Text = Format(Me.txtVAT.value, "#,##0")
         End If
     End If
 
@@ -264,25 +264,25 @@ Private Sub txtManagementID_AfterUpdate()
     Me.lblManagementIDEmpty.Visible = False
     Me.lblManagementIDError.Visible = False
     
-    Me.txtEstimateID.Value = ""
-    Me.txtEstimateCustomer.Value = ""
-    Me.txtEstimateManager.Value = ""
-    Me.txtEstimateName.Value = ""
+    Me.txtEstimateID.value = ""
+    Me.txtEstimateCustomer.value = ""
+    Me.txtEstimateManager.value = ""
+    Me.txtEstimateName.value = ""
     
     '입력한 관리번호로 견적테이블을 검색해서 견적ID를 가져옴
     bMatchedEstimateID = False
-    If Me.txtManagementID.Value <> "" Then
+    If Me.txtManagementID.value <> "" Then
         db = Get_DB(shtEstimate)
-        db = Filtered_DB(db, Me.txtManagementID.Value, 2, True)
+        db = Filtered_DB(db, Me.txtManagementID.value, 2, True)
         If IsEmpty(db) Then
             Me.lblManagementIDError.Caption = "관리번호 오류"
             Me.lblManagementIDError.Visible = True
         Else
             If UBound(db, 1) = 1 Then
-                Me.txtEstimateID.Value = db(1, 1)
-                Me.txtEstimateCustomer.Value = db(1, 4)
-                Me.txtEstimateManager.Value = db(1, 5)
-                Me.txtEstimateName.Value = db(1, 6)
+                Me.txtEstimateID.value = db(1, 1)
+                Me.txtEstimateCustomer.value = db(1, 4)
+                Me.txtEstimateManager.value = db(1, 5)
+                Me.txtEstimateName.value = db(1, 6)
             
                 bMatchedEstimateID = True
             Else
@@ -297,16 +297,16 @@ End Sub
 Private Sub txtAmount_AfterUpdate()
     Me.lblAmountError.Visible = False
     
-    If Me.txtAmount.Value <> "" Then
+    If Me.txtAmount.value <> "" Then
          '수량값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtAmount.Value) Then
-            Me.txtAmount.Value = ""
+        If Not IsNumeric(Me.txtAmount.value) Then
+            Me.txtAmount.value = ""
             Me.lblAmountError.Visible = True
         End If
     End If
     
     '수량 1,000자리 컴마 처리
-    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
+    Me.txtAmount.Text = Format(Me.txtAmount.value, "#,##0")
     
     CalculateOrderUpdateCost
 End Sub
@@ -314,16 +314,16 @@ End Sub
 Private Sub txtUnitPrice_AfterUpdate()
     Me.lblUnitPriceError.Visible = False
     
-    If Me.txtUnitPrice.Value <> "" Then
+    If Me.txtUnitPrice.value <> "" Then
         '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtUnitPrice.Value) Then
-            Me.txtUnitPrice.Value = ""
+        If Not IsNumeric(Me.txtUnitPrice.value) Then
+            Me.txtUnitPrice.value = ""
             Me.lblUnitPriceError.Visible = True
             Exit Sub
         End If
         
         '단가 1,000자리 컴마 처리
-        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
+        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.value, "#,##0")
     End If
     
     CalculateOrderUpdateCost

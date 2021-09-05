@@ -39,7 +39,7 @@ Private Sub UserForm_Initialize()
     InitializeLswCustomerAutoComplete
     InitializeLswManagerAutoComplete
     
-    Me.txtEstimateDate.Value = Date
+    Me.txtEstimateDate.value = Date
     
     '폼 위치값 조정
     If estimateInsertFormX <> 0 Then
@@ -89,21 +89,21 @@ Sub InsertEstimate()
     db = Get_DB(shtEstimate)
     
     '동일한 관리번호가 있는지 체크
-    blnUnique = IsUnique(db, Me.txtManagementID.Value, 2)
+    blnUnique = IsUnique(db, Me.txtManagementID.value, 2)
     If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
     
     Insert_Record shtEstimate, _
-                  Trim(Me.txtManagementID.Value), _
+                  Trim(Me.txtManagementID.value), _
                   , _
-                  Trim(Me.txtCustomer.Value), _
-                  Trim(Me.txtManager.Value), _
-                  Trim(Me.txtEstimateName.Value), _
-                  Trim(Me.txtSize.Value), _
-                  Trim(Me.txtAmount.Value), _
-                  Trim(Me.cboUnit.Value), _
-                  Trim(Me.txtUnitPrice.Value), _
-                  Trim(Me.txtEstimatePrice.Value), _
-                  Trim(Me.txtEstimateDate.Value), _
+                  Trim(Me.txtCustomer.value), _
+                  Trim(Me.txtManager.value), _
+                  Trim(Me.txtEstimateName.value), _
+                  Trim(Me.txtSize.value), _
+                  Trim(Me.txtAmount.value), _
+                  Trim(Me.cboUnit.value), _
+                  Trim(Me.txtUnitPrice.value), _
+                  Trim(Me.txtEstimatePrice.value), _
+                  Trim(Me.txtEstimateDate.value), _
                   , , , , _
                   , , , , , , _
                   Date, , _
@@ -120,7 +120,7 @@ End Sub
 Function CheckEstimateInsertValidation()
 
     '견적명이 입력되었는지 체크
-    If Trim(Me.txtEstimateName.Value) = "" Then
+    If Trim(Me.txtEstimateName.value) = "" Then
         MsgBox "견적명을 입력하세요."
         CheckEstimateInsertValidation = False
         Me.txtEstimateName.SetFocus
@@ -128,7 +128,7 @@ Function CheckEstimateInsertValidation()
     End If
     
     '관리번호가 입력되었는지 체크
-    If Trim(Me.txtManagementID.Value) = "" Then
+    If Trim(Me.txtManagementID.value) = "" Then
         MsgBox "관리번호를 입력하세요."
         CheckEstimateInsertValidation = False
         Me.txtManagementID.SetFocus
@@ -141,15 +141,15 @@ End Function
 Sub CalculateEstimateInsertCost()
 
     '수량값이 공백이면 견적금액은 견적단가
-    If Me.txtAmount.Value = "" Then
-        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value
+    If Me.txtAmount.value = "" Then
+        Me.txtEstimatePrice.value = Me.txtUnitPrice.value
         Exit Sub
     End If
     
     '견적단가와 수량을 곱한 값을 견적금액으로 세팅함
-    If Me.txtUnitPrice.Value <> "" And IsNumeric(Me.txtUnitPrice.Value) Then
-        Me.txtEstimatePrice.Value = CLng(Me.txtUnitPrice.Value) * CLng(Me.txtAmount.Value)
-        Me.txtEstimatePrice.Text = Format(Me.txtEstimatePrice.Value, "#,##0")
+    If Me.txtUnitPrice.value <> "" And IsNumeric(Me.txtUnitPrice.value) Then
+        Me.txtEstimatePrice.value = CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value)
+        Me.txtEstimatePrice.Text = Format(Me.txtEstimatePrice.value, "#,##0")
     End If
 
 End Sub
@@ -166,7 +166,7 @@ Private Sub txtEstimateName_Enter()
     '자동완성 리스트에서 탭해서 넘어오는 경우
     With Me.lswManagerAutoComplete
         If .Visible = True Then
-            Me.txtManager.Value = .SelectedItem.Text
+            Me.txtManager.value = .SelectedItem.Text
             .Visible = False
         End If
     End With
@@ -176,7 +176,7 @@ Private Sub txtManager_Enter()
     '자동완성 리스트에서 탭해서 넘어오는 경우
     With Me.lswCustomerAutoComplete
         If .Visible = True Then
-            Me.txtCustomer.Value = .SelectedItem.Text
+            Me.txtCustomer.value = .SelectedItem.Text
             .Visible = False
         End If
     End With
@@ -224,7 +224,7 @@ Private Sub txtCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shif
     
     '거래처 자동완성 처리
     With Me.lswCustomerAutoComplete
-        If Me.txtCustomer.Value = "" Then
+        If Me.txtCustomer.value = "" Then
             .Visible = False
         Else
             .Visible = True
@@ -232,7 +232,7 @@ Private Sub txtCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shif
             '견적거래처 DB를 읽어와서 리스트뷰에 출력
             .ListItems.Clear
             db = Get_DB(shtEstimateCustomer, True)
-            db = Filtered_DB(db, Me.txtCustomer.Value, 1, False)
+            db = Filtered_DB(db, Me.txtCustomer.value, 1, False)
             If IsEmpty(db) Then
                 .Visible = False
             Else
@@ -250,7 +250,7 @@ Private Sub lswCustomerAutoComplete_DblClick()
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
     With Me.lswCustomerAutoComplete
         If Not .SelectedItem Is Nothing Then
-            Me.txtCustomer.Value = .SelectedItem.Text
+            Me.txtCustomer.value = .SelectedItem.Text
             .Visible = False
             Me.txtManager.SetFocus
         End If
@@ -262,7 +262,7 @@ Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As I
     If KeyCode = 13 Then
         With Me.lswCustomerAutoComplete
             If Not .SelectedItem Is Nothing Then
-                Me.txtCustomer.Value = .SelectedItem.Text
+                Me.txtCustomer.value = .SelectedItem.Text
                 .Visible = False
                 Me.txtManager.SetFocus
             End If
@@ -303,7 +303,7 @@ Private Sub txtManager_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift
     
     '담당자 자동완성 처리
     With Me.lswManagerAutoComplete
-        If Me.txtManager.Value = "" Then
+        If Me.txtManager.value = "" Then
             .Visible = False
         Else
             .Visible = True
@@ -311,7 +311,7 @@ Private Sub txtManager_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift
             '견적담당자 DB를 읽어와서 리스트뷰에 출력
             .ListItems.Clear
             db = Get_DB(shtEstimateManager, True)
-            db = Filtered_DB(db, Me.txtManager.Value, 1, False)
+            db = Filtered_DB(db, Me.txtManager.value, 1, False)
             If IsEmpty(db) Then
                 .Visible = False
             Else
@@ -329,7 +329,7 @@ Private Sub lswManagerAutoComplete_DblClick()
     '담당자명에 값을 넣어주고 포커스는 사이즈로 이동
     With Me.lswManagerAutoComplete
         If Not .SelectedItem Is Nothing Then
-            Me.txtManager.Value = .SelectedItem.Text
+            Me.txtManager.value = .SelectedItem.Text
             .Visible = False
             Me.txtEstimateName.SetFocus
         End If
@@ -341,7 +341,7 @@ Private Sub lswManagerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As In
     If KeyCode = 13 Then
         With Me.lswManagerAutoComplete
             If Not .SelectedItem Is Nothing Then
-                Me.txtManager.Value = .SelectedItem.Text
+                Me.txtManager.value = .SelectedItem.Text
                 .Visible = False
                 Me.txtEstimateName.SetFocus
             End If
@@ -355,33 +355,33 @@ End Sub
 
 Private Sub txtAmount_AfterUpdate()
     
-    If Me.txtAmount.Value <> "" Then
+    If Me.txtAmount.value <> "" Then
         '수량값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtAmount.Value) Then
+        If Not IsNumeric(Me.txtAmount.value) Then
             MsgBox "숫자를 입력하세요."
-            Me.txtAmount.Value = ""
+            Me.txtAmount.value = ""
             Exit Sub
         End If
     End If
     
     '수량 1,000자리 컴마 처리
-    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
+    Me.txtAmount.Text = Format(Me.txtAmount.value, "#,##0")
     
     CalculateEstimateInsertCost
 End Sub
 
 Private Sub txtUnitPrice_AfterUpdate()
     
-    If Me.txtUnitPrice.Value <> "" Then
+    If Me.txtUnitPrice.value <> "" Then
         '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtUnitPrice.Value) Then
+        If Not IsNumeric(Me.txtUnitPrice.value) Then
             MsgBox "숫자를 입력하세요."
-            Me.txtUnitPrice.Value = ""
+            Me.txtUnitPrice.value = ""
             Exit Sub
         End If
         
         '금액 1,000자리 컴마 처리
-        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
+        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.value, "#,##0")
     End If
     
     CalculateEstimateInsertCost
@@ -389,33 +389,33 @@ End Sub
 
 
 Private Sub cboUnit_AfterUpdate()
-    Me.cboUnit.Value = Trim(Me.cboUnit.Value)
+    Me.cboUnit.value = Trim(Me.cboUnit.value)
 End Sub
 
 
 Private Sub txtCustomer_AfterUpdate()
-    Me.txtCustomer.Value = Trim(Me.txtCustomer.Value)
+    Me.txtCustomer.value = Trim(Me.txtCustomer.value)
 End Sub
 
 Private Sub txtEstimateDate_AfterUpdate()
-    Me.txtEstimateDate.Value = Trim(Me.txtEstimateDate.Value)
+    Me.txtEstimateDate.value = Trim(Me.txtEstimateDate.value)
 End Sub
 
 Private Sub txtEstimateName_AfterUpdate()
-    Me.txtEstimateName.Value = Trim(Me.txtEstimateName.Value)
+    Me.txtEstimateName.value = Trim(Me.txtEstimateName.value)
 End Sub
 
 
 Private Sub txtManagementID_AfterUpdate()
-    Me.txtManagementID.Value = Trim(Me.txtManagementID.Value)
+    Me.txtManagementID.value = Trim(Me.txtManagementID.value)
 End Sub
 
 Private Sub txtManager_AfterUpdate()
-    Me.txtManager.Value = Trim(Me.txtManager.Value)
+    Me.txtManager.value = Trim(Me.txtManager.value)
 End Sub
 
 Private Sub txtSize_AfterUpdate()
-    Me.txtSize.Value = Trim(Me.txtSize.Value)
+    Me.txtSize.value = Trim(Me.txtSize.value)
 End Sub
 
 Private Sub UserForm_Layout()

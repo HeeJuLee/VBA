@@ -61,7 +61,7 @@ Sub InitializeCboManager()
     '담당자 DB를 읽어와서
     db = Get_DB(shtEstimateManager, True)
     '거래처명으로 필터링
-    db = Filtered_DB(db, Me.cboCustomer.Value, 1, True)
+    db = Filtered_DB(db, Me.cboCustomer.value, 1, True)
     
     '기존 콤보박스 내용지우기
     Me.cboManager.Clear
@@ -85,21 +85,21 @@ Sub InsertEstimate()
     db = Get_DB(shtEstimate)
     
     '동일한 관리번호가 있는지 체크
-    blnUnique = IsUnique(db, Me.txtManagementID.Value, 3)
+    blnUnique = IsUnique(db, Me.txtManagementID.value, 3)
     If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
     
     Insert_Record shtEstimate, _
-            Me.txtManagementID.Value, _
-            Me.txtLinkedID.Value, _
-            Me.cboCustomer.Value, _
-            Me.cboManager.Value, _
-            Me.txtEstimateName.Value, _
-            Me.txtSize.Value, _
-            Me.txtAmount.Value, _
-            Me.cboUnit.Value, _
-            Me.txtUnitPrice.Value, _
-            Me.txtEstimatePrice.Value, _
-            Me.txtEstimateDate.Value, _
+            Me.txtManagementID.value, _
+            Me.txtLinkedID.value, _
+            Me.cboCustomer.value, _
+            Me.cboManager.value, _
+            Me.txtEstimateName.value, _
+            Me.txtSize.value, _
+            Me.txtAmount.value, _
+            Me.cboUnit.value, _
+            Me.txtUnitPrice.value, _
+            Me.txtEstimatePrice.value, _
+            Me.txtEstimateDate.value, _
             , , , , _
             , , , , , , _
             Date, , _
@@ -119,7 +119,7 @@ Function CheckEstimateInsertValidation()
     bCorrect = True
     
     '견적명이 입력되었는지 체크
-    If Trim(Me.txtEstimateName.Value) = "" Then
+    If Trim(Me.txtEstimateName.value) = "" Then
         bCorrect = False
         Me.lblEstimateNameEmpty.Visible = True
     Else
@@ -127,7 +127,7 @@ Function CheckEstimateInsertValidation()
     End If
     
     '관리번호가 입력되었는지 체크
-    If Trim(Me.txtManagementID.Value) = "" Then
+    If Trim(Me.txtManagementID.value) = "" Then
         bCorrect = False
         Me.lblManagementIDEmpty.Visible = True
     Else
@@ -140,15 +140,15 @@ End Function
 Sub CalculateEstimateInsertCost()
 
     '수량값이 공백이면 견적금액은 견적단가
-    If Me.txtAmount.Value = "" Then
-        Me.txtEstimatePrice.Value = Me.txtUnitPrice.Value
+    If Me.txtAmount.value = "" Then
+        Me.txtEstimatePrice.value = Me.txtUnitPrice.value
         Exit Sub
     End If
     
     '견적단가와 수량을 곱한 값을 견적금액으로 세팅함
-    If Me.txtUnitPrice.Value <> "" And IsNumeric(Me.txtUnitPrice.Value) Then
-        Me.txtEstimatePrice.Value = CLng(Me.txtUnitPrice.Value) * CLng(Me.txtAmount.Value)
-        Me.txtEstimatePrice.Text = Format(Me.txtEstimatePrice.Value, "#,##0")
+    If Me.txtUnitPrice.value <> "" And IsNumeric(Me.txtUnitPrice.value) Then
+        Me.txtEstimatePrice.value = CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value)
+        Me.txtEstimatePrice.Text = Format(Me.txtEstimatePrice.value, "#,##0")
     End If
 
 End Sub
@@ -187,16 +187,16 @@ Private Sub txtAmount_AfterUpdate()
     Me.lblAmountError.Visible = False
 '    Me.lblInputFieldError.Visible = False
     
-    If Me.txtAmount.Value <> "" Then
+    If Me.txtAmount.value <> "" Then
          '수량값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtAmount.Value) Then
-            Me.txtAmount.Value = ""
+        If Not IsNumeric(Me.txtAmount.value) Then
+            Me.txtAmount.value = ""
             Me.lblAmountError.Visible = True
         End If
     End If
     
     '수량 1,000자리 컴마 처리
-    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
+    Me.txtAmount.Text = Format(Me.txtAmount.value, "#,##0")
     
     CalculateEstimateInsertCost
 End Sub
@@ -206,16 +206,16 @@ Private Sub txtUnitPrice_AfterUpdate()
     Me.lblUnitPriceError.Visible = False
     'Me.lblInputFieldError.Visible = False
     
-    If Me.txtUnitPrice.Value <> "" Then
+    If Me.txtUnitPrice.value <> "" Then
         '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtUnitPrice.Value) Then
-            Me.txtUnitPrice.Value = ""
+        If Not IsNumeric(Me.txtUnitPrice.value) Then
+            Me.txtUnitPrice.value = ""
             Me.lblUnitPriceError.Visible = True
             Exit Sub
         End If
         
         '금액 1,000자리 컴마 처리
-        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
+        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.value, "#,##0")
     End If
     
     CalculateEstimateInsertCost

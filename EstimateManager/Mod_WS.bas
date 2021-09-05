@@ -15,7 +15,7 @@ Sub GetCalendarDate(textBox As MSForms.textBox)
     Dim vDate As Date
     Dim orgValue As Variant
     
-    orgValue = textBox.Value
+    orgValue = textBox.value
     
     vDate = frmCalendar.GetDate
     
@@ -23,10 +23,10 @@ Sub GetCalendarDate(textBox As MSForms.textBox)
     If InStr(vDate, "오전") <> 0 Or InStr(vDate, "오후") <> 0 Then
         'X를 누른 경우에 미리 입력되어 있던 값이 있으면 유지
         If orgValue = "" Then
-            textBox.Value = ""
+            textBox.value = ""
         End If
     Else
-        textBox.Value = vDate
+        textBox.value = vDate
     End If
 End Sub
 
@@ -253,7 +253,7 @@ Sub InitializeCboManager()
     '담당자 DB를 읽어와서
     db = Get_DB(shtEstimateManager, True)
     '거래처명으로 필터링
-    db = Filtered_DB(db, Me.cboCustomer.Value, 1, True)
+    db = Filtered_DB(db, Me.cboCustomer.value, 1, True)
     
     '기존 콤보박스 내용지우기
     Me.cboManager.Clear

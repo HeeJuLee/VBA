@@ -54,8 +54,8 @@ Private Sub UserForm_Initialize()
         End
     End If
 
-    Me.txtEstimateName.Value = estimate(6)
-    Me.txtManagementID.Value = estimate(2)
+    Me.txtEstimateName.value = estimate(6)
+    Me.txtManagementID.value = estimate(2)
     acceptedPrice = estimate(21)
     
     InitializeLswPaymentList    '결제 이력
@@ -110,9 +110,9 @@ Sub InitializeLswPaymentList()
                 li.Selected = False
             Next
             
-            Me.txtPaid.Value = Format(totalCost, "#,##0")
+            Me.txtPaid.value = Format(totalCost, "#,##0")
             If IsNumeric(acceptedPrice) Then
-                Me.txtRemaining.Value = Format(acceptedPrice - totalCost, "#,##0")
+                Me.txtRemaining.value = Format(acceptedPrice - totalCost, "#,##0")
             End If
         End If
     End With
@@ -120,34 +120,34 @@ End Sub
 
 Sub InsertPayment()
     
-    If Me.txtPayDate.Value = "" Then MsgBox "결제일을 입력하세요.": Exit Sub
-    If Me.txtPayAmount.Value = "" Then MsgBox "결제금액을 입력하세요.": Exit Sub
+    If Me.txtPayDate.value = "" Then MsgBox "결제일을 입력하세요.": Exit Sub
+    If Me.txtPayAmount.value = "" Then MsgBox "결제금액을 입력하세요.": Exit Sub
 
     '분할결제이력에 저장
-    Insert_Record shtPayment, CLng(currentEstimateId), Me.txtManagementID.Value, Me.txtPayDate.Value, Me.txtPayAmount.Value, Me.txtPayMemo.Value, Date
+    Insert_Record shtPayment, CLng(currentEstimateId), Me.txtManagementID.value, Me.txtPayDate.value, Me.txtPayAmount.value, Me.txtPayMemo.value, Date
     
     '합계 계산
-    Me.txtPaid.Value = Format(GetPaymentTotalCost, "#,##0")
+    Me.txtPaid.value = Format(GetPaymentTotalCost, "#,##0")
     If IsNumeric(acceptedPrice) Then
-        Me.txtRemaining.Value = Format(acceptedPrice - Me.txtPaid.Value, "#,##0")
+        Me.txtRemaining.value = Format(acceptedPrice - Me.txtPaid.value, "#,##0")
     End If
     
     '입금액/미입금액을 견적테이블에 저장
-    Update_Record_Column shtEstimate, CLng(currentEstimateId), "입금액", Me.txtPaid.Value
-    Update_Record_Column shtEstimate, CLng(currentEstimateId), "미입금액", Me.txtRemaining.Value
+    Update_Record_Column shtEstimate, CLng(currentEstimateId), "입금액", Me.txtPaid.value
+    Update_Record_Column shtEstimate, CLng(currentEstimateId), "미입금액", Me.txtRemaining.value
     
     '입금액/미입금액을 frmEstimateUpdate 폼에도 업데이트
     If isFormLoaded("frmEstimateUpdate") Then
-        frmEstimateUpdate.txtPaymentDate.Value = Me.txtPayDate.Value
-        frmEstimateUpdate.txtPaid.Value = Me.txtPaid.Value
-        frmEstimateUpdate.txtRemaining.Value = Me.txtRemaining.Value
+        frmEstimateUpdate.txtPaymentDate.value = Me.txtPayDate.value
+        frmEstimateUpdate.txtPaid.value = Me.txtPaid.value
+        frmEstimateUpdate.txtRemaining.value = Me.txtRemaining.value
     End If
     
     InitializeLswPaymentList
     
     '등록한 아이템 선택
-    Me.txtPayID.Value = Get_LastID(shtPayment)
-    SelectItemLswPayment Me.txtPayID.Value
+    Me.txtPayID.value = Get_LastID(shtPayment)
+    SelectItemLswPayment Me.txtPayID.value
     
 End Sub
 
@@ -155,33 +155,33 @@ End Sub
 Sub UpdatePayment()
     Dim cost As Variant
 
-    If Me.txtPayID.Value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
+    If Me.txtPayID.value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
     
-    If Me.txtPayDate.Value = "" Then MsgBox "결제일을 입력하세요.": Exit Sub
-    If Me.txtPayAmount.Value = "" Then MsgBox "결제금액을 입력하세요.": Exit Sub
+    If Me.txtPayDate.value = "" Then MsgBox "결제일을 입력하세요.": Exit Sub
+    If Me.txtPayAmount.value = "" Then MsgBox "결제금액을 입력하세요.": Exit Sub
     
     '기존 분할결제이력에 업데이트
-    Update_Record shtPayment, Me.txtPayID.Value, currentEstimateId, Me.txtManagementID.Value, Me.txtPayDate.Value, Me.txtPayAmount.Value, Me.txtPayMemo.Value, Date
+    Update_Record shtPayment, Me.txtPayID.value, currentEstimateId, Me.txtManagementID.value, Me.txtPayDate.value, Me.txtPayAmount.value, Me.txtPayMemo.value, Date
     
     '합계 계산
-    Me.txtPaid.Value = Format(GetPaymentTotalCost, "#,##0")
+    Me.txtPaid.value = Format(GetPaymentTotalCost, "#,##0")
     If IsNumeric(acceptedPrice) Then
-        Me.txtRemaining.Value = Format(acceptedPrice - Me.txtPaid.Value, "#,##0")
+        Me.txtRemaining.value = Format(acceptedPrice - Me.txtPaid.value, "#,##0")
     End If
     
     '입금액/미입금액을 견적테이블에 저장
-    Update_Record_Column shtEstimate, CLng(currentEstimateId), "입금액", Me.txtPaid.Value
-    Update_Record_Column shtEstimate, CLng(currentEstimateId), "미입금액", Me.txtRemaining.Value
+    Update_Record_Column shtEstimate, CLng(currentEstimateId), "입금액", Me.txtPaid.value
+    Update_Record_Column shtEstimate, CLng(currentEstimateId), "미입금액", Me.txtRemaining.value
     
     '입금액/미입금액을 frmEstimateUpdate 폼에도 업데이트
     If isFormLoaded("frmEstimateUpdate") Then
-        frmEstimateUpdate.txtPaymentDate.Value = Me.txtPayDate.Value
-        frmEstimateUpdate.txtPaid.Value = Me.txtPaid.Value
-        frmEstimateUpdate.txtRemaining.Value = Me.txtRemaining.Value
+        frmEstimateUpdate.txtPaymentDate.value = Me.txtPayDate.value
+        frmEstimateUpdate.txtPaid.value = Me.txtPaid.value
+        frmEstimateUpdate.txtRemaining.value = Me.txtRemaining.value
     End If
     
     InitializeLswPaymentList
-    SelectItemLswPayment Me.txtPayID.Value
+    SelectItemLswPayment Me.txtPayID.value
     
 End Sub
 
@@ -210,24 +210,24 @@ Sub DeletePayment()
     
     If count > 0 Then
         '합계 계산
-        Me.txtPaid.Value = Format(GetPaymentTotalCost, "#,##0")
+        Me.txtPaid.value = Format(GetPaymentTotalCost, "#,##0")
         If IsNumeric(acceptedPrice) Then
-            Me.txtRemaining.Value = Format(acceptedPrice - Me.txtPaid.Value, "#,##0")
+            Me.txtRemaining.value = Format(acceptedPrice - Me.txtPaid.value, "#,##0")
         End If
         
         '입금액/미입금액을 견적테이블에 저장
-        Update_Record_Column shtEstimate, CLng(currentEstimateId), "입금액", Me.txtPaid.Value
-        Update_Record_Column shtEstimate, CLng(currentEstimateId), "미입금액", Me.txtRemaining.Value
+        Update_Record_Column shtEstimate, CLng(currentEstimateId), "입금액", Me.txtPaid.value
+        Update_Record_Column shtEstimate, CLng(currentEstimateId), "미입금액", Me.txtRemaining.value
         
         '입금액/미입금액을 frmEstimateUpdate 폼에도 업데이트
         If isFormLoaded("frmEstimateUpdate") Then
-            frmEstimateUpdate.txtPaymentDate.Value = Me.txtPayDate.Value
-            frmEstimateUpdate.txtPaid.Value = Me.txtPaid.Value
-            frmEstimateUpdate.txtRemaining.Value = Me.txtRemaining.Value
+            frmEstimateUpdate.txtPaymentDate.value = Me.txtPayDate.value
+            frmEstimateUpdate.txtPaid.value = Me.txtPaid.value
+            frmEstimateUpdate.txtRemaining.value = Me.txtRemaining.value
         End If
     End If
         
-    Me.txtPayID.Value = ""
+    Me.txtPayID.value = ""
     InitializeLswPaymentList
     ClearPaymentInput
     
@@ -273,10 +273,10 @@ Sub SelectItemLswPayment(selectedID As Variant)
 End Sub
 
 Sub ClearPaymentInput()
-    Me.txtPayID.Value = ""
-    Me.txtPayDate.Value = ""
-    Me.txtPayAmount.Value = ""
-    Me.txtPayMemo.Value = ""
+    Me.txtPayID.value = ""
+    Me.txtPayDate.value = ""
+    Me.txtPayAmount.value = ""
+    Me.txtPayMemo.value = ""
 End Sub
 
 Private Sub btnPaymentClear_Click()
@@ -303,10 +303,10 @@ End Sub
 Private Sub lswPaymentList_Click()
     With Me.lswPaymentList
         If Not .SelectedItem Is Nothing Then
-            Me.txtPayID.Value = .SelectedItem.Text
-            Me.txtPayDate.Value = .SelectedItem.ListSubItems(1)
-            Me.txtPayAmount.Value = .SelectedItem.ListSubItems(2)
-            Me.txtPayMemo.Value = .SelectedItem.ListSubItems(3)
+            Me.txtPayID.value = .SelectedItem.Text
+            Me.txtPayDate.value = .SelectedItem.ListSubItems(1)
+            Me.txtPayAmount.value = .SelectedItem.ListSubItems(2)
+            Me.txtPayMemo.value = .SelectedItem.ListSubItems(3)
         End If
     End With
 End Sub
@@ -335,18 +335,18 @@ End Sub
 
 
 Private Sub txtPayAmount_AfterUpdate()
-    Me.txtPayAmount.Value = Trim(Me.txtPayAmount.Value)
+    Me.txtPayAmount.value = Trim(Me.txtPayAmount.value)
     
-    If Not IsNumeric(Me.txtPayAmount.Value) Then
+    If Not IsNumeric(Me.txtPayAmount.value) Then
         MsgBox "숫자를 입력하세요.", vbExclamation
         Exit Sub
     End If
     
-    Me.txtPayAmount.Value = Format(Me.txtPayAmount.Value, "#,##0")
+    Me.txtPayAmount.value = Format(Me.txtPayAmount.value, "#,##0")
 End Sub
 
 Private Sub txtPayDate_AfterUpdate()
-    Me.txtPayDate.Value = Trim(Me.txtPayDate.Value)
+    Me.txtPayDate.value = Trim(Me.txtPayDate.value)
 End Sub
 
 Private Sub txtPayDate_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
@@ -356,7 +356,7 @@ Private Sub txtPayDate_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shi
 End Sub
 
 Private Sub txtPayMemo_AfterUpdate()
-    Me.txtPayMemo.Value = Trim(Me.txtPayMemo.Value)
+    Me.txtPayMemo.value = Trim(Me.txtPayMemo.value)
 End Sub
 
 

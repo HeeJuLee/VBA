@@ -82,7 +82,7 @@ If ToRight = False Then startRng.Cells(1, 1).Resize(count) = arr Else startRng.C
 
 End Sub
 
-Sub ValueToRng(startRng As Range, count As Long, Value, Optional ToRight As Boolean = False)
+Sub ValueToRng(startRng As Range, count As Long, value, Optional ToRight As Boolean = False)
 
 '###############################################################
 '오빠두엑셀 VBA 사용자지정함수 (https://www.oppadu.com)
@@ -97,7 +97,7 @@ Sub ValueToRng(startRng As Range, count As Long, Value, Optional ToRight As Bool
 'ValueToRng Range("A1"), 10, "A"  '<- A1:A10 범위에 "A"를 출력합니다.
 '##############################################################
 
-If ToRight = False Then startRng.Cells(1, 1).Resize(count) = Value Else startRng.Cells(1, 1).Resize(1, count) = Value
+If ToRight = False Then startRng.Cells(1, 1).Resize(count) = value Else startRng.Cells(1, 1).Resize(1, count) = value
 
 End Sub
 
@@ -131,12 +131,12 @@ ReDim vArr(1 To count, 1 To 1)
     
     If Offset_Deduct <> 0 Then
         For i = 1 To count
-            T = T + startRng.Offset((i - 1) * fR, Offset_Add).Value - startRng.Offset((i - 1) * fR, Offset_Deduct).Value
+            T = T + startRng.Offset((i - 1) * fR, Offset_Add).value - startRng.Offset((i - 1) * fR, Offset_Deduct).value
             vArr(i, 1) = T
         Next
     Else
         For i = 1 To count
-            T = T + startRng.Offset((i - 1) * fR, Offset_Add).Value
+            T = T + startRng.Offset((i - 1) * fR, Offset_Add).value
             vArr(i, 1) = T
         Next
     End If

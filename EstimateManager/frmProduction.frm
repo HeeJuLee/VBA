@@ -54,10 +54,10 @@ Private Sub UserForm_Initialize()
         End
     End If
 
-    Me.txtEstimateName.Value = estimate(6)
-    Me.txtManagementID.Value = estimate(2)
-    Me.txtCustomer.Value = estimate(4)
-    Me.txtManager.Value = estimate(5)
+    Me.txtEstimateName.value = estimate(6)
+    Me.txtManagementID.value = estimate(2)
+    Me.txtCustomer.value = estimate(4)
+    Me.txtManager.value = estimate(5)
     
     InitializeCboCategory           '분류
     InitializeLswProductionList    '예상실행항목 목록
@@ -131,7 +131,7 @@ Sub InitializeLswProductionList()
                 li.Selected = False
             Next
             
-            Me.txtProductionTotalCost.Value = Format(totalCost, "#,##0")
+            Me.txtProductionTotalCost.value = Format(totalCost, "#,##0")
         End If
     End With
 End Sub
@@ -162,23 +162,23 @@ End Sub
 
 Sub InsertProduction()
     
-    If Me.txtProductionItem.Value = "" Then MsgBox "품명을 입력하세요.": Exit Sub
-    If Me.txtProductionCost.Value = "" Then MsgBox "금액을 입력하세요.": Exit Sub
+    If Me.txtProductionItem.value = "" Then MsgBox "품명을 입력하세요.": Exit Sub
+    If Me.txtProductionCost.value = "" Then MsgBox "금액을 입력하세요.": Exit Sub
 
     '예상실행항목에 저장
-    Insert_Record shtProduction, CLng(currentEstimateId), Me.txtManagementID.Value, Me.txtProductionCustomer.Value, Me.txtProductionItem.Value, _
-            Me.txtProductionMaterial.Value, Me.txtProductionSize.Value, _
-            Me.txtProductionAmount.Value, Me.cboProductionUnit.Value, Me.txtProductionUnitPrice.Value, Me.txtProductionCost.Value, Me.txtProductionMemo.Value, Me.cboCategory.Value, Date
+    Insert_Record shtProduction, CLng(currentEstimateId), Me.txtManagementID.value, Me.txtProductionCustomer.value, Me.txtProductionItem.value, _
+            Me.txtProductionMaterial.value, Me.txtProductionSize.value, _
+            Me.txtProductionAmount.value, Me.cboProductionUnit.value, Me.txtProductionUnitPrice.value, Me.txtProductionCost.value, Me.txtProductionMemo.value, Me.cboCategory.value, Date
     
     '예상실행항목 합계 계산
-    Me.txtProductionTotalCost.Value = Format(GetProductionTotalCost, "#,##0")
+    Me.txtProductionTotalCost.value = Format(GetProductionTotalCost, "#,##0")
     
     '예상실행가, 입찰차액, 마진율, 수주차액 금액을 견적테이블에 저장
-    Update_Record_Column shtEstimate, CLng(currentEstimateId), "실행가(예상)", CLng(Me.txtProductionTotalCost.Value)
+    Update_Record_Column shtEstimate, CLng(currentEstimateId), "실행가(예상)", CLng(Me.txtProductionTotalCost.value)
     
     '예상실행가를 frmEstimateUpdate 폼 값도 업데이트
     If isFormLoaded("frmEstimateUpdate") Then
-        frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.Value
+        frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.value
         frmEstimateUpdate.CalculateEstimateUpdateCost
     End If
     
@@ -186,8 +186,8 @@ Sub InsertProduction()
     InitializeLswProductionList
     
     '등록한 아이템 선택
-    Me.txtProductionID.Value = Get_LastID(shtProduction)
-    SelectItemLswProduction Me.txtProductionID.Value
+    Me.txtProductionID.value = Get_LastID(shtProduction)
+    SelectItemLswProduction Me.txtProductionID.value
     
 End Sub
 
@@ -195,30 +195,30 @@ End Sub
 Sub UpdateProduction()
     Dim cost As Variant
 
-    If Me.txtProductionID.Value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
+    If Me.txtProductionID.value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
     
-    If Me.txtProductionItem.Value = "" Then MsgBox "품명을 입력하세요.": Exit Sub
-    If Me.txtProductionCost.Value = "" Then MsgBox "금액을 입력하세요.": Exit Sub
+    If Me.txtProductionItem.value = "" Then MsgBox "품명을 입력하세요.": Exit Sub
+    If Me.txtProductionCost.value = "" Then MsgBox "금액을 입력하세요.": Exit Sub
     
     '기존 예상실행항목에 업데이트
-    Update_Record shtProduction, Me.txtProductionID.Value, currentEstimateId, Me.txtManagementID.Value, Me.txtProductionCustomer.Value, Me.txtProductionItem.Value, _
-            Me.txtProductionMaterial.Value, Me.txtProductionSize.Value, _
-            Me.txtProductionAmount.Value, Me.cboProductionUnit.Value, Me.txtProductionUnitPrice.Value, Me.txtProductionCost.Value, Me.txtProductionMemo.Value, Me.cboCategory.Value, Date
+    Update_Record shtProduction, Me.txtProductionID.value, currentEstimateId, Me.txtManagementID.value, Me.txtProductionCustomer.value, Me.txtProductionItem.value, _
+            Me.txtProductionMaterial.value, Me.txtProductionSize.value, _
+            Me.txtProductionAmount.value, Me.cboProductionUnit.value, Me.txtProductionUnitPrice.value, Me.txtProductionCost.value, Me.txtProductionMemo.value, Me.cboCategory.value, Date
     
     '예상실행가 합계 계산
-    Me.txtProductionTotalCost.Value = Format(GetProductionTotalCost, "#,##0")
+    Me.txtProductionTotalCost.value = Format(GetProductionTotalCost, "#,##0")
     
     '예상실행가를 견적테이블에 저장
-    Update_Record_Column shtEstimate, CLng(currentEstimateId), "실행가(예상)", CLng(Me.txtProductionTotalCost.Value)
+    Update_Record_Column shtEstimate, CLng(currentEstimateId), "실행가(예상)", CLng(Me.txtProductionTotalCost.value)
     
     '예상실행가를 frmEstimateUpdate 폼 값도 업데이트
     If isFormLoaded("frmEstimateUpdate") Then
-        frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.Value
+        frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.value
         frmEstimateUpdate.CalculateEstimateUpdateCost
     End If
     
     InitializeLswProductionList
-    SelectItemLswProduction Me.txtProductionID.Value
+    SelectItemLswProduction Me.txtProductionID.value
     
 End Sub
 
@@ -247,19 +247,19 @@ Sub DeleteProduction()
     
     If count > 0 Then
         '예상실행가 계산
-        Me.txtProductionTotalCost.Value = Format(GetProductionTotalCost, "#,##0")
+        Me.txtProductionTotalCost.value = Format(GetProductionTotalCost, "#,##0")
         
          '예상실행가, 입찰차액, 마진율, 수주차액 금액을 견적테이블에 저장
-        Update_Record_Column shtEstimate, CLng(currentEstimateId), "실행가(예상)", CLng(Me.txtProductionTotalCost.Value)
+        Update_Record_Column shtEstimate, CLng(currentEstimateId), "실행가(예상)", CLng(Me.txtProductionTotalCost.value)
         
         '예상실행가를 frmEstimateUpdate 폼 값도 업데이트
         If isFormLoaded("frmEstimateUpdate") Then
-            frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.Value
+            frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.value
             frmEstimateUpdate.CalculateEstimateUpdateCost
         End If
     End If
         
-    Me.txtProductionID.Value = ""
+    Me.txtProductionID.value = ""
     InitializeLswProductionList
     ClearProductionInput
     
@@ -370,16 +370,16 @@ Sub SelectItemLswProduction(selectedID As Variant)
 End Sub
 
 Sub ClearProductionInput()
-    Me.txtProductionID.Value = ""
-    Me.txtProductionCustomer.Value = ""
-    Me.txtProductionItem.Value = ""
-    Me.txtProductionMaterial.Value = ""
-    Me.txtProductionSize.Value = ""
-    Me.txtProductionAmount.Value = ""
-    Me.cboProductionUnit.Value = ""
-    Me.txtProductionUnitPrice.Value = ""
-    Me.txtProductionCost.Value = ""
-    Me.txtProductionMemo.Value = ""
+    Me.txtProductionID.value = ""
+    Me.txtProductionCustomer.value = ""
+    Me.txtProductionItem.value = ""
+    Me.txtProductionMaterial.value = ""
+    Me.txtProductionSize.value = ""
+    Me.txtProductionAmount.value = ""
+    Me.cboProductionUnit.value = ""
+    Me.txtProductionUnitPrice.value = ""
+    Me.txtProductionCost.value = ""
+    Me.txtProductionMemo.value = ""
 End Sub
 
 Private Sub btnProductionClear_Click()
@@ -410,17 +410,17 @@ End Sub
 Private Sub lswProductionList_Click()
     With Me.lswProductionList
         If Not .SelectedItem Is Nothing Then
-            Me.txtProductionItem.Value = .SelectedItem.Text
-            Me.txtProductionID.Value = .SelectedItem.ListSubItems(1)
-            Me.cboCategory.Value = .SelectedItem.ListSubItems(4)
-            Me.txtProductionCustomer.Value = .SelectedItem.ListSubItems(5)
-            Me.txtProductionMaterial.Value = .SelectedItem.ListSubItems(6)
-            Me.txtProductionSize.Value = .SelectedItem.ListSubItems(7)
-            Me.txtProductionAmount.Value = .SelectedItem.ListSubItems(8)
-            Me.cboProductionUnit.Value = .SelectedItem.ListSubItems(9)
-            Me.txtProductionUnitPrice.Value = .SelectedItem.ListSubItems(10)
-            Me.txtProductionCost.Value = .SelectedItem.ListSubItems(11)
-            Me.txtProductionMemo.Value = .SelectedItem.ListSubItems(12)
+            Me.txtProductionItem.value = .SelectedItem.Text
+            Me.txtProductionID.value = .SelectedItem.ListSubItems(1)
+            Me.cboCategory.value = .SelectedItem.ListSubItems(4)
+            Me.txtProductionCustomer.value = .SelectedItem.ListSubItems(5)
+            Me.txtProductionMaterial.value = .SelectedItem.ListSubItems(6)
+            Me.txtProductionSize.value = .SelectedItem.ListSubItems(7)
+            Me.txtProductionAmount.value = .SelectedItem.ListSubItems(8)
+            Me.cboProductionUnit.value = .SelectedItem.ListSubItems(9)
+            Me.txtProductionUnitPrice.value = .SelectedItem.ListSubItems(10)
+            Me.txtProductionCost.value = .SelectedItem.ListSubItems(11)
+            Me.txtProductionMemo.value = .SelectedItem.ListSubItems(12)
         End If
     End With
 End Sub
@@ -489,7 +489,7 @@ Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, 
     
     '거래처 자동완성 처리
     With Me.lswOrderCustomerAutoComplete
-        If Me.txtProductionCustomer.Value = "" Then
+        If Me.txtProductionCustomer.value = "" Then
             .Visible = False
         Else
             .Visible = True
@@ -497,7 +497,7 @@ Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, 
             '발주거래처 DB를 읽어와서 리스트뷰에 출력
             .ListItems.Clear
             db = Get_DB(shtOrderCustomer, True)
-            db = Filtered_DB(db, Me.txtProductionCustomer.Value, 1, False)
+            db = Filtered_DB(db, Me.txtProductionCustomer.value, 1, False)
             If IsEmpty(db) Then
                 .Visible = False
             Else
@@ -515,7 +515,7 @@ Private Sub lswOrderCustomerAutoComplete_DblClick()
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
     With Me.lswOrderCustomerAutoComplete
         If Not .SelectedItem Is Nothing Then
-            Me.txtProductionCustomer.Value = .SelectedItem.Text
+            Me.txtProductionCustomer.value = .SelectedItem.Text
             .Visible = False
             Me.txtProductionItem.SetFocus
         End If
@@ -527,7 +527,7 @@ Private Sub lswOrderCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift
     If KeyCode = 13 Then
         With Me.lswOrderCustomerAutoComplete
             If Not .SelectedItem Is Nothing Then
-                Me.txtProductionCustomer.Value = .SelectedItem.Text
+                Me.txtProductionCustomer.value = .SelectedItem.Text
                 .Visible = False
                 Me.txtProductionItem.SetFocus
             End If
@@ -539,7 +539,7 @@ End Sub
 Private Sub txtProductionItem_Enter()
     If Me.lswOrderCustomerAutoComplete.Visible = True Then
         With Me.lswOrderCustomerAutoComplete
-            Me.txtProductionCustomer.Value = .SelectedItem.Text
+            Me.txtProductionCustomer.value = .SelectedItem.Text
             .Visible = False
         End With
     End If
@@ -547,78 +547,78 @@ End Sub
 
 
 Private Sub txtProductionCustomer_AfterUpdate()
-    Me.txtProductionCustomer.Value = Trim(Me.txtProductionCustomer.Value)
+    Me.txtProductionCustomer.value = Trim(Me.txtProductionCustomer.value)
 End Sub
 
 
 Private Sub cboCategory_AfterUpdate()
-    Me.cboCategory.Value = Trim(Me.cboCategory.Value)
+    Me.cboCategory.value = Trim(Me.cboCategory.value)
 End Sub
 
 
 Private Sub txtProductionAmount_AfterUpdate()
-    If Me.txtProductionAmount.Value = "" Then
-        Me.txtProductionCost.Value = Me.txtProductionUnitPrice.Value
+    If Me.txtProductionAmount.value = "" Then
+        Me.txtProductionCost.value = Me.txtProductionUnitPrice.value
         Exit Sub
     End If
     
-    If Not IsNumeric(Me.txtProductionAmount.Value) Then
+    If Not IsNumeric(Me.txtProductionAmount.value) Then
         MsgBox "숫자를 입력하세요."
-        Me.txtProductionAmount.Value = ""
-        Me.txtProductionCost.Value = Me.txtProductionUnitPrice.Value
+        Me.txtProductionAmount.value = ""
+        Me.txtProductionCost.value = Me.txtProductionUnitPrice.value
         Exit Sub
     End If
         
-    Me.txtProductionAmount.Value = Format(Me.txtProductionAmount.Value, "#,##0")
+    Me.txtProductionAmount.value = Format(Me.txtProductionAmount.value, "#,##0")
         
     '금액 = 수량 * 단가
-    If IsNumeric(Me.txtProductionUnitPrice.Value) Then
-        Me.txtProductionCost.Value = Format(CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value), "#,##0")
+    If IsNumeric(Me.txtProductionUnitPrice.value) Then
+        Me.txtProductionCost.value = Format(CLng(Me.txtProductionAmount.value) * CLng(Me.txtProductionUnitPrice.value), "#,##0")
     End If
 End Sub
 
 
 Private Sub txtProductionItem_AfterUpdate()
-    Me.txtProductionItem.Value = Trim(Me.txtProductionItem.Value)
+    Me.txtProductionItem.value = Trim(Me.txtProductionItem.value)
 End Sub
 
 Private Sub txtProductionMaterial_AfterUpdate()
-    Me.txtProductionMaterial.Value = Trim(Me.txtProductionMaterial.Value)
+    Me.txtProductionMaterial.value = Trim(Me.txtProductionMaterial.value)
 End Sub
 
 
 Private Sub txtProductionMemo_AfterUpdate()
-    Me.txtProductionMemo.Value = Trim(Me.txtProductionMemo.Value)
+    Me.txtProductionMemo.value = Trim(Me.txtProductionMemo.value)
 End Sub
 
 
 Private Sub txtProductionSize_AfterUpdate()
-    Me.txtProductionSize.Value = Trim(Me.txtProductionSize.Value)
+    Me.txtProductionSize.value = Trim(Me.txtProductionSize.value)
 End Sub
 
 
 Private Sub txtProductionUnitPrice_AfterUpdate()
-    If Me.txtProductionUnitPrice.Value = "" Then
-        Me.txtProductionCost.Value = ""
+    If Me.txtProductionUnitPrice.value = "" Then
+        Me.txtProductionCost.value = ""
         Exit Sub
     End If
     
-    If Not IsNumeric(Me.txtProductionUnitPrice.Value) Then
+    If Not IsNumeric(Me.txtProductionUnitPrice.value) Then
         MsgBox "숫자를 입력하세요."
-        Me.txtProductionUnitPrice.Value = ""
-        Me.txtProductionCost.Value = ""
+        Me.txtProductionUnitPrice.value = ""
+        Me.txtProductionCost.value = ""
         Exit Sub
     End If
     
-    Me.txtProductionUnitPrice.Value = Format(Me.txtProductionUnitPrice.Value, "#,##0")
+    Me.txtProductionUnitPrice.value = Format(Me.txtProductionUnitPrice.value, "#,##0")
     
-    If IsNumeric(Me.txtProductionUnitPrice.Value) Then
-        If Me.txtProductionAmount.Value = "" Then
-            Me.txtProductionCost.Value = Format(Me.txtProductionCost.Value, "#,##0")
+    If IsNumeric(Me.txtProductionUnitPrice.value) Then
+        If Me.txtProductionAmount.value = "" Then
+            Me.txtProductionCost.value = Format(Me.txtProductionCost.value, "#,##0")
         Else
-            If IsNumeric(Me.txtProductionAmount.Value) Then
+            If IsNumeric(Me.txtProductionAmount.value) Then
                 '금액 = 수량 * 단가
-                Me.txtProductionCost.Value = Format(CLng(Me.txtProductionAmount.Value) * CLng(Me.txtProductionUnitPrice.Value), "#,##0")
+                Me.txtProductionCost.value = Format(CLng(Me.txtProductionAmount.value) * CLng(Me.txtProductionUnitPrice.value), "#,##0")
             End If
         End If
     End If

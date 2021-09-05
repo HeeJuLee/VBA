@@ -68,17 +68,17 @@ Sub InsertOrder()
     End If
 
     Insert_Record shtOrder, _
-            , , Me.cboCategory.Value, Me.txtManagementID.Value, _
-            Me.txtCustomer.Value, _
-            Me.txtOrderName.Value, _
-            Me.txtMaterial.Value, _
-            Me.txtSize.Value, _
-            Me.txtAmount.Value, _
-            Me.cboUnit.Value, _
-            Me.txtUnitPrice.Value, _
-            Me.txtOrderPrice.Value, _
-            Me.txtWeight.Value, _
-            , Me.txtOrderDate.Value, , , , _
+            , , Me.cboCategory.value, Me.txtManagementID.value, _
+            Me.txtCustomer.value, _
+            Me.txtOrderName.value, _
+            Me.txtMaterial.value, _
+            Me.txtSize.value, _
+            Me.txtAmount.value, _
+            Me.cboUnit.value, _
+            Me.txtUnitPrice.value, _
+            Me.txtOrderPrice.value, _
+            Me.txtWeight.value, _
+            , Me.txtOrderDate.value, , , , _
             , , , , _
             , , _
             Date, , _
@@ -98,7 +98,7 @@ Function CheckOrderInsertValidation()
     bCorrect = True
     
     '발주명이 입력되었는지 체크
-    If Trim(Me.txtOrderName.Value) = "" Then
+    If Trim(Me.txtOrderName.value) = "" Then
         bCorrect = False
         Me.lblOrderNameEmpty.Visible = True
     Else
@@ -106,7 +106,7 @@ Function CheckOrderInsertValidation()
     End If
     
     '관리번호가 입력되었고 유효한 관리번호인지 체크
-    If Trim(Me.txtManagementID.Value) = "" Or bMatchedEstimateID = False Then
+    If Trim(Me.txtManagementID.value) = "" Or bMatchedEstimateID = False Then
         bCorrect = False
         Me.lblManagementIDEmpty.Visible = True
     Else
@@ -119,15 +119,15 @@ End Function
 Sub CalculateOrderInsertCost()
 
     '수량값이 공백이면 발주금액은 단가
-    If Me.txtAmount.Value = "" Then
-        Me.txtOrderPrice.Value = Me.txtUnitPrice.Value
+    If Me.txtAmount.value = "" Then
+        Me.txtOrderPrice.value = Me.txtUnitPrice.value
         Exit Sub
     End If
     
     '단가와 수량을 곱한 값을 발주금액으로 세팅함
-    If Me.txtUnitPrice.Value <> "" And IsNumeric(Me.txtUnitPrice.Value) Then
-        Me.txtOrderPrice.Value = CLng(Me.txtUnitPrice.Value) * CLng(Me.txtAmount.Value)
-        Me.txtOrderPrice.Text = Format(Me.txtOrderPrice.Value, "#,##0")
+    If Me.txtUnitPrice.value <> "" And IsNumeric(Me.txtUnitPrice.value) Then
+        Me.txtOrderPrice.value = CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value)
+        Me.txtOrderPrice.Text = Format(Me.txtOrderPrice.value, "#,##0")
     End If
 
 End Sub
@@ -160,25 +160,25 @@ Private Sub txtManagementID_AfterUpdate()
     Me.lblManagementIDEmpty.Visible = False
     Me.lblManagementIDError.Visible = False
     
-    Me.txtEstimateID.Value = ""
-    Me.txtEstimateCustomer.Value = ""
-    Me.txtEstimateManager.Value = ""
-    Me.txtEstimateName.Value = ""
+    Me.txtEstimateID.value = ""
+    Me.txtEstimateCustomer.value = ""
+    Me.txtEstimateManager.value = ""
+    Me.txtEstimateName.value = ""
     
     '입력한 관리번호로 견적테이블을 검색해서 견적ID를 가져옴
     bMatchedEstimateID = False
-    If Me.txtManagementID.Value <> "" Then
+    If Me.txtManagementID.value <> "" Then
         db = Get_DB(shtEstimate)
-        db = Filtered_DB(db, Me.txtManagementID.Value, 2, True)
+        db = Filtered_DB(db, Me.txtManagementID.value, 2, True)
         If IsEmpty(db) Then
             Me.lblManagementIDError.Caption = "관리번호 오류"
             Me.lblManagementIDError.Visible = True
         Else
             If UBound(db, 1) = 1 Then
-                Me.txtEstimateID.Value = db(1, 1)
-                Me.txtEstimateCustomer.Value = db(1, 4)
-                Me.txtEstimateManager.Value = db(1, 5)
-                Me.txtEstimateName.Value = db(1, 6)
+                Me.txtEstimateID.value = db(1, 1)
+                Me.txtEstimateCustomer.value = db(1, 4)
+                Me.txtEstimateManager.value = db(1, 5)
+                Me.txtEstimateName.value = db(1, 6)
             
                 bMatchedEstimateID = True
             Else
@@ -194,16 +194,16 @@ Private Sub txtAmount_AfterUpdate()
     '오류메시지 숨김
     Me.lblAmountError.Visible = False
     
-    If Me.txtAmount.Value <> "" Then
+    If Me.txtAmount.value <> "" Then
          '수량값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtAmount.Value) Then
-            Me.txtAmount.Value = ""
+        If Not IsNumeric(Me.txtAmount.value) Then
+            Me.txtAmount.value = ""
             Me.lblAmountError.Visible = True
         End If
     End If
     
     '수량 1,000자리 컴마 처리
-    Me.txtAmount.Text = Format(Me.txtAmount.Value, "#,##0")
+    Me.txtAmount.Text = Format(Me.txtAmount.value, "#,##0")
     
     CalculateOrderInsertCost
 End Sub
@@ -212,18 +212,18 @@ Private Sub txtUnitPrice_AfterUpdate()
      '오류메시지 숨김
     Me.lblUnitPriceError.Visible = False
     
-    If Me.txtUnitPrice.Value <> "" Then
+    If Me.txtUnitPrice.value <> "" Then
         '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-        If IsNumeric(Me.txtUnitPrice.Value) Then
-            Me.txtUnitPrice.Value = CLng(Me.txtUnitPrice.Value)
+        If IsNumeric(Me.txtUnitPrice.value) Then
+            Me.txtUnitPrice.value = CLng(Me.txtUnitPrice.value)
         Else
-            Me.txtUnitPrice.Value = ""
+            Me.txtUnitPrice.value = ""
             Me.lblUnitPriceError.Visible = True
             Exit Sub
         End If
         
         '금액 1,000자리 컴마 처리
-        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.Value, "#,##0")
+        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.value, "#,##0")
     End If
     
     CalculateOrderInsertCost

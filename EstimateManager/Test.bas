@@ -72,7 +72,7 @@ Dim i As Integer
     Else
         '타이틀을 표시한다.
         For i = 1 To rs.fields.count
-          Cells(1, i).Value = rs.fields(i - 1).Name
+          Cells(1, i).value = rs.fields(i - 1).Name
         Next
         
         

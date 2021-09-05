@@ -180,7 +180,7 @@ For Each vType In vaType
             For Each Exc In Excs
                 If ctl.Name Like Trim(Exc) Then blnPass = True: Exit For
             Next
-            If blnPass = False Then ctl.Value = ""
+            If blnPass = False Then ctl.value = ""
         End If
     Next
 Next
@@ -205,7 +205,7 @@ If InStr(1, CtlType, ",") > 0 Then: vaType = Split(CtlType, ","): Else vaType = 
 For Each vType In vaType
     For Each ctl In frm.Controls
         If ctl.Name Like Trim(vType) And ctl.Name <> Exclude Then
-            If ctl.Value = "" Then IsEmpty_Ctrls = True: Exit Function
+            If ctl.value = "" Then IsEmpty_Ctrls = True: Exit Function
         End If
     Next
 Next

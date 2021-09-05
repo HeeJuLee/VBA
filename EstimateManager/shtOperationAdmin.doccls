@@ -8,7 +8,7 @@ Dim isListInit As Boolean
 Private Sub lswOperationList_Click()
     With Me.lswOperationList
         If Not .SelectedItem Is Nothing Then
-            Me.txtOperationID.Value = .SelectedItem.Text
+            Me.txtOperationID.value = .SelectedItem.Text
             Range("E7") = Format(.SelectedItem.ListSubItems(2), "mm/dd")
             Range("E8") = .SelectedItem.ListSubItems(3)
             Range("E9") = .SelectedItem.ListSubItems(4)
@@ -64,14 +64,14 @@ Sub OperationSearch()
     db = Get_DB(shtOperation, False, False)
       
     If Not IsEmpty(db) Then
-        If txtFromDate.Value <> "" Then db = Filtered_DB(db, ">=" & txtFromDate.Value, 14)    '등록일자 필드와 날짜 비교
+        If txtFromDate.value <> "" Then db = Filtered_DB(db, ">=" & txtFromDate.value, 14)    '등록일자 필드와 날짜 비교
     End If
     If Not IsEmpty(db) Then
-        If txtToDate.Value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.Value, 14)    '등록일자 필드와 날짜 비교
+        If txtToDate.value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.value, 14)    '등록일자 필드와 날짜 비교
     End If
     
     If Not IsEmpty(db) Then
-        If Me.txtKeyword.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword.Value)     '모든 필드에서 키워드 검색
+        If Me.txtKeyword.value <> "" Then db = Filtered_DB(db, Me.txtKeyword.value)     '모든 필드에서 키워드 검색
     End If
     
     '기존 검색결과 지우기
@@ -141,8 +141,8 @@ Sub SetExpenseSummary(db)
         End If
     Next
     
-    shtOperationAdmin.Range("Q5").Value = income
-    shtOperationAdmin.Range("T5").Value = expense
+    shtOperationAdmin.Range("Q5").value = income
+    shtOperationAdmin.Range("T5").value = expense
     
 End Sub
 
@@ -158,7 +158,7 @@ Sub ClearOperationSearchResult()
 End Sub
 
 Sub ClearInputData()
-    Me.txtOperationID.Value = ""
+    Me.txtOperationID.value = ""
     Range("E7:E17") = ""
 End Sub
 
@@ -215,7 +215,7 @@ Sub OperationDelete()
     cRow = Selection.row
 
     '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 6 Or Range("B" & cRow).Value = "" Then
+    If cRow < 6 Or Range("B" & cRow).value = "" Then
         MsgBox "삭제할 행을 선택하신 후 '삭제' 버튼을 클릭하세요."
         End
     End If
@@ -225,7 +225,7 @@ Sub OperationDelete()
     If YN = vbNo Then Exit Sub
     
     'DB에서 견적정보 삭제
-    Delete_Record shtOperation, Range("B" & cRow).Value
+    Delete_Record shtOperation, Range("B" & cRow).value
 
     OperationSearch
 End Sub
@@ -256,10 +256,10 @@ End Sub
 
 '전체 선택 시 '월'만 전체로 바꿈
 Private Sub optAll_Click()
-    If Me.cboSelectMonth.Value = "전체" Then
+    If Me.cboSelectMonth.value = "전체" Then
         OperationSearch
     Else
-        Me.cboSelectMonth.Value = "전체"
+        Me.cboSelectMonth.value = "전체"
     End If
     
 End Sub
@@ -269,11 +269,11 @@ Private Sub optThisMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
     
-    txtFromDate.Value = DateSerial(Y, M, 1)
-    txtToDate.Value = DateSerial(Y, M + 1, 0)
+    txtFromDate.value = DateSerial(Y, M, 1)
+    txtToDate.value = DateSerial(Y, M + 1, 0)
     
-    Me.cboSelectYear.Value = Y & "년"
-    Me.cboSelectMonth.Value = M & "월"      '실제 검색은 cboSelectMonth_change()에서 검색 됨
+    Me.cboSelectYear.value = Y & "년"
+    Me.cboSelectMonth.value = M & "월"      '실제 검색은 cboSelectMonth_change()에서 검색 됨
     
 End Sub
 
@@ -282,15 +282,15 @@ Private Sub optLastMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = Month(Date)
     
-    txtFromDate.Value = DateSerial(Y, M - 1, 1)
-    txtToDate.Value = DateSerial(Y, M, 0)
+    txtFromDate.value = DateSerial(Y, M - 1, 1)
+    txtToDate.value = DateSerial(Y, M, 0)
     
     If M = 1 Then
-        Me.cboSelectYear.Value = Y - 1 & "년"
-        Me.cboSelectMonth.Value = "12월"
+        Me.cboSelectYear.value = Y - 1 & "년"
+        Me.cboSelectMonth.value = "12월"
     Else
-        Me.cboSelectYear.Value = Y & "년"
-        Me.cboSelectMonth.Value = M - 1 & "월"
+        Me.cboSelectYear.value = Y & "년"
+        Me.cboSelectMonth.value = M - 1 & "월"
     End If
     
 End Sub
@@ -325,34 +325,34 @@ Private Sub cboSelectYear_Change()
     Dim M As Long: M = Month(Date)
     Dim pos As Long
     
-    If Me.cboSelectYear.Value = "전체" Then
-        txtFromDate.Value = ""
-        txtToDate.Value = ""
+    If Me.cboSelectYear.value = "전체" Then
+        txtFromDate.value = ""
+        txtToDate.value = ""
         
-        If Me.cboSelectMonth.Value = "전체" Then
+        If Me.cboSelectMonth.value = "전체" Then
             '월 선택이 전체로 선택되어 있으면 바로 검색 실행
             OperationSearch
         Else
             '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
-            Me.cboSelectMonth.Value = "전체"
+            Me.cboSelectMonth.value = "전체"
         End If
     Else
         '년도를 선택한 경우
-        pos = InStr(Me.cboSelectYear.Value, "년")
+        pos = InStr(Me.cboSelectYear.value, "년")
         If pos <> 0 Then
-            Y = Left(Me.cboSelectYear.Value, pos - 1)
+            Y = Left(Me.cboSelectYear.value, pos - 1)
         End If
     
-        If Me.cboSelectMonth.Value = "전체" Then
-            txtFromDate.Value = DateSerial(Y, 1, 1)
-            txtToDate.Value = DateSerial(Y, 12, 31)
+        If Me.cboSelectMonth.value = "전체" Then
+            txtFromDate.value = DateSerial(Y, 1, 1)
+            txtToDate.value = DateSerial(Y, 12, 31)
         Else
-            pos = InStr(Me.cboSelectMonth.Value, "월")
+            pos = InStr(Me.cboSelectMonth.value, "월")
             If pos <> 0 Then
-                M = Left(Me.cboSelectMonth.Value, pos - 1)
+                M = Left(Me.cboSelectMonth.value, pos - 1)
                 
-                txtFromDate.Value = DateSerial(Y, M, 1)
-                txtToDate.Value = DateSerial(Y, M + 1, 0)
+                txtFromDate.value = DateSerial(Y, M, 1)
+                txtToDate.value = DateSerial(Y, M + 1, 0)
             End If
         End If
         
@@ -367,34 +367,34 @@ Private Sub cboSelectMonth_Change()
     Dim M As Long: M = Month(Date)
     Dim pos As Long
     
-    If Me.cboSelectYear.Value = "전체" Then
-        txtFromDate.Value = ""
-        txtToDate.Value = ""
+    If Me.cboSelectYear.value = "전체" Then
+        txtFromDate.value = ""
+        txtToDate.value = ""
         
-         If Me.cboSelectMonth.Value = "전체" Then
+         If Me.cboSelectMonth.value = "전체" Then
              '월 선택이 전체로 선택되어 있으면 바로 검색 실행
             OperationSearch
         Else
-            Me.cboSelectMonth.Value = "전체"
+            Me.cboSelectMonth.value = "전체"
         End If
     Else
-        pos = InStr(Me.cboSelectYear.Value, "년")
+        pos = InStr(Me.cboSelectYear.value, "년")
         If pos <> 0 Then
-            Y = Left(Me.cboSelectYear.Value, pos - 1)
+            Y = Left(Me.cboSelectYear.value, pos - 1)
         End If
     
-        If Me.cboSelectMonth.Value = "전체" Then
-            txtFromDate.Value = DateSerial(Y, 1, 1)
-            txtToDate.Value = DateSerial(Y, 12, 31)
+        If Me.cboSelectMonth.value = "전체" Then
+            txtFromDate.value = DateSerial(Y, 1, 1)
+            txtToDate.value = DateSerial(Y, 12, 31)
             
-            If Me.optAll.Value = False Then Me.optAll.Value = True Else OperationSearch
+            If Me.optAll.value = False Then Me.optAll.value = True Else OperationSearch
         Else
-            pos = InStr(Me.cboSelectMonth.Value, "월")
+            pos = InStr(Me.cboSelectMonth.value, "월")
             If pos <> 0 Then
-                M = Left(Me.cboSelectMonth.Value, pos - 1)
+                M = Left(Me.cboSelectMonth.value, pos - 1)
                 
-                txtFromDate.Value = DateSerial(Y, M, 1)
-                txtToDate.Value = DateSerial(Y, M + 1, 0)
+                txtFromDate.value = DateSerial(Y, M, 1)
+                txtToDate.value = DateSerial(Y, M + 1, 0)
             End If
             
             OperationSearch

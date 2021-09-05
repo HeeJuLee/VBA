@@ -7,8 +7,8 @@ Option Compare Text
 '########################
 Function Get_MaxID(WS As Worksheet) As Long
 With WS
-    Get_MaxID = .Cells(1, .Columns.count).End(xlToLeft).Value
-    .Cells(1, .Columns.count).End(xlToLeft).Value = .Cells(1, .Columns.count).End(xlToLeft).Value + 1
+    Get_MaxID = .Cells(1, .Columns.count).End(xlToLeft).value
+    .Cells(1, .Columns.count).End(xlToLeft).value = .Cells(1, .Columns.count).End(xlToLeft).value + 1
 End With
 End Function
 '########################
@@ -18,7 +18,7 @@ End Function
 '########################
 Function Get_CurrentID(WS As Worksheet) As Long
 With WS
-    Get_CurrentID = .Cells(1, .Columns.count).End(xlToLeft).Value
+    Get_CurrentID = .Cells(1, .Columns.count).End(xlToLeft).value
 End With
 End Function
 '########################
@@ -28,7 +28,7 @@ End Function
 '########################
 Function Get_LastID(WS As Worksheet) As Long
 With WS
-    Get_LastID = .Cells(1, .Columns.count).End(xlToLeft).Value - 1
+    Get_LastID = .Cells(1, .Columns.count).End(xlToLeft).value - 1
 End With
 End Function
 '########################
@@ -55,7 +55,7 @@ Dim cRow As Long
 With WS
     cRow = Get_InsertRow(WS) - 1
     For i = 1 To cRow
-        If .Cells(i, 1).Value = ID Then get_UpdateRow = i: Exit For
+        If .Cells(i, 1).value = ID Then get_UpdateRow = i: Exit For
     Next
 End With
 End Function
@@ -100,12 +100,12 @@ ReDim vFieldNo(0 To UBound(vFields))
 With WS
     For Each vField In vFields
         For i = 1 To cCol
-            If .Cells(1, i).Value = Trim(vField) Then vFieldNo(j) = i: j = j + 1
+            If .Cells(1, i).value = Trim(vField) Then vFieldNo(j) = i: j = j + 1
         Next
     Next
 Stop
     For i = 2 To cRow
-        If .Cells(i, 1).Value = ID Then
+        If .Cells(i, 1).value = ID Then
             For j = 0 To UBound(vFieldNo)
                 vFieldNo(j) = .Cells(i, vFieldNo(j))
             Next
@@ -137,7 +137,7 @@ Function Get_Record_Array(WS As Worksheet, ID)
 
     With WS
         For row = 2 To cRow
-            If .Cells(row, 1).Value = ID Then
+            If .Cells(row, 1).value = ID Then
                 For col = 1 To cCol
                     fields(col) = .Cells(row, col)
                 Next
@@ -162,16 +162,16 @@ Dim vaArr As Variant: Dim i As Long: i = 2
 
 With WS
     cRow = Get_InsertRow(WS)
-    If InStr(1, .Cells(1, 1).Value, "ID") > 0 Then
+    If InStr(1, .Cells(1, 1).value, "ID") > 0 Then
         cID = Get_MaxID(WS)
-        .Cells(cRow, 1).Value = cID
+        .Cells(cRow, 1).value = cID
         For Each vaArr In vaParamArr
-            .Cells(cRow, i).Value = vaArr
+            .Cells(cRow, i).value = vaArr
             i = i + 1
         Next
     Else
         For Each vaArr In vaParamArr
-            .Cells(cRow, i - 1).Value = vaArr
+            .Cells(cRow, i - 1).value = vaArr
             i = i + 1
         Next
     End If
@@ -195,7 +195,7 @@ With WS
     cRow = get_UpdateRow(WS, ID)
     
     For i = 1 To UBound(vaParamArr)
-        If Not IsMissing(vaParamArr(i)) Then .Cells(cRow, i + 1).Value = vaParamArr(i)
+        If Not IsMissing(vaParamArr(i)) Then .Cells(cRow, i + 1).value = vaParamArr(i)
     Next
     
 End With
@@ -214,7 +214,7 @@ Dim cCol As Long
 With WS
     cCol = Get_ColumnCnt(WS)
     For i = 1 To cCol
-        If .Cells(1, i).Value = vFieldName Then Get_Column_Index = i: Exit For
+        If .Cells(1, i).value = vFieldName Then Get_Column_Index = i: Exit For
     Next
 End With
 
@@ -236,7 +236,7 @@ If IsNumeric(ID) = True Then ID = CLng(ID)
 With WS
     cRow = get_UpdateRow(WS, ID)
     cCol = Get_Column_Index(WS, vFieldName)
-    .Cells(cRow, cCol).Value = vData
+    .Cells(cRow, cCol).value = vData
 End With
 
 End Sub
@@ -376,7 +376,7 @@ End Function
 ' 특정 배열에서 Value를 포함하는 레코드만 찾아 다시 배열로 반환
 ' Array = Filtered_DB(Array, "검색값", 2, False)
 '########################
-Function Filtered_DB(db, Value, Optional FilterCol, Optional ExactMatch As Boolean = False) As Variant
+Function Filtered_DB(db, value, Optional FilterCol, Optional ExactMatch As Boolean = False) As Variant
 
 Dim cRow As Long
 Dim cCol As Long
@@ -389,7 +389,7 @@ Dim Operator As String
 
 Set Dict = CreateObject("Scripting.Dictionary")
 
-If Value <> "" Then
+If value <> "" Then
     cRow = UBound(db, 1)
     cCol = UBound(db, 2)
     ReDim vArr(1 To cRow)
@@ -417,12 +417,12 @@ If Value <> "" Then
     
     '2021.09.03 hjlee 수정
     'If Left(Value, 2) = ">=" Or Left(Value, 2) = "<=" Or Left(Value, 2) = "=>" Or Left(Value, 2) = "=<" Then
-    If Left(Value, 2) = ">=" Or Left(Value, 2) = "<=" Or Left(Value, 2) = "=>" Or Left(Value, 2) = "=<" Or Left(Value, 2) = "<>" Then
-        Operator = Left(Value, 2)
-        If IsDate(Right(Value, Len(Value) - 2)) Then isDateVal = True
-    ElseIf Left(Value, 1) = ">" Or Left(Value, 1) = "<" Then
-        Operator = Left(Value, 1)
-        If IsDate(Right(Value, Len(Value) - 1)) Then isDateVal = True
+    If Left(value, 2) = ">=" Or Left(value, 2) = "<=" Or Left(value, 2) = "=>" Or Left(value, 2) = "=<" Or Left(value, 2) = "<>" Then
+        Operator = Left(value, 2)
+        If IsDate(Right(value, Len(value) - 2)) Then isDateVal = True
+    ElseIf Left(value, 1) = ">" Or Left(value, 1) = "<" Then
+        Operator = Left(value, 1)
+        If IsDate(Right(value, Len(value) - 1)) Then isDateVal = True
     Else: End If
     
     If Operator <> "" Then
@@ -430,43 +430,43 @@ If Value <> "" Then
             Select Case Operator
                 Case ">"
                     For i = 1 To cRow
-                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) > CDbl(Right(Value, Len(Value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) > CDbl(Right(value, Len(value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 Case "<"
                     For i = 1 To cRow
-                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) < CDbl(Right(Value, Len(Value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) < CDbl(Right(value, Len(value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 Case ">=", "=>"
                     For i = 1 To cRow
-                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) >= CDbl(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) >= CDbl(Right(value, Len(value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                  Case "<=", "=<"
                     For i = 1 To cRow
-                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDbl(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDbl(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDbl(Right(value, Len(value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                    '2021.09.03 hjlee 추가
                   Case "<>"
                     For i = 1 To cRow
-                        If Left(filterArr(i), Len(filterArr(i)) - 2) <> Right(Value, Len(Value) - 2) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If Left(filterArr(i), Len(filterArr(i)) - 2) <> Right(value, Len(value) - 2) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
             End Select
         Else
             Select Case Operator
                 Case ">"
                     For i = 1 To cRow
-                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) > CDate(Right(Value, Len(Value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) > CDate(Right(value, Len(value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 Case "<"
                     For i = 1 To cRow
-                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) < CDate(Right(Value, Len(Value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) < CDate(Right(value, Len(value) - 1)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 Case ">=", "=>"
                     For i = 1 To cRow
-                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) >= CDate(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) >= CDate(Right(value, Len(value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                  Case "<=", "=<"
                     For i = 1 To cRow
-                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDate(Right(Value, Len(Value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDate(Right(value, Len(value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
                     Next
                 
             End Select
@@ -474,7 +474,7 @@ If Value <> "" Then
     Else
         If ExactMatch = False Then
             For i = 1 To cRow
-                If filterArr(i) Like "*" & Value & "*" Then
+                If filterArr(i) Like "*" & value & "*" Then
                     vArr(i) = Left(vArr(i), Len(vArr(i)) - 2)
                     vReturn = Split(vArr(i), "|^")
                     Dict.Add i, vReturn
@@ -482,7 +482,7 @@ If Value <> "" Then
             Next
         Else
             For i = 1 To cRow
-                If filterArr(i) Like Value & "|^" Then
+                If filterArr(i) Like value & "|^" Then
                     vArr(i) = Left(vArr(i), Len(vArr(i)) - 2)
                     vReturn = Split(vArr(i), "|^")
                     Dict.Add i, vReturn
@@ -571,7 +571,7 @@ With WS
         For j = 2 To cCol
             vArr(j - 1) = .Cells(i, j)
         Next
-        Dict.Add .Cells(i, 1).Value, vArr
+        Dict.Add .Cells(i, 1).value, vArr
     Next
 End With
 
@@ -613,10 +613,10 @@ With WS
         Next
         
         'Dict(.Cells(i, keyFieldNo).Value) = vArr
-        If Dict.Exists(.Cells(i, keyFieldNo).Value) Then
-            Dict.Remove (.Cells(i, keyFieldNo).Value)
+        If Dict.Exists(.Cells(i, keyFieldNo).value) Then
+            Dict.Remove (.Cells(i, keyFieldNo).value)
         End If
-        Dict.Add .Cells(i, keyFieldNo).Value, vArr
+        Dict.Add .Cells(i, keyFieldNo).value, vArr
     Next
 End With
 
