@@ -49,13 +49,13 @@ End Function
 ' 시트에서 특정 ID 의 행 번호 반환 (-> 해당 행 번호 데이터 업데이트)
 ' i = get_UpdateRow(Sheet1, ID)
 '########################
-Function get_UpdateRow(WS As Worksheet, ID)
+Function get_UpdateRow(WS As Worksheet, id)
 Dim i As Long
 Dim cRow As Long
 With WS
     cRow = Get_InsertRow(WS) - 1
     For i = 1 To cRow
-        If .Cells(i, 1).value = ID Then get_UpdateRow = i: Exit For
+        If .Cells(i, 1).value = id Then get_UpdateRow = i: Exit For
     Next
 End With
 End Function
@@ -84,7 +84,7 @@ End Function
 '특정 시트에서 지정한 ID의 필드 값 반환 (이번 예제파일 전용)
 ' Value = Get_Records(Sheet1, ID, "필드명")
 '########################
-Function Get_Records(WS As Worksheet, ID, fields)
+Function Get_Records(WS As Worksheet, id, fields)
 
 Dim cRow As Long: Dim cCol As Long
 Dim vFields As Variant: Dim vField As Variant
@@ -105,7 +105,7 @@ With WS
     Next
 Stop
     For i = 2 To cRow
-        If .Cells(i, 1).value = ID Then
+        If .Cells(i, 1).value = id Then
             For j = 0 To UBound(vFieldNo)
                 vFieldNo(j) = .Cells(i, vFieldNo(j))
             Next
@@ -124,7 +124,7 @@ End Function
 '특정 시트에서 지정한 ID의 전체 필드 값 반환
 ' Value = Get_Record_Array(Sheet1, ID)
 '########################
-Function Get_Record_Array(WS As Worksheet, ID)
+Function Get_Record_Array(WS As Worksheet, id)
 
     Dim cRow, cCol As Long
     Dim row, col As Long
@@ -137,7 +137,7 @@ Function Get_Record_Array(WS As Worksheet, ID)
 
     With WS
         For row = 2 To cRow
-            If .Cells(row, 1).value = ID Then
+            If .Cells(row, 1).value = id Then
                 For col = 1 To cCol
                     fields(col) = .Cells(row, col)
                 Next
@@ -187,12 +187,12 @@ Sub Update_Record(WS As Worksheet, ParamArray vaParamArr() As Variant)
 
 Dim cRow As Long
 Dim i As Long
-Dim ID As Variant
+Dim id As Variant
 
-If IsNumeric(vaParamArr(0)) = True Then ID = CLng(vaParamArr(0)) Else ID = vaParamArr(0)
+If IsNumeric(vaParamArr(0)) = True Then id = CLng(vaParamArr(0)) Else id = vaParamArr(0)
 
 With WS
-    cRow = get_UpdateRow(WS, ID)
+    cRow = get_UpdateRow(WS, id)
     
     For i = 1 To UBound(vaParamArr)
         If Not IsMissing(vaParamArr(i)) Then .Cells(cRow, i + 1).value = vaParamArr(i)
@@ -226,15 +226,15 @@ End Function
 ' 시트에서 ID 를 갖는 레코드의 vFieldName 필드값을 vData로 업데이트
 ' Update_Record_Column Sheet1, ID, "컬럼명", "변경할 값"
 '########################
-Sub Update_Record_Column(WS As Worksheet, ID, vFieldName, vData As Variant)
+Sub Update_Record_Column(WS As Worksheet, id, vFieldName, vData As Variant)
 
 Dim cRow As Long
 Dim cCol As Long
 
-If IsNumeric(ID) = True Then ID = CLng(ID)
+If IsNumeric(id) = True Then id = CLng(id)
 
 With WS
-    cRow = get_UpdateRow(WS, ID)
+    cRow = get_UpdateRow(WS, id)
     cCol = Get_Column_Index(WS, vFieldName)
     .Cells(cRow, cCol).value = vData
 End With
@@ -244,14 +244,14 @@ End Sub
 ' 시트에서 ID 를 갖는 레코드 삭제
 ' Delete_Record Sheet1, ID
 '########################
-Sub Delete_Record(WS As Worksheet, ID)
+Sub Delete_Record(WS As Worksheet, id)
 
 Dim cRow As Long
 
-If IsNumeric(ID) = True Then ID = CLng(ID)
+If IsNumeric(id) = True Then id = CLng(id)
 
 With WS
-    cRow = get_UpdateRow(WS, ID)
+    cRow = get_UpdateRow(WS, id)
     .Cells(cRow, 1).EntireRow.Delete
 End With
 

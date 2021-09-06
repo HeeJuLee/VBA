@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmProduction 
    Caption         =   "예상실행항목 관리"
-   ClientHeight    =   7650
+   ClientHeight    =   8430.001
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   15360
@@ -30,8 +30,8 @@ Private Sub UserForm_Initialize()
     For Each contr In Me.Controls
         If contr.Name Like "lbl*" Then
             If contr.Name Like "lbl2*" Then
-                contr.BackColor = RGB(48, 84, 150)
-                contr.ForeColor = RGB(255, 255, 255)
+                'contr.BackColor = RGB(48, 84, 150)
+                'contr.ForeColor = RGB(255, 255, 255)
             ElseIf contr.Name Like "lbl3*" Then
                 contr.BackColor = RGB(221, 235, 247)
             Else
@@ -85,7 +85,7 @@ Sub InitializeLswProductionList()
         .HideSelection = True
         .FullRowSelect = True
         .MultiSelect = True
-        .LabelEdit = lvwManual
+        .LabelEdit = lvwAutomatic
         .CheckBoxes = False
         
         .ColumnHeaders.Clear
@@ -359,8 +359,9 @@ Sub SelectItemLswProduction(selectedID As Variant)
         If Not IsMissing(selectedID) Then
             For i = 1 To .ListItems.count
                 If selectedID = .ListItems(i).SubItems(1) Then
-                    .SelectedItem = .ListItems(i)
                     .SetFocus
+                    .selectedItem = .ListItems(i)
+                    .selectedItem.EnsureVisible
                 Else
                     .ListItems(i).Selected = False
                 End If
@@ -409,18 +410,18 @@ End Sub
 
 Private Sub lswProductionList_Click()
     With Me.lswProductionList
-        If Not .SelectedItem Is Nothing Then
-            Me.txtProductionItem.value = .SelectedItem.Text
-            Me.txtProductionID.value = .SelectedItem.ListSubItems(1)
-            Me.cboCategory.value = .SelectedItem.ListSubItems(4)
-            Me.txtProductionCustomer.value = .SelectedItem.ListSubItems(5)
-            Me.txtProductionMaterial.value = .SelectedItem.ListSubItems(6)
-            Me.txtProductionSize.value = .SelectedItem.ListSubItems(7)
-            Me.txtProductionAmount.value = .SelectedItem.ListSubItems(8)
-            Me.cboProductionUnit.value = .SelectedItem.ListSubItems(9)
-            Me.txtProductionUnitPrice.value = .SelectedItem.ListSubItems(10)
-            Me.txtProductionCost.value = .SelectedItem.ListSubItems(11)
-            Me.txtProductionMemo.value = .SelectedItem.ListSubItems(12)
+        If Not .selectedItem Is Nothing Then
+            Me.txtProductionItem.value = .selectedItem.Text
+            Me.txtProductionID.value = .selectedItem.ListSubItems(1)
+            Me.cboCategory.value = .selectedItem.ListSubItems(4)
+            Me.txtProductionCustomer.value = .selectedItem.ListSubItems(5)
+            Me.txtProductionMaterial.value = .selectedItem.ListSubItems(6)
+            Me.txtProductionSize.value = .selectedItem.ListSubItems(7)
+            Me.txtProductionAmount.value = .selectedItem.ListSubItems(8)
+            Me.cboProductionUnit.value = .selectedItem.ListSubItems(9)
+            Me.txtProductionUnitPrice.value = .selectedItem.ListSubItems(10)
+            Me.txtProductionCost.value = .selectedItem.ListSubItems(11)
+            Me.txtProductionMemo.value = .selectedItem.ListSubItems(12)
         End If
     End With
 End Sub
@@ -464,7 +465,7 @@ Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger
                 KeyCode = 0
             Else
                 If .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
+                .selectedItem = .ListItems(1)
                 .SetFocus
             End If
             End If
@@ -473,7 +474,7 @@ Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger
         '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
         With Me.lswOrderCustomerAutoComplete
             If .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
+                .selectedItem = .ListItems(1)
                 .SetFocus
             End If
         End With
@@ -514,8 +515,8 @@ End Sub
 Private Sub lswOrderCustomerAutoComplete_DblClick()
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
     With Me.lswOrderCustomerAutoComplete
-        If Not .SelectedItem Is Nothing Then
-            Me.txtProductionCustomer.value = .SelectedItem.Text
+        If Not .selectedItem Is Nothing Then
+            Me.txtProductionCustomer.value = .selectedItem.Text
             .Visible = False
             Me.txtProductionItem.SetFocus
         End If
@@ -526,8 +527,8 @@ Private Sub lswOrderCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
     If KeyCode = 13 Then
         With Me.lswOrderCustomerAutoComplete
-            If Not .SelectedItem Is Nothing Then
-                Me.txtProductionCustomer.value = .SelectedItem.Text
+            If Not .selectedItem Is Nothing Then
+                Me.txtProductionCustomer.value = .selectedItem.Text
                 .Visible = False
                 Me.txtProductionItem.SetFocus
             End If
@@ -539,7 +540,7 @@ End Sub
 Private Sub txtProductionItem_Enter()
     If Me.lswOrderCustomerAutoComplete.Visible = True Then
         With Me.lswOrderCustomerAutoComplete
-            Me.txtProductionCustomer.value = .SelectedItem.Text
+            Me.txtProductionCustomer.value = .selectedItem.Text
             .Visible = False
         End With
     End If

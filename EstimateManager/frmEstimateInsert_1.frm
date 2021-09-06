@@ -196,7 +196,7 @@ Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Sh
         '탭키, 아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
         With Me.lswEstimateCustomerAutoComplete
             If .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
+                .selectedItem = .ListItems(1)
                 .SetFocus
             End If
         End With
@@ -231,7 +231,7 @@ Private Sub txtCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shif
     End With
 End Sub
 
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtEstimateDate
 End Sub
 

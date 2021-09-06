@@ -22,16 +22,16 @@ Sub ArrayToRng(startRng As Range, arr As Variant, Optional ColumnNo As String = 
 On Error GoTo SingleDimension:
 
 Dim Cols As Variant: Dim col As Variant
-Dim X As Long: X = 1
+Dim x As Long: x = 1
 If ColumnNo = "" Then
     startRng.Cells(1, 1).Resize(UBound(arr, 1) - LBound(arr, 1) + 1, UBound(arr, 2) - LBound(arr, 2) + 1) = arr
 Else
     Cols = Split(ColumnNo, ",")
     For Each col In Cols
         If Trim(col) <> "" Then
-            startRng.Cells(1, X).Resize(UBound(arr, 1) - LBound(arr, 1) + 1) = Extract_Column(arr, CLng(Trim(col)))
+            startRng.Cells(1, x).Resize(UBound(arr, 1) - LBound(arr, 1) + 1) = Extract_Column(arr, CLng(Trim(col)))
         End If
-        X = X + 1
+        x = x + 1
     Next
 End If
 Exit Sub
@@ -287,13 +287,13 @@ End Sub
 '###############################################################
 Function ArrayDimension(vaArray As Variant) As Integer
  
-Dim i As Integer: Dim X As Integer
+Dim i As Integer: Dim x As Integer
  
 On Error Resume Next
  
 Do
     i = i + 1
-    X = UBound(vaArray, i)
+    x = UBound(vaArray, i)
 Loop Until Err.Number <> 0
  
 Err.Clear

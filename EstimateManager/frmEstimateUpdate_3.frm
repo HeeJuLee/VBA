@@ -1,19 +1,18 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate_3 
    Caption         =   "견적 수정"
    ClientHeight    =   12240
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   19320
-   OleObjectBlob   =   "frmEstimateUpdate.frx":0000
+   ClientWidth     =   19200
+   OleObjectBlob   =   "frmEstimateUpdate_3.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
-Attribute VB_Name = "frmEstimateUpdate"
+Attribute VB_Name = "frmEstimateUpdate_3"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
 
 Option Explicit
 
@@ -21,249 +20,46 @@ Dim orgManagementID As Variant
 Dim totlalCheckCount As Long
 Dim mouseX As Integer
 Dim headerIndex As Integer
-Dim beforeSelectedItem As ListItem
 
-Private Sub txtEdit_AfterUpdate()
-    Dim orderPrice As Long
-    
-    If headerIndex > 0 Then
-        '탭키나 엔터키가 아닌 마우스를 클릭해서 벗어나는 경우: beforeSelectedItem을 사용해야 함
-        
-        Debug.Print "AfterUpdate - headerIndex: " & headerIndex
-        Debug.Print "AfterUpdate - 원래값: " & beforeSelectedItem.ListSubItems(headerIndex - 1)
-        Debug.Print "AfterUpdate - 변경값: " & Me.txtEdit.value
-        
-        If Me.txtEdit.value <> beforeSelectedItem.ListSubItems(headerIndex - 1).Text Then
-            '입력값 포맷 변경
-            ConvertOrderListFormat Me.txtEdit, headerIndex
-            beforeSelectedItem.ListSubItems(headerIndex - 1).Text = Me.txtEdit.value
-            UpdateOrderListValue beforeSelectedItem.Text, headerIndex, Me.txtEdit.value
-                        
-            '수량,단가 변경한 경우에는 금액도 변경해야 함
-            If headerIndex = 9 Or headerIndex = 11 Then
-                orderPrice = CalculateOrderListPrice(beforeSelectedItem)
-                beforeSelectedItem.ListSubItems(11).Text = Format(orderPrice, "#,##0")
-                UpdateOrderListValue beforeSelectedItem.Text, 12, orderPrice
-            End If
-                
-            '실행가 총액 계산
-            Me.txtExecutionCost = Format(CalculateOrderListTotalCost, "#,##0")
-            CalculateEstimateUpdateCost
-                
-            headerIndex = 0
-        End If
-    End If
-    
-End Sub
-
-Sub UpdateOrderListValue(id, headerIndex, value)
-    Dim fieldName As String
-
-    Select Case headerIndex
-        Case 4  '분류
-            fieldName = "분류2"
-        Case 5  '거래처
-            fieldName = "거래처"
-        Case 6  '품명
-            fieldName = "품목"
-        Case 7  '재질
-            fieldName = "재질"
-        Case 8  '규격
-            fieldName = "규격"
-        Case 9  '수량
-            fieldName = "수량"
-        Case 10  '단위
-            fieldName = "단위"
-        Case 11  '단가
-            fieldName = "단가"
-        Case 12  '금액
-            fieldName = "금액"
-        Case 13  '발주
-            fieldName = "발주일자"
-        Case 14  '납기
-            fieldName = "납기일자"
-        Case 15  '입고
-            fieldName = "입고일자"
-        Case 16  '명세서
-            fieldName = "명세서일자"
-        Case 17  '계산서
-            fieldName = "계산서일자"
-        Case 18  '결제일
-            fieldName = "결제일자"
-    End Select
-    
-    If fieldName <> "" Then
-        Update_Record_Column shtOrder, id, fieldName, value
-        Update_Record_Column shtOrder, id, "수정일자", Date
-    End If
-
-End Sub
-
-Sub ConvertOrderListFormat(textBox, headerIndex)
-    Dim value As Variant
-    Dim pos As Long
-    Dim Y, M, D As Long
-    
-    value = Trim(textBox.Text)
-    
-    Select Case headerIndex
-        Case 9, 11, 12  '수량, 단가, 금액 - 1000자리 콤마
-            If IsNumeric(value) Then
-                textBox.Text = Format(value, "#,##0")
-            End If
-        Case 13, 14, 15, 16, 17, 18  '발주, 납기, 입고, 명세서, 계산서, 결제일 - 날짜 변환
-            pos = InStr(value, "/")
-            If pos > 0 Then
-                M = Left(value, pos - 1)
-                If Len(value) = pos Then
-                    pos = 0
-                Else
-                    D = Mid(value, pos + 1)
-                End If
-            End If
-            
-            If pos > 0 Then
-                textBox.Text = DateSerial(Year(Date), M, D)
-            End If
-    End Select
-    
-End Sub
-
-Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    Dim orderPrice As Long
-    
-    With Me.lswOrderList
-        If KeyCode = 13 Then
-            '엔터키 - 값만 바꿔줌. 다음칸으로 이동하지 않음
-            If Me.txtEdit.value <> .selectedItem.ListSubItems(headerIndex - 1).Text Then
-                '변경한 값을 바꿔줌
-                ConvertOrderListFormat Me.txtEdit, headerIndex
-                .selectedItem.ListSubItems(headerIndex - 1).Text = Me.txtEdit.value
-                UpdateOrderListValue .selectedItem.Text, headerIndex, Me.txtEdit.value
-                '수량,단가 변경한 경우에는 금액도 변경해야 함
-                If headerIndex = 9 Or headerIndex = 11 Then
-                    orderPrice = CalculateOrderListPrice(.selectedItem)
-                    .selectedItem.ListSubItems(11).Text = Format(orderPrice, "#,##0")
-                    UpdateOrderListValue .selectedItem.Text, 12, orderPrice
-                End If
-                '실행가 총액 계산
-                Me.txtExecutionCost = Format(CalculateOrderListTotalCost, "#,##0")
-                CalculateEstimateUpdateCost
-            End If
-            Me.txtEdit.Visible = False
-            Me.frmEdit.Visible = False
-        ElseIf KeyCode = 9 Then
-            '탭키 - 값 바꿔주고 다음칸에 txtEdit를 보여줌. 포커스 안넘어가도록 함
-            If Me.txtEdit.value <> .selectedItem.ListSubItems(headerIndex - 1).Text Then
-                '변경한 값을 바꿔줌
-                ConvertOrderListFormat Me.txtEdit, headerIndex
-                .selectedItem.ListSubItems(headerIndex - 1).Text = Me.txtEdit.value
-                UpdateOrderListValue .selectedItem.Text, headerIndex, Me.txtEdit.value
-                '수량,단가 변경한 경우에는 금액도 변경해야 함
-                If headerIndex = 9 Or headerIndex = 11 Then
-                    orderPrice = CalculateOrderListPrice(.selectedItem)
-                    .selectedItem.ListSubItems(11).Text = Format(orderPrice, "#,##0")
-                    UpdateOrderListValue .selectedItem.Text, 12, orderPrice
-                End If
-                '실행가 총액 계산
-                Me.txtExecutionCost = Format(CalculateOrderListTotalCost, "#,##0")
-                CalculateEstimateUpdateCost
-            End If
-            If headerIndex = 11 Then
-                '금액 필드 건너뛰기 위해서 +2 해줌
-                headerIndex = headerIndex + 2
-            Else
-                headerIndex = headerIndex + 1
-            End If
-            SelectOrderListColumn
-            KeyCode = 0
-        ElseIf KeyCode = 40 Then
-            '아래화살키
-            KeyCode = 0
-        ElseIf KeyCode = 27 Then
-            'ESC키
-            Me.txtEdit.Visible = False
-            Me.frmEdit.Visible = False
-        End If
-    End With
-End Sub
-
-Private Sub lswOrderList_DblClick()
-
-    Dim i As Integer
-    Dim pos As Integer
-    
-    With Me.lswOrderList
-        headerIndex = 0
-        For i = 1 To .ColumnHeaders.count
-            pos = .ColumnHeaders(i).Left
-            If mouseX < pos Then
-                headerIndex = i - 1
-                Exit For
-            End If
-        Next
-        
-        If headerIndex = 0 Then
-            If Not .selectedItem Is Nothing Then
-                clickOrderId = .selectedItem.Text
-                
-                If isFormLoaded("frmOrderUpdate") = True Then
-                    Unload frmOrderUpdate
-                End If
-                frmOrderUpdate.Show (False)
-            End If
-        ElseIf headerIndex = 12 Then
-            '금액은 변경할 수 없음
-        Else
-            ' 현재 선택한 열을 저장해놓음
-            If Not beforeSelectedItem Is Nothing Then
-                Set beforeSelectedItem = Nothing
-            End If
-            Set beforeSelectedItem = .selectedItem
-            
-            SelectOrderListColumn
-        End If
-    End With
-
-End Sub
-
-
-Sub SelectOrderListColumn()
+Private Sub txtEdit2_AfterUpdate()
+    Dim lin         As Integer
+    Dim col         As Integer
+    Dim nValor      As String
+    Dim cod         As Long
+    Dim WPlan       As Worksheet
+    Dim R           As Range
     Dim ItemSel    As ListItem
     
-    If Not lswOrderList.selectedItem Is Nothing Then
-        If headerIndex = lswOrderList.ColumnHeaders.count Then
-            frmEdit.Visible = False
-            txtEdit.Visible = False
-        End If
-        
-        If headerIndex > 0 And headerIndex < lswOrderList.ColumnHeaders.count Then
-        
-            Set ItemSel = lswOrderList.selectedItem
-        
-            With frmEdit
-                .Visible = True
-                .top = ItemSel.top + lswOrderList.top
-                .Left = lswOrderList.ColumnHeaders(headerIndex).Left + lswOrderList.Left
-                .Width = lswOrderList.ColumnHeaders(headerIndex).Width
-                .Height = ItemSel.Height + 10
-                .ZOrder msoBringToFront
-            End With
-            
-            With Me.txtEdit
-                .Visible = True
-                .Text = ItemSel.SubItems(headerIndex - 1)
-                .SetFocus
-                .SelStart = 0
-                .Left = 0
-                .top = 0
-                .Width = lswOrderList.ColumnHeaders(headerIndex).Width - 2
-                .Height = lswOrderList.selectedItem.Height + 3
-                .SelLength = Len(.Text)
-            End With
-        End If
+    Set ItemSel = Me.lswOrderList.selectedItem
+    
+    On Error Resume Next
+    
+    If headerIndex <> 0 Then
+        ItemSel.SubItems(headerIndex - 1) = Me.txtEdit2.value
     End If
+    
+    Set ItemSel = Nothing
+    
+    Me.Frame3.Visible = False
 
+End Sub
+
+
+Private Sub txtEdit2_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 13 Then
+            '엔터키 - 다음 입력칸으로 이동
+            headerIndex = headerIndex + 1
+            SelectOrderListColumn
+            Me.txtEdit2.SetFocus
+        ElseIf KeyCode = 9 Then
+            '탭키
+            headerIndex = headerIndex + 1
+            SelectOrderListColumn
+            Me.txtEdit2.SetFocus
+        ElseIf KeyCode = 40 Then
+            '아래화살키
+           
+        End If
 End Sub
 
 Private Sub UserForm_Initialize()
@@ -472,7 +268,7 @@ Sub InitializeLswOrderList()
         .ColumnHeaders.Add , , "ID_견적", 0
         .ColumnHeaders.Add , , "관리번호", 0
         .ColumnHeaders.Add , , "분류", 34
-        .ColumnHeaders.Add , , "거래처", 60
+        .ColumnHeaders.Add , , "거래처", 70
         .ColumnHeaders.Add , , "품명", 115
         .ColumnHeaders.Add , , "재질", 62
         .ColumnHeaders.Add , , "규격", 62
@@ -486,7 +282,7 @@ Sub InitializeLswOrderList()
         .ColumnHeaders.Add , , "명세서", 59, lvwColumnCenter
         .ColumnHeaders.Add , , "계산서", 59, lvwColumnCenter
         .ColumnHeaders.Add , , "결제일", 59, lvwColumnCenter
-        .ColumnHeaders.Add , , "수정", 30
+        .ColumnHeaders.Add , , "더미", 0
         
         '.ColumnHeaders(1).Position = 6
     
@@ -514,7 +310,6 @@ Sub InitializeLswOrderList()
                 li.ListSubItems.Add , , db(i, 20)       '명세서
                 li.ListSubItems.Add , , db(i, 21)       '계산서
                 li.ListSubItems.Add , , db(i, 22)       '결제일
-                li.ListSubItems.Add , , "열기"       '수정
                 li.Selected = False
                 
                 If IsNumeric(db(i, 13)) Then
@@ -719,46 +514,6 @@ Sub CalculateEstimateUpdateCost()
     
 End Sub
 
-Function CalculateOrderListTotalCost() As Long
-    Dim i As Long
-    Dim cost, totalCost As Long
-    
-    With Me.lswOrderList
-        For i = 1 To .ListItems.count
-
-            If Not IsNumeric(.ListItems(i).SubItems(11)) Then
-                If .ListItems(i).SubItems(11) <> "" Then
-                    MsgBox "금액 필드에 숫자가 아닌 값이 있어서 실행가 합계를 구할 수 없습니다.", vbExclamation
-                    CalculateOrderListTotalCost = 0
-                    Exit Function
-                End If
-            Else
-                totalCost = totalCost + .ListItems(i).SubItems(11)
-            End If
-        Next
-    End With
-    
-    CalculateOrderListTotalCost = totalCost
-End Function
-
-Function CalculateOrderListPrice(selectedItem As ListItem) As Long
-    Dim amount, unitPrice As Variant
-    Dim orderPrice As Long
-
-    '수량, 단가가 변하는 경우에는 금액 계산해서 변경해야 함
-    amount = selectedItem.ListSubItems(8).Text
-    unitPrice = selectedItem.ListSubItems(10).Text
-    
-    If amount = "" Then
-        If IsNumeric(unitPrice) Then
-            orderPrice = unitPrice
-        End If
-    ElseIf IsNumeric(amount) And IsNumeric(unitPrice) Then
-        orderPrice = amount * unitPrice
-    End If
-    
-    CalculateOrderListPrice = orderPrice
-End Function
 
 Function GetProductionTotalCost()
     Dim i As Long
@@ -897,11 +652,74 @@ Private Sub lswOrderList_MouseDown(ByVal Button As Integer, ByVal Shift As Integ
     mouseX = pointsPerPixelX * x
 End Sub
 
+Private Sub lswOrderList_DblClick()
+'    With Me.lswOrderList
+'        If Not .SelectedItem Is Nothing Then
+'            clickOrderId = .SelectedItem.Text
+'
+'            If frmOrderUpdate.Visible = True Then
+'                Unload frmOrderUpdate
+'            End If
+'
+'            frmOrderUpdate.Show (False)
+'        End If
+'    End With
+    
+    Dim i           As Integer
+    Dim pos As Integer
+    
+    headerIndex = 0
+    For i = 1 To lswOrderList.ColumnHeaders.count
+        pos = lswOrderList.ColumnHeaders(i).Left
+        If mouseX < pos Then
+            headerIndex = i - 1
+            shtEstimateAdmin.Range("D11").value = "mouseX: " & mouseX & ", pos: " & pos & ", header: " & i & ", name:" & lswOrderList.ColumnHeaders(headerIndex).Text
+            Exit For
+        End If
+    Next
+    
+    SelectOrderListColumn
+End Sub
 
+Sub SelectOrderListColumn()
+    Dim ItemSel    As ListItem
+    
+    If Not lswOrderList.selectedItem Is Nothing Then
+        If headerIndex <> 0 Then
+        
+            Set ItemSel = lswOrderList.selectedItem
+        
+            With Frame3
+                
+                .Visible = True
+                .top = ItemSel.top + lswOrderList.top
+                .Left = lswOrderList.ColumnHeaders(headerIndex).Left + lswOrderList.Left
+                .Width = lswOrderList.ColumnHeaders(headerIndex).Width
+                .Height = ItemSel.Height + 10
+                
+                .ZOrder msoBringToFront
+            End With
+            
+            With Me.txtEdit2
+                
+                .Visible = True
+                .Text = ItemSel.SubItems(headerIndex - 1)
+                .SetFocus
+                .SelStart = 0
+                .Left = 0
+                .top = 0
+                .Width = lswOrderList.ColumnHeaders(headerIndex).Width
+                .Height = lswOrderList.selectedItem.Height + 3
+                .SelLength = Len(.Text)
+            End With
+        End If
+    End If
+
+End Sub
 
 Private Sub lswOrderList_Click()
-    Me.frmEdit.Visible = False
-    Me.txtEdit.value = ""
+    Me.Frame3.Visible = False
+    Me.txtEdit2.value = ""
 End Sub
 
 Private Sub lswOrderList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
@@ -1424,5 +1242,6 @@ Private Sub UserForm_Layout()
     estimateUpdateFormX = Me.Left
     estimateUpdateFormY = Me.top
 End Sub
+
 
 

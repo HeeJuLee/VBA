@@ -9,6 +9,7 @@ Public estimateInsertFormX, estimateInsertFormY As Long
 Public orderInsertFormX, orderInsertFormY As Long
 Public productionFormX, productionFormY As Long
 Public paymentFormX, paymentFormY As Long
+Public operationFormX, operationFormY As Long
 Public selectionRow As Long
 
 Sub GetCalendarDate(textBox As MSForms.textBox)
@@ -238,16 +239,17 @@ Function isFormLoaded(ByVal strName As String) As Boolean
     Next
     isFormLoaded = False
 End Function
-'==========================================================================================
 
-Sub InitializeCboCustomer()
+
+'==========================================================================================
+Private Sub InitializeCboCustomer()
     Dim db As Variant
     db = Get_DB(shtEstimateCustomer, True)
 
     Update_Cbo Me.cboCustomer, db, 1
 End Sub
 
-Sub InitializeCboManager()
+Private Sub InitializeCboManager()
     Dim db As Variant
     
     '담당자 DB를 읽어와서

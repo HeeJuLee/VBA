@@ -683,8 +683,8 @@ Sub SelectItemLswProduction(selectedID As Variant)
         If Not IsMissing(selectedID) Then
             For i = 1 To .ListItems.count
                 If selectedID = .ListItems(i).SubItems(1) Then
-                    .SelectedItem = .ListItems(i)
-                    .SetFocus
+                    .selectedItem = .ListItems(i)
+                    .selectedItem.EnsureVisible
                 End If
             Next
         End If
@@ -693,25 +693,25 @@ End Sub
 
 Private Sub lswProductionList_Click()
     With Me.lswProductionList
-        If Not .SelectedItem Is Nothing Then
-            Me.txtProductionID.value = .SelectedItem.ListSubItems(1)
-            Me.txtProductionItem.value = .SelectedItem.Text
-            Me.txtProductionCustomer.value = .SelectedItem.ListSubItems(4)
-            Me.txtProductionMaterial.value = .SelectedItem.ListSubItems(5)
-            Me.txtProductionSize.value = .SelectedItem.ListSubItems(6)
-            Me.txtProductionAmount.value = .SelectedItem.ListSubItems(7)
-            Me.cboProductionUnit.value = .SelectedItem.ListSubItems(8)
-            Me.txtProductionUnitPrice.value = .SelectedItem.ListSubItems(9)
-            Me.txtProductionCost.value = .SelectedItem.ListSubItems(10)
-            Me.txtProductionMemo.value = .SelectedItem.ListSubItems(11)
+        If Not .selectedItem Is Nothing Then
+            Me.txtProductionID.value = .selectedItem.ListSubItems(1)
+            Me.txtProductionItem.value = .selectedItem.Text
+            Me.txtProductionCustomer.value = .selectedItem.ListSubItems(4)
+            Me.txtProductionMaterial.value = .selectedItem.ListSubItems(5)
+            Me.txtProductionSize.value = .selectedItem.ListSubItems(6)
+            Me.txtProductionAmount.value = .selectedItem.ListSubItems(7)
+            Me.cboProductionUnit.value = .selectedItem.ListSubItems(8)
+            Me.txtProductionUnitPrice.value = .selectedItem.ListSubItems(9)
+            Me.txtProductionCost.value = .selectedItem.ListSubItems(10)
+            Me.txtProductionMemo.value = .selectedItem.ListSubItems(11)
         End If
     End With
 End Sub
 
 Private Sub lswOrderList_DblClick()
     With Me.lswOrderList
-        If Not .SelectedItem Is Nothing Then
-            clickOrderId = .SelectedItem.ListSubItems(1)
+        If Not .selectedItem Is Nothing Then
+            clickOrderId = .selectedItem.ListSubItems(1)
             
             If frmOrderUpdate.Visible = True Then
                 Unload frmOrderUpdate
@@ -766,7 +766,7 @@ End Sub
 
 Private Sub lswProductionList_ItemCheck(ByVal Item As MSComctlLib.ListItem)
     With Me.lswProductionList
-        .SelectedItem.Selected = False
+        .selectedItem.Selected = False
         
         If Item.Checked = True Then
             Item.Bold = True
@@ -796,7 +796,7 @@ Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger
         '탭키, 아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
         With Me.lswOrderCustomerAutoComplete
             If .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
+                .selectedItem = .ListItems(1)
                 .SetFocus
             End If
         End With
@@ -834,8 +834,8 @@ End Sub
 Private Sub lswOrderCustomerAutoComplete_DblClick()
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
     With Me.lswOrderCustomerAutoComplete
-        If Not .SelectedItem Is Nothing Then
-            Me.txtProductionCustomer.value = .SelectedItem.Text
+        If Not .selectedItem Is Nothing Then
+            Me.txtProductionCustomer.value = .selectedItem.Text
             .Visible = False
             Me.txtProductionItem.SetFocus
         End If
@@ -846,8 +846,8 @@ Private Sub lswOrderCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
     If KeyCode = 13 Then
         With Me.lswOrderCustomerAutoComplete
-            If Not .SelectedItem Is Nothing Then
-                Me.txtProductionCustomer.value = .SelectedItem.Text
+            If Not .selectedItem Is Nothing Then
+                Me.txtProductionCustomer.value = .selectedItem.Text
                 .Visible = False
                 Me.txtProductionItem.SetFocus
             End If
@@ -859,43 +859,43 @@ Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVa
     If KeyCode = 27 Then Unload Me
 End Sub
 
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtEstimateDate
 End Sub
 
-Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtAcceptedDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtBidDate
 End Sub
 
-Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtDeliveryDate
 End Sub
 
-Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtInsuranceDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtSpecificationDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtTaxInvoiceDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtPaymentDate
 End Sub
 
-Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtExpectPaymentDate
     Me.txtExpectPaymentMonth = Format(Me.txtExpectPaymentDate, "mm" & "월")
 End Sub

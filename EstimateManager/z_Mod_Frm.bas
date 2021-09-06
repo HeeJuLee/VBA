@@ -30,15 +30,15 @@ End Sub
 ' 콤보박스의 특정 필드 값을 참조하여 값을 선택
 ' Select_CboItm cboBox, 1, 1
 '########################
-Sub Select_CboItm(cboBox As MSForms.ComboBox, ID, Optional colNo As Long = 1)
+Sub Select_CboItm(cboBox As MSForms.ComboBox, id, Optional colNo As Long = 1)
 
 Dim i As Long
 
-If IsNumeric(ID) Then ID = CLng(ID)
+If IsNumeric(id) Then id = CLng(id)
 
 With cboBox
     For i = 0 To .ListCount - 1
-        If .List(i, colNo - 1) = ID Then .ListIndex = i
+        If .List(i, colNo - 1) = id Then .ListIndex = i
     Next
 End With
 
@@ -92,18 +92,18 @@ End Function
 ' 리스트박스의 첫번째필드 ID를 참조하여 해당 ID 값을 선택
 ' Select_ListItm ListBox, ID
 '########################
-Function Select_ListItm(lstBox As Control, ID, Optional colNo As Long = 1)
+Function Select_ListItm(lstBox As Control, id, Optional colNo As Long = 1)
 
 Dim i As Long
 Dim listID As Variant
 
-If IsNumeric(ID) Then ID = CLng(ID)
+If IsNumeric(id) Then id = CLng(id)
 
 With lstBox
     For i = 0 To .ListCount - 1
         listID = .List(i, colNo - 1)
         If IsNumeric(listID) Then listID = CLng(listID)
-        If listID = ID Then
+        If listID = id Then
             .Selected(i) = True: Exit For
         End If
     Next

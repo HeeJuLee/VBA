@@ -166,7 +166,7 @@ Private Sub txtEstimateName_Enter()
     '자동완성 리스트에서 탭해서 넘어오는 경우
     With Me.lswManagerAutoComplete
         If .Visible = True Then
-            Me.txtManager.value = .SelectedItem.Text
+            Me.txtManager.value = .selectedItem.Text
             .Visible = False
         End If
     End With
@@ -176,7 +176,7 @@ Private Sub txtManager_Enter()
     '자동완성 리스트에서 탭해서 넘어오는 경우
     With Me.lswCustomerAutoComplete
         If .Visible = True Then
-            Me.txtCustomer.value = .SelectedItem.Text
+            Me.txtCustomer.value = .selectedItem.Text
             .Visible = False
         End If
     End With
@@ -205,13 +205,13 @@ Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Sh
                 Me.txtManager.SetFocus
                 KeyCode = 0
             ElseIf .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
+                .selectedItem = .ListItems(1)
                 .SetFocus
             End If
         ElseIf KeyCode = 40 Then
             '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
             If .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
+                .selectedItem = .ListItems(1)
                 .SetFocus
             End If
         End If
@@ -249,8 +249,8 @@ End Sub
 Private Sub lswCustomerAutoComplete_DblClick()
     '거래처에 값을 넣어주고 포커스는 품명으로 이동
     With Me.lswCustomerAutoComplete
-        If Not .SelectedItem Is Nothing Then
-            Me.txtCustomer.value = .SelectedItem.Text
+        If Not .selectedItem Is Nothing Then
+            Me.txtCustomer.value = .selectedItem.Text
             .Visible = False
             Me.txtManager.SetFocus
         End If
@@ -261,8 +261,8 @@ Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As I
     '거래처 선택 후 엔터키 들어오면 이 값을 거래처명에 넣어주고 포커스는 다음(매니저명)으로 이동
     If KeyCode = 13 Then
         With Me.lswCustomerAutoComplete
-            If Not .SelectedItem Is Nothing Then
-                Me.txtCustomer.value = .SelectedItem.Text
+            If Not .selectedItem Is Nothing Then
+                Me.txtCustomer.value = .selectedItem.Text
                 .Visible = False
                 Me.txtManager.SetFocus
             End If
@@ -283,13 +283,13 @@ Private Sub txtManager_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shi
                 Me.txtEstimateName.SetFocus
                 KeyCode = 0
             ElseIf .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
+                .selectedItem = .ListItems(1)
                 .SetFocus
             End If
         ElseIf KeyCode = 40 Then
             '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
             If .ListItems.count > 0 And .Visible = True Then
-                .SelectedItem = .ListItems(1)
+                .selectedItem = .ListItems(1)
                 .SetFocus
             End If
         End If
@@ -328,8 +328,8 @@ End Sub
 Private Sub lswManagerAutoComplete_DblClick()
     '담당자명에 값을 넣어주고 포커스는 사이즈로 이동
     With Me.lswManagerAutoComplete
-        If Not .SelectedItem Is Nothing Then
-            Me.txtManager.value = .SelectedItem.Text
+        If Not .selectedItem Is Nothing Then
+            Me.txtManager.value = .selectedItem.Text
             .Visible = False
             Me.txtEstimateName.SetFocus
         End If
@@ -340,8 +340,8 @@ Private Sub lswManagerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As In
     '담당자 선택 후 엔터키 들어오면 이 값을 담당자명에 넣어주고 포커스는 다음(사이즈)으로 이동
     If KeyCode = 13 Then
         With Me.lswManagerAutoComplete
-            If Not .SelectedItem Is Nothing Then
-                Me.txtManager.value = .SelectedItem.Text
+            If Not .selectedItem Is Nothing Then
+                Me.txtManager.value = .selectedItem.Text
                 .Visible = False
                 Me.txtEstimateName.SetFocus
             End If
@@ -349,7 +349,7 @@ Private Sub lswManagerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As In
     End If
 End Sub
 
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtEstimateDate
 End Sub
 

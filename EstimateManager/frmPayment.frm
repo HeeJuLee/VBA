@@ -30,8 +30,8 @@ Private Sub UserForm_Initialize()
     For Each contr In Me.Controls
         If contr.Name Like "lbl*" Then
             If contr.Name Like "lbl2*" Then
-                contr.BackColor = RGB(48, 84, 150)
-                contr.ForeColor = RGB(255, 255, 255)
+                'contr.BackColor = RGB(48, 84, 150)
+                'contr.ForeColor = RGB(255, 255, 255)
             ElseIf contr.Name Like "lbl3*" Then
                 contr.BackColor = RGB(221, 235, 247)
             Else
@@ -262,7 +262,7 @@ Sub SelectItemLswPayment(selectedID As Variant)
         If Not IsMissing(selectedID) Then
             For i = 1 To .ListItems.count
                 If selectedID = .ListItems(i).SubItems(1) Then
-                    .SelectedItem = .ListItems(i)
+                    .selectedItem = .ListItems(i)
                     .SetFocus
                 Else
                     .ListItems(i).Selected = False
@@ -302,11 +302,11 @@ End Sub
 
 Private Sub lswPaymentList_Click()
     With Me.lswPaymentList
-        If Not .SelectedItem Is Nothing Then
-            Me.txtPayID.value = .SelectedItem.Text
-            Me.txtPayDate.value = .SelectedItem.ListSubItems(1)
-            Me.txtPayAmount.value = .SelectedItem.ListSubItems(2)
-            Me.txtPayMemo.value = .SelectedItem.ListSubItems(3)
+        If Not .selectedItem Is Nothing Then
+            Me.txtPayID.value = .selectedItem.Text
+            Me.txtPayDate.value = .selectedItem.ListSubItems(1)
+            Me.txtPayAmount.value = .selectedItem.ListSubItems(2)
+            Me.txtPayMemo.value = .selectedItem.ListSubItems(3)
         End If
     End With
 End Sub
@@ -329,7 +329,7 @@ Private Sub btnPaymentClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVa
     End If
 End Sub
 
-Private Sub imgPayDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgPayDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtPayDate
 End Sub
 

@@ -5,7 +5,32 @@ Dim searchResultCount As Long
 Dim isEnd As Boolean
 Dim isListInit As Boolean
 
-
+Private Sub lswOperationList_Click()
+    With Me.lswOperationList
+        If Not .selectedItem Is Nothing Then
+            Me.txtOperationID.value = .selectedItem.Text
+            Range("E7") = Format(.selectedItem.ListSubItems(2), "mm/dd")
+            Range("E8") = .selectedItem.ListSubItems(3)
+            Range("E9") = .selectedItem.ListSubItems(4)
+            Range("E10") = .selectedItem.ListSubItems(5)
+            Range("E11") = .selectedItem.ListSubItems(6)
+            Range("E12") = .selectedItem.ListSubItems(7)
+            If IsNumeric(.selectedItem.ListSubItems(8)) Then
+                Range("E13") = CLng(.selectedItem.ListSubItems(8))
+            Else
+                Range("E13") = .selectedItem.ListSubItems(8)
+            End If
+            Range("E14") = Format(.selectedItem.ListSubItems(9), "mm/dd")
+            Range("E15") = Format(.selectedItem.ListSubItems(10), "mm/dd")
+            Range("E16") = Format(.selectedItem.ListSubItems(11), "mm/dd")
+            If IsNumeric(.selectedItem.ListSubItems(12)) Then
+                Range("E17") = CLng(.selectedItem.ListSubItems(12))
+            Else
+                Range("E17") = .selectedItem.ListSubItems(12)
+            End If
+        End If
+    End With
+End Sub
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -30,6 +55,10 @@ End Sub
 '운영비 데이터를 검색해서 시트에 출력
 Sub OperationSearch()
     Dim db As Variant
+    Dim i As Long
+    Dim li As ListItem
+    Dim income, expense As Long
+    
     
     '운영비 데이터를 읽어옴
     db = Get_DB(shtOperation, False, False)
@@ -55,9 +84,37 @@ Sub OperationSearch()
         '검색결과 건수를 저장
         searchResultCount = UBound(db, 1)
         
-        '검색결과 리스트뷰에 출력
-        SetOperationList (db)
+        income = 0
+        expense = 0
+        With Me.lswOperationList
+            For i = 1 To UBound(db)
+               
+                Set li = .ListItems.Add(, , db(i, 1))
+                li.ListSubItems.Add , , i
+                li.ListSubItems.Add , , db(i, 14)
+                li.ListSubItems.Add , , db(i, 15)
+                li.ListSubItems.Add , , db(i, 3)
+                li.ListSubItems.Add , , db(i, 5)
+                li.ListSubItems.Add , , db(i, 7)
+                li.ListSubItems.Add , , db(i, 8)
+                li.ListSubItems.Add , , Format(db(i, 9), "#,##0")
+                li.ListSubItems.Add , , db(i, 10)
+                li.ListSubItems.Add , , db(i, 11)
+                li.ListSubItems.Add , , db(i, 12)
+                li.ListSubItems.Add , , Format(db(i, 13), "#,##0")
+                
+                If db(i, 3) = "수입" Then
+                    income = income + db(i, 9)
+                ElseIf db(i, 3) = "지출" Then
+                    expense = expense + db(i, 9)
+                End If
+            Next
+        End With
     End If
+    
+    '합계 출력
+'    shtOperationAdmin.Range("S4").Value = income
+'    shtOperationAdmin.Range("V4").Value = expense
     
     '검색 결과 건수 출력
     Me.lblSearchResult.Caption = searchResultCount & "건"
@@ -70,40 +127,22 @@ Sub OperationSearch()
     
 End Sub
 
-Sub SetOperationList(db)
+Sub SetExpenseSummary(db)
     Dim i As Long
-    Dim li As ListItem
     Dim income, expense As Long
     
     income = 0
     expense = 0
-    With Me.lswOperationList
-        For i = 1 To UBound(db)
-           
-            Set li = .ListItems.Add(, , db(i, 1))
-            li.ListSubItems.Add , , i
-            li.ListSubItems.Add , , db(i, 14)
-            li.ListSubItems.Add , , db(i, 15)
-            li.ListSubItems.Add , , db(i, 3)
-            li.ListSubItems.Add , , db(i, 5)
-            li.ListSubItems.Add , , db(i, 7)
-            li.ListSubItems.Add , , db(i, 8)
-            li.ListSubItems.Add , , Format(db(i, 9), "#,##0")
-            li.ListSubItems.Add , , db(i, 10)
-            li.ListSubItems.Add , , db(i, 11)
-            li.ListSubItems.Add , , db(i, 12)
-            li.ListSubItems.Add , , Format(db(i, 13), "#,##0")
-            
-            If db(i, 3) = "수입" Then
-                income = income + db(i, 9)
-            ElseIf db(i, 3) = "지출" Then
-                expense = expense + db(i, 9)
-            End If
-        Next
-    End With
+    For i = 1 To UBound(db)
+        If db(i, 3) = "수입" Then
+            income = income + db(i, 9)
+        ElseIf db(i, 3) = "지출" Then
+            expense = expense + db(i, 9)
+        End If
+    Next
     
-    shtOperationAdmin.Range("Q6").value = income
-    shtOperationAdmin.Range("T6").value = expense
+    shtOperationAdmin.Range("Q5").value = income
+    shtOperationAdmin.Range("T5").value = expense
     
 End Sub
 
@@ -113,9 +152,14 @@ Sub ClearOperationSearchResult()
     '리스트뷰 내용 삭제
     Me.lswOperationList.ListItems.Clear
     
-    '입력 셀 내용 지움
-    'ClearOperationInput
+    '등록 셀 내용 지움
+    ClearInputData
     
+End Sub
+
+Sub ClearInputData()
+    Me.txtOperationID.value = ""
+    Range("E7:E17") = ""
 End Sub
 
 Sub InitializeLswOperationList()
@@ -123,6 +167,8 @@ Sub InitializeLswOperationList()
     Dim i, j, totalCost As Long
     Dim li As ListItem
     Dim fullPath As String
+    
+    fullPath = getLocalFullName(ThisWorkbook.Path) & "\listview-1.jpg"
     
     With Me.ImageList1.ListImages
         .Add , , Me.Image1.Picture
@@ -136,7 +182,7 @@ Sub InitializeLswOperationList()
         .HideColumnHeaders = False
         .HideSelection = True
         .FullRowSelect = True
-        .MultiSelect = True
+        .MultiSelect = False
         .LabelEdit = lvwManual
         .SmallIcons = Me.ImageList1
         
@@ -160,91 +206,31 @@ Sub InitializeLswOperationList()
     isListInit = True
 End Sub
 
-Sub SelectItemLswOperation(selectedID As Variant)
-    Dim i As Long
-    
-    With Me.lswOperationList
-        If Not IsMissing(selectedID) Then
-            For i = 1 To .ListItems.count
-                If selectedID = .ListItems(i).Text Then
-                    .selectedItem = .ListItems(i)
-                    .selectedItem.EnsureVisible
-                Else
-                    .ListItems(i).Selected = False
-                End If
-            Next
-        End If
-    End With
-End Sub
-
-Sub ClearOperationInput()
-    Range("D6:N6") = ""
-    Range("D6").value = Date
-End Sub
-
-'운영비 등록
-Sub InsertOperation()
-    Dim cost As Variant
-
-    If Range("I6").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
-    If Range("D6") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
-    
-    '운영비에 저장
-    Insert_Record shtOperation, , Range("F6").value, , Range("G6"), , Range("H6"), Range("I6"), Range("J6"), Range("K6"), Range("L6"), Range("M6"), Range("N6"), Range("D6"), Range("E6")
-    
-    OperationSearch
-    
-    '등록한 아이템 선택
-    Me.txtOperationID.value = Get_LastID(shtOperation)
-    SelectItemLswOperation Me.txtOperationID.value
-
-End Sub
-
-'운영비 수정
-Sub UpdateOperation()
-    Dim cost As Variant
-
-    If Me.txtOperationID.value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
-    
-    If Range("I6").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
-    If Range("D6") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
-    
-    '기존 운영비 업데이트
-    Update_Record shtOperation, Me.txtOperationID.value, , Range("F6").value, , Range("G6"), , Range("H6"), Range("I6"), Range("J6"), Range("K6"), Range("L6"), Range("M6"), Range("N6"), Range("D6"), Range("E6")
-    
-    OperationSearch
-    
-    '등록한 아이템 선택
-    SelectItemLswOperation Me.txtOperationID.value
-End Sub
-
-'운영비 삭제
-Sub DeleteOperation()
-    Dim db As Variant
+'발주삭제
+Sub OperationDelete()
+    Dim cRow As Long
     Dim YN As VbMsgBoxResult
-    Dim count As Long
-    Dim li As ListItem
-
-    count = 0
-    For Each li In Me.lswOperationList.ListItems
-        If li.Selected = True Then count = count + 1
-    Next
-    If count = 0 Then MsgBox "삭제할 항목을 선택하세요.": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 항목을 삭제합니다.", vbYesNo)
+    '선택한 행 번호
+    cRow = Selection.row
+
+    '데이터가 있는 행이 아닐 경우는 중지
+    If cRow < 6 Or Range("B" & cRow).value = "" Then
+        MsgBox "삭제할 행을 선택하신 후 '삭제' 버튼을 클릭하세요."
+        End
+    End If
+
+    '안내 문구 출력
+    YN = MsgBox("선택한 발주정보를 정말로 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     If YN = vbNo Then Exit Sub
-
-    For Each li In Me.lswOperationList.ListItems
-        If li.Selected = True Then
-            Delete_Record shtOperation, li.Text
-        End If
-    Next
     
-    Me.txtOperationID.value = ""
-    ClearOperationInput
+    'DB에서 견적정보 삭제
+    Delete_Record shtOperation, Range("B" & cRow).value
+
     OperationSearch
 End Sub
 
+''조회 기간', '검색어' 등 일반 텍스트 박스 클릭 시 Object 선택이 안되도록 클릭이벤트를 빈 매크로로 연결
 Sub EmptyProcedure()
 
 End Sub
@@ -306,49 +292,6 @@ Private Sub optLastMonth_Click()
         Me.cboSelectYear.value = Y & "년"
         Me.cboSelectMonth.value = M - 1 & "월"
     End If
-    
-End Sub
-
-
-Private Sub lswOperationList_Click()
-    With Me.lswOperationList
-        If Not .selectedItem Is Nothing Then
-            Me.txtOperationID.value = .selectedItem.Text
-            Range("D6") = Format(.selectedItem.ListSubItems(2), "mm/dd")
-            Range("E6") = .selectedItem.ListSubItems(3)
-            Range("F6") = .selectedItem.ListSubItems(4)
-            Range("G6") = .selectedItem.ListSubItems(5)
-            Range("H6") = .selectedItem.ListSubItems(6)
-            Range("I6") = .selectedItem.ListSubItems(7)
-            If IsNumeric(.selectedItem.ListSubItems(8)) Then
-                Range("J6") = CLng(.selectedItem.ListSubItems(8))
-            Else
-                Range("J6") = .selectedItem.ListSubItems(8)
-            End If
-            Range("K6") = Format(.selectedItem.ListSubItems(9), "mm/dd")
-            Range("L6") = Format(.selectedItem.ListSubItems(10), "mm/dd")
-            Range("M6") = Format(.selectedItem.ListSubItems(11), "mm/dd")
-            If IsNumeric(.selectedItem.ListSubItems(12)) Then
-                Range("N6") = CLng(.selectedItem.ListSubItems(12))
-            Else
-                Range("N6") = .selectedItem.ListSubItems(12)
-            End If
-        End If
-    End With
-End Sub
-
-
-Private Sub lswOperationList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
-    
-    With Me.lswOperationList
-        .SortKey = ColumnHeader.Index - 1
-        If .SortOrder = lvwAscending Then
-            .SortOrder = lvwDescending
-        Else
-            .SortOrder = lvwAscending
-        End If
-        .Sorted = True
-    End With
     
 End Sub
 
@@ -459,13 +402,3 @@ Private Sub cboSelectMonth_Change()
     End If
 End Sub
 
-
-Private Sub Worksheet_Change(ByVal Target As Range)
-    If Target.Address = "$J$6" Then
-        If Target.value = "" Then
-            Range("N6").value = ""
-        ElseIf IsNumeric(Target.value) Then
-            Range("N6").value = Target.value * 0.1
-        End If
-    End If
-End Sub
