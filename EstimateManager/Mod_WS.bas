@@ -10,6 +10,7 @@ Public orderInsertFormX, orderInsertFormY As Long
 Public productionFormX, productionFormY As Long
 Public paymentFormX, paymentFormY As Long
 Public operationFormX, operationFormY As Long
+Public orderDateUpdateFormX, orderDateUpdateFormY As Long
 Public selectionRow As Long
 
 Sub GetCalendarDate(textBox As MSForms.textBox)

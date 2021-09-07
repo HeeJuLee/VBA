@@ -329,7 +329,7 @@ Private Sub btnPaymentClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVa
     End If
 End Sub
 
-Private Sub imgPayDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgPayDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtPayDate
 End Sub
 

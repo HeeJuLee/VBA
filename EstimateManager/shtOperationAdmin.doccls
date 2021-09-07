@@ -21,10 +21,10 @@ Private Sub Worksheet_Activate()
     isKeyworldSearch = False
     isEnd = False
     
-    If isListInit = False Then
-        InitializeLswOperationList
-        OperationSearch
-    End If
+'    If isListInit = False Then
+'        InitializeLswOperationList
+'        OperationSearch
+'    End If
 End Sub
 
 '운영비 데이터를 검색해서 시트에 출력
@@ -75,9 +75,42 @@ Sub SetOperationList(db)
     Dim li As ListItem
     Dim income, expense As Long
     
-    income = 0
-    expense = 0
+    With Me.ImageList1.ListImages
+        .Add , , Me.Image1.Picture
+    End With
+    
+     '리스트뷰 값 설정
     With Me.lswOperationList
+        .View = lvwReport
+        .Gridlines = True
+        .FullRowSelect = True
+        .HideColumnHeaders = False
+        .HideSelection = True
+        .FullRowSelect = True
+        .MultiSelect = True
+        .LabelEdit = lvwManual
+        .SmallIcons = Me.ImageList1
+        .Sorted = False
+        
+        .ColumnHeaders.Clear
+
+        .ColumnHeaders.Add , , "ID", 0
+        .ColumnHeaders.Add , , "No", 40, lvwColumnCenter
+        .ColumnHeaders.Add , , "등록일자", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "고정비", 60, lvwColumnCenter
+        .ColumnHeaders.Add , , "수입지출", 70, lvwColumnCenter
+        .ColumnHeaders.Add , , "분류", 55, lvwColumnCenter
+        .ColumnHeaders.Add , , "거래처", 100
+        .ColumnHeaders.Add , , "품목", 250
+        .ColumnHeaders.Add , , "금액", 80, lvwColumnRight
+        .ColumnHeaders.Add , , "명세서", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "계산서", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "부가세", 80, lvwColumnRight
+    
+        income = 0
+        expense = 0
+        
         For i = 1 To UBound(db)
            
             Set li = .ListItems.Add(, , db(i, 1))
@@ -147,7 +180,7 @@ Sub InitializeLswOperationList()
         .ColumnHeaders.Add , , "등록일자", 80, lvwColumnCenter
         .ColumnHeaders.Add , , "고정비", 60, lvwColumnCenter
         .ColumnHeaders.Add , , "수입지출", 70, lvwColumnCenter
-        .ColumnHeaders.Add , , "분류", 50, lvwColumnCenter
+        .ColumnHeaders.Add , , "분류", 55, lvwColumnCenter
         .ColumnHeaders.Add , , "거래처", 100
         .ColumnHeaders.Add , , "품목", 250
         .ColumnHeaders.Add , , "금액", 80, lvwColumnRight
@@ -184,13 +217,31 @@ End Sub
 
 '운영비 등록
 Sub InsertOperation()
-    Dim cost As Variant
+    Dim YN As VbMsgBoxResult
+    Dim count As Long
+    Dim li As ListItem
 
-    If Range("I6").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
-    If Range("D6") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
-    
-    '운영비에 저장
-    Insert_Record shtOperation, , Range("F6").value, , Range("G6"), , Range("H6"), Range("I6"), Range("J6"), Range("K6"), Range("L6"), Range("M6"), Range("N6"), Range("D6"), Range("E6")
+    count = 0
+    For Each li In Me.lswOperationList.ListItems
+        If li.Selected = True Then count = count + 1
+    Next
+    If count <= 1 Then
+        If Range("I6").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
+        If Range("D6") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
+        
+        '운영비에 저장
+        Insert_Record shtOperation, , Range("F6").value, , Range("G6"), , Range("H6"), Range("I6"), Range("J6"), Range("K6"), Range("L6"), Range("M6"), Range("N6"), Range("D6"), Range("E6")
+    Else
+        '여러개 선택 후 등록 시 대량 등록 진행
+        YN = MsgBox("선택한 " & count & "개 항목을 등록합니다.", vbYesNo)
+        If YN = vbNo Then Exit Sub
+        
+        For Each li In Me.lswOperationList.ListItems
+            If li.Selected = True Then
+                Insert_Record shtOperation, , li.SubItems(4), , li.SubItems(5), , li.SubItems(6), li.SubItems(7), li.SubItems(8), li.SubItems(9), li.SubItems(10), li.SubItems(11), li.SubItems(12), Date, li.SubItems(3)
+            End If
+        Next
+    End If
     
     OperationSearch
     
@@ -220,7 +271,6 @@ End Sub
 
 '운영비 삭제
 Sub DeleteOperation()
-    Dim db As Variant
     Dim YN As VbMsgBoxResult
     Dim count As Long
     Dim li As ListItem
@@ -468,4 +518,14 @@ Private Sub Worksheet_Change(ByVal Target As Range)
             Range("N6").value = Target.value * 0.1
         End If
     End If
+End Sub
+
+Sub DeleteKeyword1()
+    Me.txtKeyword.value = ""
+    OrderSearch
+End Sub
+
+Sub DeleteKeyword2()
+    Me.txtKeyword2.value = ""
+    OrderSearch
 End Sub

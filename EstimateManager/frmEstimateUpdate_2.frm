@@ -101,7 +101,7 @@ Private Sub UserForm_Initialize()
     Me.cboCategory.value = Trim(estimate(25))   '분류
     '26은 납기일
     Me.txtSpecificationDate.value = estimate(27)    '거래명세서
-    Me.txtTaxInvoiceDate.value = estimate(28)    '세금계산서
+    Me.txtTaxinvoiceDate.value = estimate(28)    '세금계산서
     Me.txtPaymentDate.value = estimate(29)    '결제일자
     Me.txtExpectPaymentDate.value = estimate(30)  '예상결제일
     Me.txtExpectPaymentMonth.value = Format(estimate(30), "mm" & "월")  '예상결제월
@@ -363,7 +363,7 @@ Sub UpdateEstimate()
         Me.txtAcceptedMargin.value, _
         Me.txtInsertDate.value, Date, _
         Me.cboCategory.value, , _
-        Me.txtSpecificationDate.value, Me.txtTaxInvoiceDate.value, Me.txtPaymentDate.value, Me.txtExpectPaymentDate.value, _
+        Me.txtSpecificationDate.value, Me.txtTaxinvoiceDate.value, Me.txtPaymentDate.value, Me.txtExpectPaymentDate.value, _
         Me.txtVAT.value, Me.txtMemo.value, Me.chkVAT.value
     
 End Sub
@@ -445,7 +445,7 @@ Sub CalculateEstimateUpdateCost()
 
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 수주금액의 10%
@@ -859,43 +859,43 @@ Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVa
     If KeyCode = 27 Then Unload Me
 End Sub
 
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtEstimateDate
 End Sub
 
-Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgAcceptedDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtAcceptedDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgBidDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtBidDate
 End Sub
 
-Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtDeliveryDate
 End Sub
 
-Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgInsuranceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtInsuranceDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtSpecificationDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgTaxInvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
+Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtTaxinvoiceDate
     CalculateEstimateUpdateCost
 End Sub
 
-Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtPaymentDate
 End Sub
 
-Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgExpectPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtExpectPaymentDate
     Me.txtExpectPaymentMonth = Format(Me.txtExpectPaymentDate, "mm" & "월")
 End Sub

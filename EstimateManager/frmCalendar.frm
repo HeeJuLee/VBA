@@ -211,7 +211,7 @@ Else
     MousePOS = convertMouseToForm()
     Me.StartUpPosition = 0
     Me.top = MousePOS.Y
-    Me.Left = MousePOS.x
+    Me.Left = MousePOS.X
 End If
 
 YearBetween = YearGap
@@ -273,48 +273,48 @@ Next
 
 End Sub
 
-Private Sub Label1_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label43: End Sub
-Private Sub Label2_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label44: End Sub
-Private Sub Label3_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label45: End Sub
-Private Sub Label4_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label46: End Sub
-Private Sub Label5_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label47: End Sub
-Private Sub Label6_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label48: End Sub
-Private Sub Label7_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label49: End Sub
-Private Sub Label8_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label50: End Sub
-Private Sub Label9_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label51: End Sub
-Private Sub Label10_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label52: End Sub
-Private Sub Label11_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label53: End Sub
-Private Sub Label12_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label54: End Sub
-Private Sub Label13_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label55: End Sub
-Private Sub Label14_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label56: End Sub
-Private Sub Label15_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label57: End Sub
-Private Sub Label16_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label58: End Sub
-Private Sub Label17_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label59: End Sub
-Private Sub Label18_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label60: End Sub
-Private Sub Label19_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label61: End Sub
-Private Sub Label20_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label62: End Sub
-Private Sub Label21_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label63: End Sub
-Private Sub Label22_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label64: End Sub
-Private Sub Label23_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label65: End Sub
-Private Sub Label24_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label66: End Sub
-Private Sub Label25_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label67: End Sub
-Private Sub Label26_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label68: End Sub
-Private Sub Label27_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label69: End Sub
-Private Sub Label28_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label70: End Sub
-Private Sub Label29_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label71: End Sub
-Private Sub Label30_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label72: End Sub
-Private Sub Label31_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label73: End Sub
-Private Sub Label32_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label74: End Sub
-Private Sub Label33_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label75: End Sub
-Private Sub Label34_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label76: End Sub
-Private Sub Label35_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label77: End Sub
-Private Sub Label36_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label78: End Sub
-Private Sub Label37_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label79: End Sub
-Private Sub Label38_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label80: End Sub
-Private Sub Label39_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label81: End Sub
-Private Sub Label40_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label82: End Sub
-Private Sub Label41_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label83: End Sub
-Private Sub Label42_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single): OnHover_Css Me.Label84: End Sub
+Private Sub Label1_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label43: End Sub
+Private Sub Label2_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label44: End Sub
+Private Sub Label3_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label45: End Sub
+Private Sub Label4_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label46: End Sub
+Private Sub Label5_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label47: End Sub
+Private Sub Label6_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label48: End Sub
+Private Sub Label7_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label49: End Sub
+Private Sub Label8_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label50: End Sub
+Private Sub Label9_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label51: End Sub
+Private Sub Label10_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label52: End Sub
+Private Sub Label11_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label53: End Sub
+Private Sub Label12_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label54: End Sub
+Private Sub Label13_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label55: End Sub
+Private Sub Label14_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label56: End Sub
+Private Sub Label15_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label57: End Sub
+Private Sub Label16_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label58: End Sub
+Private Sub Label17_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label59: End Sub
+Private Sub Label18_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label60: End Sub
+Private Sub Label19_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label61: End Sub
+Private Sub Label20_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label62: End Sub
+Private Sub Label21_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label63: End Sub
+Private Sub Label22_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label64: End Sub
+Private Sub Label23_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label65: End Sub
+Private Sub Label24_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label66: End Sub
+Private Sub Label25_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label67: End Sub
+Private Sub Label26_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label68: End Sub
+Private Sub Label27_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label69: End Sub
+Private Sub Label28_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label70: End Sub
+Private Sub Label29_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label71: End Sub
+Private Sub Label30_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label72: End Sub
+Private Sub Label31_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label73: End Sub
+Private Sub Label32_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label74: End Sub
+Private Sub Label33_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label75: End Sub
+Private Sub Label34_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label76: End Sub
+Private Sub Label35_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label77: End Sub
+Private Sub Label36_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label78: End Sub
+Private Sub Label37_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label79: End Sub
+Private Sub Label38_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label80: End Sub
+Private Sub Label39_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label81: End Sub
+Private Sub Label40_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label82: End Sub
+Private Sub Label41_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label83: End Sub
+Private Sub Label42_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single): OnHover_Css Me.Label84: End Sub
 
 Private Sub Label1_Click(): Call lblClick(Me.Label1): End Sub
 Private Sub Label2_Click(): Call lblClick(Me.Label2): End Sub
@@ -374,7 +374,7 @@ If KeyCode = vbKeyReturn Then returnDate = Date: Unload Me
 If KeyCode = vbKeyEscape Then Unload Me
 End Sub
 
-Private Sub UserForm_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub UserForm_MouseMove(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
 Dim ctl As Control: Dim i As Long
 Dim vList As Variant
 

@@ -349,7 +349,7 @@ Private Sub lswManagerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As In
     End If
 End Sub
 
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtEstimateDate
 End Sub
 
