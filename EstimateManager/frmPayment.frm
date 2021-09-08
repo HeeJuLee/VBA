@@ -22,7 +22,7 @@ Private Sub UserForm_Initialize()
     Dim estimate As Variant
     
     If currentEstimateId = "" Then
-        MsgBox "currentEstimateId 오류: 선택한 견적이 없습니다."
+        MsgBox "currentEstimateId 오류: 선택한 견적이 없습니다.", vbInformation, "작업 확인"
         End
     End If
     
@@ -50,7 +50,7 @@ Private Sub UserForm_Initialize()
     'currentEstimateId로 견적데이터 읽어오기 (확인용)
     estimate = Get_Record_Array(shtEstimate, currentEstimateId)
     If IsEmpty(estimate) Then
-        MsgBox "currentEstimateId에 해당하는 견적 데이터가 없습니다."
+        MsgBox "currentEstimateId에 해당하는 견적 데이터가 없습니다.", vbInformation, "작업 확인"
         End
     End If
 
@@ -120,8 +120,8 @@ End Sub
 
 Sub InsertPayment()
     
-    If Me.txtPayDate.value = "" Then MsgBox "결제일을 입력하세요.": Exit Sub
-    If Me.txtPayAmount.value = "" Then MsgBox "결제금액을 입력하세요.": Exit Sub
+    If Me.txtPayDate.value = "" Then MsgBox "결제일을 입력하세요.", vbInformation, "작업 확인": Exit Sub
+    If Me.txtPayAmount.value = "" Then MsgBox "결제금액을 입력하세요.", vbInformation, "작업 확인": Exit Sub
 
     '분할결제이력에 저장
     Insert_Record shtPayment, CLng(currentEstimateId), Me.txtManagementID.value, Me.txtPayDate.value, Me.txtPayAmount.value, Me.txtPayMemo.value, Date
@@ -155,10 +155,10 @@ End Sub
 Sub UpdatePayment()
     Dim cost As Variant
 
-    If Me.txtPayID.value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
+    If Me.txtPayID.value = "" Then MsgBox "수정할 항목을 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    If Me.txtPayDate.value = "" Then MsgBox "결제일을 입력하세요.": Exit Sub
-    If Me.txtPayAmount.value = "" Then MsgBox "결제금액을 입력하세요.": Exit Sub
+    If Me.txtPayDate.value = "" Then MsgBox "결제일을 입력하세요.", vbInformation, "작업 확인": Exit Sub
+    If Me.txtPayAmount.value = "" Then MsgBox "결제금액을 입력하세요.", vbInformation, "작업 확인": Exit Sub
     
     '기존 분할결제이력에 업데이트
     Update_Record shtPayment, Me.txtPayID.value, currentEstimateId, Me.txtManagementID.value, Me.txtPayDate.value, Me.txtPayAmount.value, Me.txtPayMemo.value, Date
@@ -196,9 +196,9 @@ Sub DeletePayment()
     For Each li In Me.lswPaymentList.ListItems
         If li.Selected = True Then count = count + 1
     Next
-    If count = 0 Then MsgBox "삭제할 항목을 선택하세요.": Exit Sub
+    If count = 0 Then MsgBox "삭제할 항목을 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 항목을 삭제합니다.", vbYesNo)
+    YN = MsgBox("선택한 " & count & "개 항목을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
     If YN = vbNo Then Exit Sub
 
     For Each li In Me.lswPaymentList.ListItems
@@ -338,7 +338,7 @@ Private Sub txtPayAmount_AfterUpdate()
     Me.txtPayAmount.value = Trim(Me.txtPayAmount.value)
     
     If Not IsNumeric(Me.txtPayAmount.value) Then
-        MsgBox "숫자를 입력하세요.", vbExclamation
+        MsgBox "숫자를 입력하세요.", vbInformation, "작업 확인"
         Exit Sub
     End If
     

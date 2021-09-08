@@ -4,7 +4,7 @@ Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmOrderDateUpdate
    ClientHeight    =   5910
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   16020
+   ClientWidth     =   15555
    OleObjectBlob   =   "frmOrderDateUpdate.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
@@ -21,7 +21,7 @@ Private Sub UserForm_Initialize()
     Dim contr As Control
     
     If isFormLoaded("frmEstimateUpdate") = False Then
-        MsgBox "견적 수정화면을 찾을 수 없습니다.", vbExclamation
+        MsgBox "견적 수정화면을 찾을 수 없습니다.", vbInformation, "작업 확인"
         Exit Sub
     End If
     
@@ -33,7 +33,7 @@ Private Sub UserForm_Initialize()
     Next
     
     If count = 0 Then
-        MsgBox "일괄 변경할 발주를 선택하세요.", vbExclamation
+        MsgBox "일괄 변경할 발주를 선택하세요.", vbInformation, "작업 확인"
         Exit Sub
     End If
     

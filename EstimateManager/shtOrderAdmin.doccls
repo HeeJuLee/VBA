@@ -353,6 +353,7 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     '관리번호를 더블클릭한 경우 관리번호로 검색
     If Target.Column = 5 Then
         Me.txtKeyword.value = Target.value
+        Range("S4").value = ""
         OrderSearch
     Else
         '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌

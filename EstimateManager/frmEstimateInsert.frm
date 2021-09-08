@@ -90,7 +90,7 @@ Sub InsertEstimate()
     
     '동일한 관리번호가 있는지 체크
     blnUnique = IsUnique(db, Me.txtManagementID.value, 2)
-    If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
+    If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation, "작업 확인": Exit Sub
     
     Insert_Record shtEstimate, _
                   Trim(Me.txtManagementID.value), _
@@ -121,7 +121,7 @@ Function CheckEstimateInsertValidation()
 
     '견적명이 입력되었는지 체크
     If Trim(Me.txtEstimateName.value) = "" Then
-        MsgBox "견적명을 입력하세요."
+        MsgBox "견적명을 입력하세요.", vbInformation, "작업 확인"
         CheckEstimateInsertValidation = False
         Me.txtEstimateName.SetFocus
         Exit Function
@@ -129,7 +129,7 @@ Function CheckEstimateInsertValidation()
     
     '관리번호가 입력되었는지 체크
     If Trim(Me.txtManagementID.value) = "" Then
-        MsgBox "관리번호를 입력하세요."
+        MsgBox "관리번호를 입력하세요.", vbInformation, "작업 확인"
         CheckEstimateInsertValidation = False
         Me.txtManagementID.SetFocus
         Exit Function
@@ -199,10 +199,17 @@ Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Sh
             .Visible = False
             Me.txtManager.SetFocus
         ElseIf KeyCode = 9 Then
-            '탭키일 경우에 자동완성 결과가 하나이면 다음 입력칸으로 이동
+            '탭키일 경우에 자동완성 결과가 하나이면
             If .ListItems.count = 1 Then
-                .Visible = False
-                Me.txtManager.SetFocus
+                If Me.txtCustomer.value <> .ListItems(1).Text Then
+                    '자동완성 결과와 입력값이 다르면 포커스를 자동완성 리스트로 이동
+                    .selectedItem = .ListItems(1)
+                    .SetFocus
+                Else
+                    '자동완성 결과와 입력값이 같으면 다음 입력칸으로 이동
+                    .Visible = False
+                    Me.txtManager.SetFocus
+                End If
                 KeyCode = 0
             ElseIf .ListItems.count > 0 And .Visible = True Then
                 .selectedItem = .ListItems(1)
@@ -277,10 +284,17 @@ Private Sub txtManager_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shi
             .Visible = False
             Me.txtEstimateName.SetFocus
         ElseIf KeyCode = 9 Then
-            '탭키일 경우에 자동완성 결과가 하나이면 다음 입력칸으로 이동
+            '탭키일 경우에 자동완성 결과가 하나이면
             If .ListItems.count = 1 Then
-                .Visible = False
-                Me.txtEstimateName.SetFocus
+                If Me.txtCustomer.value <> .ListItems(1).Text Then
+                    '자동완성 결과와 입력값이 다르면 포커스를 자동완성 리스트로 이동
+                    .selectedItem = .ListItems(1)
+                    .SetFocus
+                Else
+                    '자동완성 결과와 입력값이 같으면 다음 입력칸으로 이동
+                    .Visible = False
+                    Me.txtEstimateName.SetFocus
+                End If
                 KeyCode = 0
             ElseIf .ListItems.count > 0 And .Visible = True Then
                 .selectedItem = .ListItems(1)
@@ -358,7 +372,7 @@ Private Sub txtAmount_AfterUpdate()
     If Me.txtAmount.value <> "" Then
         '수량값이 숫자가 아닐 경우 오류메시지 출력
         If Not IsNumeric(Me.txtAmount.value) Then
-            MsgBox "숫자를 입력하세요."
+            MsgBox "숫자를 입력하세요.", vbInformation, "작업 확인"
             Me.txtAmount.value = ""
             Exit Sub
         End If
@@ -375,7 +389,7 @@ Private Sub txtUnitPrice_AfterUpdate()
     If Me.txtUnitPrice.value <> "" Then
         '견적단가값이 숫자가 아닐 경우 오류메시지 출력
         If Not IsNumeric(Me.txtUnitPrice.value) Then
-            MsgBox "숫자를 입력하세요."
+            MsgBox "숫자를 입력하세요.", vbInformation, "작업 확인"
             Me.txtUnitPrice.value = ""
             Exit Sub
         End If

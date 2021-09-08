@@ -13,6 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
 Dim orgManagementID As Variant
@@ -21,6 +22,10 @@ Dim mouseX As Integer
 Dim headerIndex As Integer
 Dim beforeSelectedItem As ListItem
 
+
+Private Sub frmOrder_Click()
+
+End Sub
 
 Private Sub UserForm_Activate()
     Me.txtManagementID.SetFocus
@@ -42,7 +47,7 @@ Private Sub UserForm_Initialize()
     
         '데이터가 있는 행이 아닐 경우는 중지
         If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).value = "" Then
-            MsgBox "수정할 견적 행을 먼저 선택한 후 견적수정 버튼을 클릭하세요."
+            MsgBox "수정할 견적 행을 먼저 선택한 후 견적수정 버튼을 클릭하세요.", vbInformation, "작업 확인"
             End
         End If
         
@@ -224,15 +229,16 @@ Sub InitializeLswOrderList()
         .MultiSelect = True
         .LabelEdit = lvwManual
         .SmallIcons = Me.ImageList1
+        .Sorted = False
         
         .ColumnHeaders.Clear
         .ColumnHeaders.Add , , "ID", 0
         .ColumnHeaders.Add , , "ID_견적", 0
         .ColumnHeaders.Add , , "관리번호", 0
         .ColumnHeaders.Add , , "분류", 34
-        .ColumnHeaders.Add , , "거래처", 60
-        .ColumnHeaders.Add , , "품명", 115
-        .ColumnHeaders.Add , , "재질", 62
+        .ColumnHeaders.Add , , "거래처", 50
+        .ColumnHeaders.Add , , "품목", 115
+        .ColumnHeaders.Add , , "재질", 60
         .ColumnHeaders.Add , , "규격", 62
         .ColumnHeaders.Add , , "수량", 30, lvwColumnRight
         .ColumnHeaders.Add , , "단위", 30, lvwColumnCenter
@@ -257,7 +263,7 @@ Sub InitializeLswOrderList()
                 li.ListSubItems.Add , , db(i, 5)        '관리번호
                 li.ListSubItems.Add , , db(i, 4)        '분류
                 li.ListSubItems.Add , , db(i, 6)        '거래처
-                li.ListSubItems.Add , , db(i, 7)        '품명
+                li.ListSubItems.Add , , db(i, 7)        '품목
                 li.ListSubItems.Add , , db(i, 8)        '재질
                 li.ListSubItems.Add , , db(i, 9)        '규격
                 li.ListSubItems.Add , , db(i, 10)        '수량
@@ -319,7 +325,7 @@ Sub UpdateEstimate()
     
     '동일한 관리번호가 있는지 체크
     blnUnique = IsUnique(db, Me.txtManagementID.value, 2, orgManagementID)
-    If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation: Exit Sub
+    If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbInformation, "작업 확인": Exit Sub
     
     '견적 테이블 업데이트
     Update_Record shtEstimate, Me.txtID.value, _
@@ -404,7 +410,7 @@ Sub UpdateOrderListValue(id, headerIndex, value)
             fieldName = "분류2"
         Case 5  '거래처
             fieldName = "거래처"
-        Case 6  '품명
+        Case 6  '품목
             fieldName = "품목"
         Case 7  '재질
             fieldName = "재질"
@@ -489,9 +495,9 @@ Sub DeleteOrderList()
             count = count + 1
         End If
     Next
-    If count = 0 Then MsgBox "삭제할 발주를 선택하세요.": Exit Sub
+    If count = 0 Then MsgBox "삭제할 발주를 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 발주를 삭제합니다.", vbYesNo)
+    YN = MsgBox("선택한 " & count & "개 발주를 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
     If YN = vbNo Then Exit Sub
 
     For Each li In Me.lswOrderList.ListItems
@@ -517,7 +523,7 @@ Sub BatchUpdateOrderdate()
             count = count + 1
         End If
     Next
-    If count = 0 Then MsgBox "일괄 변경할 발주를 선택하세요.": Exit Sub
+    If count = 0 Then MsgBox "일괄 변경할 발주를 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
     If isFormLoaded("frmOrderDateUpdate") = True Then
         Unload frmOrderDateUpdate
@@ -601,7 +607,7 @@ Sub UpdateShtOrderField(orderId, headerIndex, value)
                 fieldNo = 7
             Case 5  '거래처
                 fieldNo = 8
-            Case 6  '품명
+            Case 6  '품목
                 fieldNo = 9
             Case 7  '재질
                 fieldNo = 10

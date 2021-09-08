@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmProduction 
    Caption         =   "예상실행항목 관리"
-   ClientHeight    =   8430.001
+   ClientHeight    =   8250.001
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   15360
@@ -22,7 +22,7 @@ Private Sub UserForm_Initialize()
     Dim estimate As Variant
     
     If currentEstimateId = "" Then
-        MsgBox "currentEstimateId 오류: 선택한 견적이 없습니다."
+        MsgBox "currentEstimateId 오류: 선택한 견적이 없습니다.", vbInformation, "작업 확인"
         End
     End If
     
@@ -50,7 +50,7 @@ Private Sub UserForm_Initialize()
     'currentEstimateId로 견적데이터 읽어오기 (확인용)
     estimate = Get_Record_Array(shtEstimate, currentEstimateId)
     If IsEmpty(estimate) Then
-        MsgBox "currentEstimateId에 해당하는 견적 데이터가 없습니다."
+        MsgBox "currentEstimateId에 해당하는 견적 데이터가 없습니다.", vbInformation, "작업 확인"
         End
     End If
 
@@ -76,6 +76,10 @@ Sub InitializeLswProductionList()
     db = Get_DB(shtProduction)
     db = Filtered_DB(db, currentEstimateId, 2, True)
     
+    With Me.ImageList1.ListImages
+        .Add , , Me.imgListImage.Picture
+    End With
+    
      '리스트뷰 값 설정
     With Me.lswProductionList
         .View = lvwReport
@@ -87,6 +91,7 @@ Sub InitializeLswProductionList()
         .MultiSelect = True
         .LabelEdit = lvwAutomatic
         .CheckBoxes = False
+        .SmallIcons = Me.ImageList1
         
         .ColumnHeaders.Clear
         .ColumnHeaders.Add , , "품명", 130
@@ -162,8 +167,8 @@ End Sub
 
 Sub InsertProduction()
     
-    If Me.txtProductionItem.value = "" Then MsgBox "품명을 입력하세요.": Exit Sub
-    If Me.txtProductionCost.value = "" Then MsgBox "금액을 입력하세요.": Exit Sub
+    If Me.txtProductionItem.value = "" Then MsgBox "품명을 입력하세요.", vbInformation, "작업 확인": Exit Sub
+    If Me.txtProductionCost.value = "" Then MsgBox "금액을 입력하세요.", vbInformation, "작업 확인": Exit Sub
 
     '예상실행항목에 저장
     Insert_Record shtProduction, CLng(currentEstimateId), Me.txtManagementID.value, Me.txtProductionCustomer.value, Me.txtProductionItem.value, _
@@ -195,10 +200,10 @@ End Sub
 Sub UpdateProduction()
     Dim cost As Variant
 
-    If Me.txtProductionID.value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
+    If Me.txtProductionID.value = "" Then MsgBox "수정할 항목을 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    If Me.txtProductionItem.value = "" Then MsgBox "품명을 입력하세요.": Exit Sub
-    If Me.txtProductionCost.value = "" Then MsgBox "금액을 입력하세요.": Exit Sub
+    If Me.txtProductionItem.value = "" Then MsgBox "품명을 입력하세요.", vbInformation, "작업 확인": Exit Sub
+    If Me.txtProductionCost.value = "" Then MsgBox "금액을 입력하세요.", vbInformation, "작업 확인": Exit Sub
     
     '기존 예상실행항목에 업데이트
     Update_Record shtProduction, Me.txtProductionID.value, currentEstimateId, Me.txtManagementID.value, Me.txtProductionCustomer.value, Me.txtProductionItem.value, _
@@ -233,9 +238,9 @@ Sub DeleteProduction()
     For Each li In Me.lswProductionList.ListItems
         If li.Selected = True Then count = count + 1
     Next
-    If count = 0 Then MsgBox "삭제할 항목을 선택하세요.": Exit Sub
+    If count = 0 Then MsgBox "삭제할 항목을 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 항목을 삭제합니다.", vbYesNo)
+    YN = MsgBox("선택한 " & count & "개 항목을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
     If YN = vbNo Then Exit Sub
 
     For Each li In Me.lswProductionList.ListItems
@@ -281,11 +286,11 @@ Sub ProductionToOrder()
     '수주 확정이 아닌 견적의 경우는 발주를 할 수 없음
     estimate = Get_Record_Array(shtEstimate, currentEstimateId)
     If estimate(38) = "" Then
-        MsgBox "수주 확정을 진행해야 발주할 수 있습니다.", vbInformation
+        MsgBox "수주 확정을 진행해야 발주할 수 있습니다.", vbInformation, "작업 확인"
         Exit Sub
     End If
     
-    YN = MsgBox("선택한 " & count & "개 항목을 발주합니다.", vbYesNo)
+    YN = MsgBox("선택한 " & count & "개 항목을 발주할까요?", vbYesNo + vbQuestion, "작업 확인")
     If YN = vbNo Then Exit Sub
     
     count = 0
@@ -321,7 +326,7 @@ Sub ProductionToOrder()
         frmEstimateUpdate.CalculateEstimateUpdateCost
     End If
     
-    MsgBox "총 " & count & "개 항목을 발주하였습니다.", vbInformation
+    MsgBox "총 " & count & "개 항목을 발주하였습니다.", vbInformation, "작업 확인"
     
     shtOrderAdmin.Activate
     shtOrderAdmin.OrderSearch
@@ -564,7 +569,7 @@ Private Sub txtProductionAmount_AfterUpdate()
     End If
     
     If Not IsNumeric(Me.txtProductionAmount.value) Then
-        MsgBox "숫자를 입력하세요."
+        MsgBox "숫자를 입력하세요.", vbInformation, "작업 확인"
         Me.txtProductionAmount.value = ""
         Me.txtProductionCost.value = Me.txtProductionUnitPrice.value
         Exit Sub
@@ -605,7 +610,7 @@ Private Sub txtProductionUnitPrice_AfterUpdate()
     End If
     
     If Not IsNumeric(Me.txtProductionUnitPrice.value) Then
-        MsgBox "숫자를 입력하세요."
+        MsgBox "숫자를 입력하세요.", vbInformation, "작업 확인"
         Me.txtProductionUnitPrice.value = ""
         Me.txtProductionCost.value = ""
         Exit Sub
