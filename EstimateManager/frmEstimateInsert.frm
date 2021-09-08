@@ -25,12 +25,8 @@ Private Sub UserForm_Initialize()
     
     '텍스트박스 라벨 컨트롤 색상 조정
     For Each contr In Me.Controls
-        If contr.Name Like "lbl*" Then
-            'contr.top = contr.top + 2
-            If contr.Name Like "lbl2*" Then
-            Else
-                contr.BackColor = RGB(242, 242, 242)
-            End If
+        If contr.Name Like "Label*" Then
+            contr.top = contr.top - 2
         End If
     Next
 

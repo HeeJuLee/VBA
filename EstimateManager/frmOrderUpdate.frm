@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmOrderUpdate 
    Caption         =   "발주 수정"
-   ClientHeight    =   9435.001
+   ClientHeight    =   6180
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   10140
+   ClientWidth     =   15630
    OleObjectBlob   =   "frmOrderUpdate.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
@@ -16,6 +16,10 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Dim bMatchedEstimateID As Boolean
+
+Private Sub UserForm_Activate()
+    Me.txtManagementID.SetFocus
+End Sub
 
 Private Sub UserForm_Initialize()
     Dim cRow As Long
@@ -65,10 +69,7 @@ Private Sub UserForm_Initialize()
     bMatchedEstimateID = False
     db = Get_DB(shtEstimate)
     db = Filtered_DB(db, Me.txtManagementID.value, 2, True)
-    If IsEmpty(db) Then
-        Me.lblManagementIDError.Caption = "관리번호 오류"
-        Me.lblManagementIDError.Visible = True
-    Else
+    If Not IsEmpty(db) Then
         '여러개 있을 경우에는 맨 마지막 견적정보 사용
         count = UBound(db, 1)
         Me.txtEstimateID.value = db(count, 1)
@@ -79,9 +80,10 @@ Private Sub UserForm_Initialize()
         bMatchedEstimateID = True
     End If
     
-    InitializeOrderCategory
     InitializeCboUnit
     InitializePayMethod
+    InitializeOrderCategory
+    InitializeLswCustomerAutoComplete
     
     Me.cboCategory.value = Trim(order(4))     '분류
     Me.txtCustomer.value = order(6)     '거래처
@@ -95,7 +97,7 @@ Private Sub UserForm_Initialize()
     Me.txtWeight.value = order(14)          '중량
     Me.txtOrderDate.value = order(16)       '발주일자
     Me.txtDueDate.value = order(17)         '납기일자
-    Me.txtDeliveryDate.value = order(18)       '입고일자
+    Me.txtReceivingDate.value = order(18)       '입고일자
     Me.txtSpecificationDate.value = order(20)   '명세서
     Me.txtTaxinvoiceDate.value = order(21)      '계산서
     Me.txtPaymentDate.value = order(22)     '결제일자
@@ -108,8 +110,6 @@ Private Sub UserForm_Initialize()
     Me.txtMemo.value = order(29)            '메모
     Me.chkVAT.value = order(30)             '부가세 제외 여부
     
-    '발주명 입력창에 포커스
-    Me.txtOrderName.SetFocus
 End Sub
 
 Sub InitializeCboUnit()
@@ -133,6 +133,15 @@ Sub InitializePayMethod()
     Update_Cbo Me.cboPayMethod, db
 End Sub
 
+Sub InitializeLswCustomerAutoComplete()
+    
+    With Me.lswCustomerAutoComplete
+        .View = lvwList
+        .LabelEdit = lvwManual
+        .Height = 108
+        .Visible = False
+    End With
+End Sub
 
 Sub UpdateOrder()
     Dim db As Variant
@@ -152,7 +161,7 @@ Sub UpdateOrder()
         Me.cboUnit.value, Me.txtUnitPrice, _
         Me.txtOrderPrice.value, Me.txtWeight.value, _
         , Me.txtOrderDate.value, Me.txtDueDate.value, _
-        Me.txtDeliveryDate.value, , _
+        Me.txtReceivingDate.value, , _
         Me.txtSpecificationDate.value, Me.txtTaxinvoiceDate.value, Me.txtPaymentDate.value, , _
         Me.cboPayMethod.value, Me.txtVAT.value, _
         Me.txtInsertDate, Date, _
@@ -172,40 +181,41 @@ End Sub
 
 
 Function CheckOrderUpdateValidation()
-    Dim bCorrect As Boolean
     
-    bCorrect = True
+    CheckOrderUpdateValidation = False
     
-    '발주명이 입력되었는지 체크
+    '품목이 입력되었는지 체크
     If Trim(Me.txtOrderName.value) = "" Then
-        bCorrect = False
-        Me.lblOrderNameEmpty.Visible = True
-    Else
-        Me.lblOrderNameEmpty.Visible = False
+        MsgBox "품목을 입력하세요.", vbInformation, "작업 확인"
+        Exit Function
     End If
     
     '관리번호가 입력되었고 유효한 관리번호인지 체크
-    If Trim(Me.txtManagementID.value) = "" Or bMatchedEstimateID = False Then
-        bCorrect = False
-        Me.lblManagementIDEmpty.Visible = True
-    Else
-        Me.lblManagementIDEmpty.Visible = False
+    If Trim(Me.txtManagementID.value) = "" Then
+        MsgBox "관리번호를 입력하세요.", vbInformation, "작업 확인"
+        Exit Function
     End If
     
-    CheckOrderUpdateValidation = bCorrect
+    If bMatchedEstimateID = False Then
+        MsgBox "관리번호가 유효하지 않습니다.", vbInformation, "작업 확인"
+        Exit Function
+    End If
+    
+    CheckOrderUpdateValidation = True
+    
 End Function
 
 Sub CalculateOrderUpdateCost()
 
-    '발주금액 계산
-    If Me.txtUnitPrice.value <> "" Then
-        If Me.txtAmount.value = "" Then
-            Me.txtOrderPrice.value = Me.txtUnitPrice.value
-        Else
-            Me.txtOrderPrice.value = CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value)
+    If Me.txtAmount.value = "" Then
+        Me.txtOrderPrice.value = Me.txtUnitPrice.value
+    Else
+        If Me.txtUnitPrice.value = "" Then
+            Me.txtOrderPrice.value = ""
+        ElseIf IsNumeric(Me.txtUnitPrice.value) And IsNumeric(Me.txtAmount.value) Then
+            Me.txtOrderPrice.value = Format(CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value), "#,##0")
         End If
     End If
-    Me.txtOrderPrice.Text = Format(Me.txtOrderPrice.value, "#,##0")
     
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
@@ -229,7 +239,105 @@ Private Sub btnOrderClose_Click()
     Unload Me
 End Sub
 
+Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    With Me.lswCustomerAutoComplete
+        If KeyCode = 13 Then
+            '엔터키 - 다음 입력칸으로 이동
+            .Visible = False
+            Me.txtOrderName.SetFocus
+        ElseIf KeyCode = 9 Then
+            If .ListItems.count = 1 Then
+                If Me.txtCustomer.value <> .ListItems(1).Text Then
+                    '탭키일 경우 자동완성 결과와 입력값이 다르면 포커스를 자동완성 리스트로 이동
+                    .selectedItem = .ListItems(1)
+                    .SetFocus
+                Else
+                    '입력값과 자동완성 결과가 같으면 다음 입력칸으로 이동
+                    .Visible = False
+                    Me.txtOrderName.SetFocus
+                End If
+                KeyCode = 0
+            ElseIf .ListItems.count > 0 And .Visible = True Then
+                .selectedItem = .ListItems(1)
+                .SetFocus
+            End If
+        ElseIf KeyCode = 40 Then
+            '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
+            If .ListItems.count > 0 And .Visible = True Then
+                .selectedItem = .ListItems(1)
+                .SetFocus
+            End If
+        End If
+    End With
+End Sub
+
+Private Sub txtCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Dim db As Variant
+    Dim i As Long
+    
+    '거래처 자동완성 처리
+    With Me.lswCustomerAutoComplete
+        If Me.txtCustomer.value = "" Then
+            .Visible = False
+        Else
+            .Visible = True
+            
+            '발주거래처 DB를 읽어와서 리스트뷰에 출력
+            .ListItems.Clear
+            db = Get_DB(shtOrderCustomer, True)
+            db = Filtered_DB(db, Me.txtCustomer.value, 1, False)
+            If IsEmpty(db) Then
+                .Visible = False
+            Else
+                For i = 1 To UBound(db)
+                    .ListItems.Add , , db(i, 1)
+                    If i = 7 Then Exit For
+                Next
+            End If
+            
+        End If
+    End With
+End Sub
+
+Private Sub lswCustomerAutoComplete_DblClick()
+    '거래처에 값을 넣어주고 포커스는 품명으로 이동
+    With Me.lswCustomerAutoComplete
+        If Not .selectedItem Is Nothing Then
+            Me.txtCustomer.value = .selectedItem.Text
+            .Visible = False
+            Me.txtOrderName.SetFocus
+        End If
+    End With
+End Sub
+
+Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
+    '거래처 선택 후 엔터키 들어오면 이 값을 거래처명에 넣어주고 포커스는 다음(품명)으로 이동
+    If KeyCode = 13 Then
+        With Me.lswCustomerAutoComplete
+            If Not .selectedItem Is Nothing Then
+                Me.txtCustomer.value = .selectedItem.Text
+                .Visible = False
+                Me.txtOrderName.SetFocus
+            End If
+        End With
+    End If
+End Sub
+
+Private Sub txtOrderName_Enter()
+    '자동완성 리스트에서 탭해서 넘어오는 경우
+    With Me.lswCustomerAutoComplete
+        If .Visible = True Then
+            Me.txtCustomer.value = .selectedItem.Text
+            .Visible = False
+        End If
+    End With
+End Sub
+
 Private Sub txtOrderName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = 27 Then Unload Me
+End Sub
+
+Private Sub txtManagementID_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     If KeyCode = 27 Then Unload Me
 End Sub
 
@@ -242,7 +350,7 @@ Private Sub imgDueDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer
 End Sub
 
 Private Sub imgDeliveryDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtDeliveryDate
+    GetCalendarDate Me.txtReceivingDate
 End Sub
 
 Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
@@ -261,8 +369,7 @@ End Sub
 Private Sub txtManagementID_AfterUpdate()
     Dim db As Variant
     
-    Me.lblManagementIDEmpty.Visible = False
-    Me.lblManagementIDError.Visible = False
+    Me.txtManagementID.value = Trim(Me.txtManagementID.value)
     
     Me.txtEstimateID.value = ""
     Me.txtEstimateCustomer.value = ""
@@ -275,8 +382,8 @@ Private Sub txtManagementID_AfterUpdate()
         db = Get_DB(shtEstimate)
         db = Filtered_DB(db, Me.txtManagementID.value, 2, True)
         If IsEmpty(db) Then
-            Me.lblManagementIDError.Caption = "관리번호 오류"
-            Me.lblManagementIDError.Visible = True
+            MsgBox "관리번호에 해당하는 견적(수주) 정보가 없습니다.", vbInformation, "작업 확인"
+            Exit Sub
         Else
             If UBound(db, 1) = 1 Then
                 Me.txtEstimateID.value = db(1, 1)
@@ -286,8 +393,8 @@ Private Sub txtManagementID_AfterUpdate()
             
                 bMatchedEstimateID = True
             Else
-                Me.lblManagementIDError.Caption = "관리번호 중복"
-                Me.lblManagementIDError.Visible = True
+                MsgBox "관리번호가 여러개의 견적(수주) 정보에서 사용 중입니다.", vbInformation, "작업 확인"
+                Exit Sub
             End If
         End If
     End If
@@ -295,13 +402,14 @@ Private Sub txtManagementID_AfterUpdate()
 End Sub
 
 Private Sub txtAmount_AfterUpdate()
-    Me.lblAmountError.Visible = False
+    Me.txtAmount.value = Trim(Me.txtAmount.value)
     
     If Me.txtAmount.value <> "" Then
          '수량값이 숫자가 아닐 경우 오류메시지 출력
         If Not IsNumeric(Me.txtAmount.value) Then
             Me.txtAmount.value = ""
-            Me.lblAmountError.Visible = True
+            MsgBox "숫자를 입력하세요.", vbInformation, "작업 확인"
+            Exit Sub
         End If
     End If
     
@@ -312,24 +420,67 @@ Private Sub txtAmount_AfterUpdate()
 End Sub
 
 Private Sub txtUnitPrice_AfterUpdate()
-    Me.lblUnitPriceError.Visible = False
+    Me.txtUnitPrice.value = Trim(Me.txtUnitPrice.value)
     
     If Me.txtUnitPrice.value <> "" Then
         '견적단가값이 숫자가 아닐 경우 오류메시지 출력
-        If Not IsNumeric(Me.txtUnitPrice.value) Then
+        If IsNumeric(Me.txtUnitPrice.value) Then
+            Me.txtUnitPrice.value = CLng(Me.txtUnitPrice.value)
+        Else
             Me.txtUnitPrice.value = ""
-            Me.lblUnitPriceError.Visible = True
+            MsgBox "숫자를 입력하세요.", vbInformation, "작업 확인"
             Exit Sub
         End If
-        
-        '단가 1,000자리 컴마 처리
-        Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.value, "#,##0")
     End If
+    
+    '금액 1,000자리 컴마 처리
+    Me.txtUnitPrice.Text = Format(Me.txtUnitPrice.value, "#,##0")
     
     CalculateOrderUpdateCost
 End Sub
 
+Private Sub txtCustomer_AfterUpdate()
+    Me.txtCustomer.value = Trim(Me.txtCustomer.value)
+End Sub
+
+Private Sub txtOrderName_AfterUpdate()
+    Me.txtOrderName.value = Trim(Me.txtOrderName.value)
+End Sub
+
+Private Sub txtMaterial_AfterUpdate()
+    Me.txtMaterial.value = Trim(Me.txtMaterial.value)
+End Sub
+
+Private Sub txtOrderDate_AfterUpdate()
+    Me.txtOrderDate.value = Trim(Me.txtOrderDate.value)
+End Sub
+
+Private Sub txtSize_AfterUpdate()
+    Me.txtSize.value = Trim(Me.txtSize.value)
+End Sub
+
+Private Sub txtWeight_AfterUpdate()
+    Me.txtWeight.value = Trim(Me.txtWeight.value)
+End Sub
+
+Private Sub txtReceivingDate_AfterUpdate()
+    Me.txtReceivingDate.value = Trim(Me.txtReceivingDate.value)
+End Sub
+
+Private Sub txtDueDate_AfterUpdate()
+    Me.txtDueDate.value = Trim(Me.txtDueDate.value)
+End Sub
+
+Private Sub txtPaymentDate_AfterUpdate()
+    Me.txtPaymentDate.value = Trim(Me.txtPaymentDate.value)
+End Sub
+
+Private Sub txtSpecificationDate_AfterUpdate()
+    Me.txtSpecificationDate.value = Trim(Me.txtSpecificationDate.value)
+End Sub
+
 Private Sub txtTaxInvoiceDate_AfterUpdate()
+    Me.txtTaxinvoiceDate.value = Trim(Me.txtTaxinvoiceDate.value)
    CalculateOrderUpdateCost
 End Sub
 

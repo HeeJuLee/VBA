@@ -1,22 +1,31 @@
 VERSION 5.00
-Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmOrderInsert 
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmOrderInsert_2 
    Caption         =   "발주 등록"
-   ClientHeight    =   5355
+   ClientHeight    =   5175
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   12195
-   OleObjectBlob   =   "frmOrderInsert.frx":0000
+   ClientWidth     =   12495
+   OleObjectBlob   =   "frmOrderInsert_2.frx":0000
    StartUpPosition =   1  '소유자 가운데
 End
-Attribute VB_Name = "frmOrderInsert"
+Attribute VB_Name = "frmOrderInsert_2"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-
 Option Explicit
 Dim bMatchedEstimateID As Boolean
+
+Private Sub txtOrderName_Enter()
+    '자동완성 리스트에서 탭해서 넘어오는 경우
+    With Me.lswCustomerAutoComplete
+        If .Visible = True Then
+            Me.txtCustomer.value = .selectedItem.Text
+            .Visible = False
+        End If
+    End With
+End Sub
 
 Private Sub UserForm_Activate()
     '관리번호 입력창에 포커스
@@ -32,13 +41,6 @@ Private Sub UserForm_Initialize()
         Me.Left = orderInsertFormX
         Me.top = orderInsertFormY
     End If
-    
-    '텍스트박스 라벨 위치 조정
-    For Each contr In Me.Controls
-        If contr.Name Like "txt*" Or contr.Name Like "cbo*" Or contr.Name Like "img*" Then
-            contr.top = contr.top - 2
-        End If
-    Next
     
     InitializeCboUnit
     InitializeOrderCategory
@@ -69,7 +71,7 @@ Sub InitializeLswCustomerAutoComplete()
     With Me.lswCustomerAutoComplete
         .View = lvwList
         .LabelEdit = lvwManual
-        .Height = 108
+        .Height = 126
         .Visible = False
     End With
 End Sub
@@ -139,12 +141,13 @@ Sub CalculateOrderInsertCost()
     '수량값이 공백이면 발주금액은 단가
     If Me.txtAmount.value = "" Then
         Me.txtOrderPrice.value = Me.txtUnitPrice.value
-    Else
-        If Me.txtUnitPrice.value = "" Then
-            Me.txtOrderPrice.value = ""
-        ElseIf IsNumeric(Me.txtUnitPrice.value) And IsNumeric(Me.txtAmount.value) Then
-            Me.txtOrderPrice.value = Format(CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value), "#,##0")
-        End If
+        Exit Sub
+    End If
+    
+    '단가와 수량을 곱한 값을 발주금액으로 세팅함
+    If Me.txtUnitPrice.value <> "" And IsNumeric(Me.txtUnitPrice.value) Then
+        Me.txtOrderPrice.value = CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value)
+        Me.txtOrderPrice.Text = Format(Me.txtOrderPrice.value, "#,##0")
     End If
 
 End Sub
@@ -209,7 +212,7 @@ Private Sub txtCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shif
             Else
                 For i = 1 To UBound(db)
                     .ListItems.Add , , db(i, 1)
-                    If i = 7 Then Exit For
+                    If i = 8 Then Exit For
                 Next
             End If
             
@@ -245,24 +248,10 @@ Private Sub txtOrderName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal S
     If KeyCode = 27 Then Unload Me
 End Sub
 
-Private Sub txtManagementID_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then Unload Me
-End Sub
-
 Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     GetCalendarDate Me.txtOrderDate
 End Sub
 
-
-Private Sub txtOrderName_Enter()
-    '자동완성 리스트에서 탭해서 넘어오는 경우
-    With Me.lswCustomerAutoComplete
-        If .Visible = True Then
-            Me.txtCustomer.value = .selectedItem.Text
-            .Visible = False
-        End If
-    End With
-End Sub
 
 Private Sub txtManagementID_AfterUpdate()
     Dim db As Variant
