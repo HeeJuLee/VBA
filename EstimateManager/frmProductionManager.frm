@@ -212,9 +212,10 @@ Sub RefreshProductionTotalCost()
     
     '예상실행가를 frmEstimateUpdate 폼 값도 업데이트
     If isFormLoaded("frmEstimateUpdate") Then
-        frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.value
-        frmEstimateUpdate.CalculateEstimateUpdateCost
-        frmEstimateUpdate.UpdateShtEstimateField currentEstimateId, "예상실행가", Me.txtProductionTotalCost.value
+        'frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.value
+        frmEstimateUpdate.UpdateProductionTotalCost Me.txtProductionTotalCost.value
+'        frmEstimateUpdate.CalculateEstimateUpdateCost
+'        frmEstimateUpdate.UpdateShtEstimateField currentEstimateId, "예상실행가", Me.txtProductionTotalCost.value
     End If
     
     '예상실행항목 리스트박스 새로고침

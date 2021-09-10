@@ -136,13 +136,13 @@ End Function
 
 Sub CalculateEstimateInsertCost()
 
-    '수량값이 공백이면 견적금액은 견적단가
+    '수량값이 공백이면 금액은 단가
     If Me.txtAmount.value = "" Then
         Me.txtEstimatePrice.value = Me.txtUnitPrice.value
         Exit Sub
     End If
     
-    '견적단가와 수량을 곱한 값을 견적금액으로 세팅함
+    '단가와 수량을 곱한 값을 금액으로 세팅함
     If Me.txtUnitPrice.value <> "" And IsNumeric(Me.txtUnitPrice.value) Then
         Me.txtEstimatePrice.value = CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value)
         Me.txtEstimatePrice.Text = Format(Me.txtEstimatePrice.value, "#,##0")
@@ -383,7 +383,7 @@ End Sub
 Private Sub txtUnitPrice_AfterUpdate()
     
     If Me.txtUnitPrice.value <> "" Then
-        '견적단가값이 숫자가 아닐 경우 오류메시지 출력
+        '단가값이 숫자가 아닐 경우 오류메시지 출력
         If Not IsNumeric(Me.txtUnitPrice.value) Then
             MsgBox "숫자를 입력하세요.", vbInformation, "작업 확인"
             Me.txtUnitPrice.value = ""

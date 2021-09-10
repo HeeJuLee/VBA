@@ -233,9 +233,18 @@ Dim cCol As Long
 
 If IsNumeric(id) = True Then id = CLng(id)
 
+If id = "" Or id = 0 Then
+    Exit Sub
+End If
+
 With WS
     cRow = get_UpdateRow(WS, id)
     cCol = Get_Column_Index(WS, vFieldName)
+    
+    If cRow = 0 Or cCol = 0 Then
+        Exit Sub
+    End If
+    
     .Cells(cRow, cCol).value = vData
 End With
 

@@ -321,7 +321,7 @@ Private Sub txtUnitPrice_AfterUpdate()
     Me.txtUnitPrice.value = Trim(Me.txtUnitPrice.value)
     
     If Me.txtUnitPrice.value <> "" Then
-        '견적단가값이 숫자가 아닐 경우 오류메시지 출력
+        '단가값이 숫자가 아닐 경우 오류메시지 출력
         If IsNumeric(Me.txtUnitPrice.value) Then
             Me.txtUnitPrice.value = CLng(Me.txtUnitPrice.value)
         Else

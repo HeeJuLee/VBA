@@ -159,7 +159,7 @@ Sub OrderDateUpdate(fieldName, value)
             'DB 업데이트
             Update_Record_Column shtOrder, orgItem.Text, fieldName, value
             'shtOrderAdmin 시트 업데이트
-            frmEstimateUpdate.UpdateShtOrderField orgItem.Text, orderColNo, value
+            frmEstimateUpdate.UpdateShtOrderColNo orgItem.Text, orderColNo, value
         End If
     Next
 End Sub
