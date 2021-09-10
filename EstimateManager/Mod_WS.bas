@@ -2,7 +2,7 @@ Attribute VB_Name = "Mod_WS"
 Option Explicit
 
 Public clickOrderId, currentOrderId As Variant
-Public clickEstimateId, currentEstimateId As Variant
+Public clickEstimateId, currentEstimateId, currentManagementId As Variant
 Public estimateUpdateFormX, estimateUpdateFormY As Long
 Public orderUpdateFormX, orderUpdateFormY As Long
 Public estimateInsertFormX, estimateInsertFormY As Long
@@ -11,6 +11,7 @@ Public productionFormX, productionFormY As Long
 Public paymentFormX, paymentFormY As Long
 Public operationFormX, operationFormY As Long
 Public orderDateUpdateFormX, orderDateUpdateFormY As Long
+Public productionCopyFormX, productionCopyFormY As Long
 Public selectionRow As Long
 
 Sub GetCalendarDate(textBox As MSForms.textBox)

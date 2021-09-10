@@ -5,8 +5,6 @@ Dim searchResultCount As Long
 Dim isEnd As Boolean
 Dim isListInit As Boolean
 
-
-
 '최초 로드 시
 Private Sub Worksheet_Activate()
     Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
@@ -21,10 +19,9 @@ Private Sub Worksheet_Activate()
     isKeyworldSearch = False
     isEnd = False
     
-'    If isListInit = False Then
-'        InitializeLswOperationList
-'        OperationSearch
-'    End If
+    If isListInit = False Then
+        OperationSearch
+    End If
 End Sub
 
 '운영비 데이터를 검색해서 시트에 출력
@@ -67,7 +64,7 @@ Sub OperationSearch()
     End If
     
     isEnd = False
-    
+    isListInit = True
 End Sub
 
 Sub SetOperationList(db)

@@ -404,7 +404,20 @@ End Sub
 
 
 Private Sub txtCustomer_AfterUpdate()
+    Dim db As Variant
+    Dim day As String
+    
     Me.txtCustomer.value = Trim(Me.txtCustomer.value)
+    
+    If Me.txtCustomer.value <> "" Then
+        db = Get_DB(shtEstimateCustomer, True)
+        db = Filtered_DB(db, Me.txtCustomer.value, 1, True)
+        If IsEmpty(db) Then
+            Me.txtManagementID.value = Format(Date, "yy") & "Z" & Format(Date, "mmdd") & "-" & Format(time, "hhmm")
+        Else
+            Me.txtManagementID.value = Format(Date, "yy") & db(1, 2) & Format(Date, "mmdd") & "-" & Format(time, "hhmm")
+        End If
+    End If
 End Sub
 
 Private Sub txtEstimateDate_AfterUpdate()

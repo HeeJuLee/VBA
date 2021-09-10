@@ -246,12 +246,12 @@ Sub resetDate()
 
 Dim Y As Integer: Dim M As Integer: Dim D As Integer: Dim w As Integer
 Dim i As Integer
-Y = Left(Me.lblYear.Caption, 4): M = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1): D = Day(DateSerial(Y, M + 1, 1) - 1)
+Y = Left(Me.lblYear.Caption, 4): M = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1): D = day(DateSerial(Y, M + 1, 1) - 1)
 w = Weekday(DateSerial(Y, M, 1))
 
 For i = 1 To 42
     Me.Controls("Label" & i).Enabled = True: Me.Controls("Label" & i + 41).Enabled = True
-    Me.Controls("Label" & i).Caption = Day(DateSerial(Y, M, i) - w + 1)
+    Me.Controls("Label" & i).Caption = day(DateSerial(Y, M, i) - w + 1)
     
     If Month(DateSerial(Y, M, i) - w + 1) <> M Then
         Me.Controls("Label" & i).ForeColor = RGB(222, 222, 222): Me.Controls("Label" & i).Enabled = False: Me.Controls("Label" & i + 41).Enabled = False
@@ -333,7 +333,7 @@ Private Sub Label14_Click(): Call lblClick(Me.Label14): End Sub
 Private Sub Label15_Click(): Call lblClick(Me.Label15): End Sub
 Private Sub Label16_Click(): Call lblClick(Me.Label16): End Sub
 Private Sub Label17_Click(): Call lblClick(Me.Label17): End Sub
-Private Sub Label18_Click(): Call lblClick(Me.label18): End Sub
+Private Sub Label18_Click(): Call lblClick(Me.Label18): End Sub
 Private Sub Label19_Click(): Call lblClick(Me.Label19): End Sub
 Private Sub Label20_Click(): Call lblClick(Me.Label20): End Sub
 Private Sub Label21_Click(): Call lblClick(Me.Label21): End Sub
