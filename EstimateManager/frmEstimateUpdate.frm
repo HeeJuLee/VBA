@@ -22,9 +22,11 @@ Dim headerIndex As Integer
 Dim beforeSelectedItem As ListItem
 
 
+
 Private Sub UserForm_Activate()
     Me.txtManagementID.SetFocus
 End Sub
+
 
 Private Sub UserForm_Initialize()
     Dim cRow As Long
@@ -455,13 +457,14 @@ Sub SelectOrderListColumn()
         If headerIndex > 3 And headerIndex < lswOrderList.ColumnHeaders.count Then
         
             Set ItemSel = lswOrderList.selectedItem
+            ItemSel.EnsureVisible
         
             With frmEdit
                 .Visible = True
                 .top = ItemSel.top + lswOrderList.top
                 .Left = lswOrderList.ColumnHeaders(headerIndex).Left + lswOrderList.Left
                 .Width = lswOrderList.ColumnHeaders(headerIndex).Width
-                .Height = ItemSel.Height + 10
+                .Height = ItemSel.Height + 3
                 .ZOrder msoBringToFront
             End With
             
@@ -887,9 +890,11 @@ Private Sub btnOrderListInsert_Click()
         li.ListSubItems.Add , , ""       '계산서
         li.ListSubItems.Add , , ""       '결제일
         li.ListSubItems.Add , , "열기"       '수정
+        
+        .selectedItem.Selected = False
         li.Selected = True
         li.EnsureVisible
-            
+        
         headerIndex = 4
         SelectOrderListColumn
     End With
@@ -967,6 +972,20 @@ Private Sub btnOrderListDelete_Click()
     DeleteOrderList
 End Sub
 
+Private Sub Frame4_Click()
+    Me.frmEdit.Visible = False
+    Me.txtEdit.Visible = False
+End Sub
+
+Private Sub frmOrder_Click()
+    Me.frmEdit.Visible = False
+    Me.txtEdit.Visible = False
+End Sub
+
+Private Sub UserForm_Click()
+    Me.frmEdit.Visible = False
+    Me.txtEdit.Visible = False
+End Sub
 
 Private Sub lswCustomerAutoComplete_DblClick()
     '거래처에 값을 넣어주고 포커스는 매니저로 이동
@@ -1252,13 +1271,13 @@ Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift 
                 CalculateEstimateUpdateCost
             End If
             
-'            엔터키 - 값만 바꿔줌. 다음칸으로 이동하지 않음 --> 아래쪽으로 이동하도록 수정
-'            If KeyCode = 13 Then
-'                Me.txtEdit.Visible = False
-'                Me.frmEdit.Visible = False
-'
-'                Me.lswOrderList.SetFocus
-            If KeyCode = 9 Or KeyCode = 39 Then
+            '엔터키 - 값만 바꿔줌. 다음칸으로 이동하지 않음
+            If KeyCode = 13 Then
+                Me.txtEdit.Visible = False
+                Me.frmEdit.Visible = False
+
+                Me.lswOrderList.SetFocus
+            ElseIf KeyCode = 9 Or KeyCode = 39 Then
                 '탭키, 오른쪽 화살표키
                 If headerIndex = 11 Then
                     headerIndex = headerIndex + 2   '금액 필드 건너뛰기 위해서 +2 해줌
@@ -1286,7 +1305,7 @@ Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift 
                 End With
                 SelectOrderListColumn
                 KeyCode = 0
-            ElseIf KeyCode = 13 Or KeyCode = 40 Then
+            ElseIf KeyCode = 40 Then
                 '아래화살표키
                 With Me.lswOrderList
                     For i = 1 To .ListItems.count
