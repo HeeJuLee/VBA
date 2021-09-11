@@ -330,10 +330,6 @@ Private Sub btnPaymentClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVa
     End If
 End Sub
 
-Private Sub imgPayDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-End Sub
-
-
 Private Sub txtPayAmount_AfterUpdate()
     Me.txtPayAmount.value = Trim(Me.txtPayAmount.value)
     

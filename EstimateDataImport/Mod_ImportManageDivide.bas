@@ -12,6 +12,7 @@ Sub DivideManage()
     Dim pos As Integer
     Dim Y, M, D As String
     Dim currentId As Long
+    Dim insDate As String
     
     Application.ScreenUpdating = False
     
@@ -48,6 +49,40 @@ Sub DivideManage()
             man.부가세 = .Cells(i, 24)
             man.등록일자 = .Cells(i, 25)
             
+            '등록일자 세팅
+'            insDate = ""
+'            If man.분류2 = "수주" Or (man.수입지출 = "지출" And Len(man.관리번호) >= 10) Then
+'                If man.분류2 = "수주" Then
+'                    insDate = man.수주
+'                Else
+'                    If man.발주 <> "" Then
+'                        insDate = man.발주
+'                    ElseIf man.명세서 <> "" Then
+'                        insDate = man.명세서
+'                    ElseIf man.계산서 <> "" Then
+'                        insDate = man.계산서
+'                    ElseIf man.결재 <> "" Then
+'                        insDate = man.결재
+'                    End If
+'                End If
+'
+'                If insDate = "" Then
+'                    pos = InStr(man.관리번호, "-")
+'                    If pos > 0 Then
+'                        M = Mid(man.관리번호, pos - 4, 2)
+'                        D = Mid(man.관리번호, pos - 2, 2)
+'                        If IsNumeric(M) And IsNumeric(D) Then
+'                            Y = year(man.등록일자)
+'                            insDate = DateSerial(Y, M, D)
+'                        End If
+'                    End If
+'                End If
+'
+'                If insDate <> "" Then
+'                    man.등록일자 = insDate
+'                End If
+'            End If
+               
             If man.분류2 = "수주" Then
                 '수주이면 수주 테이블에 등록
                 Insert_Record shtAcceptedData, man.ID, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.납기, man.명세서, man.계산서, man.결재, man.결재월, man.부가세, man.등록일자
@@ -60,7 +95,6 @@ Sub DivideManage()
                 '발주인 경우에는 분류1을 결제수단 필드에 넣음
                 Insert_Record shtOrderData, man.ID, , man.분류2, man.관리번호, man.거래처, man.품목, man.재질, man.규격, man.수량, man.단위, man.단가, man.금액, man.중량, _
                               man.수주, man.발주, man.납기, man.입고, man.납품, man.명세서, man.계산서, man.결재, man.결재월, man.분류1, man.부가세, man.등록일자
-                              
             Else
                 '그 외 남는 것은 운영비 테이블에 등록
                 Insert_Record shtOperatingData, man.ID, man.수입지출, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.금액, man.명세서, man.계산서, man.결재, man.부가세, man.등록일자

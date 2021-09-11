@@ -374,9 +374,9 @@ Sub EstimateDelete()
     Delete_Record shtEstimate, estimateId
     
     '수주발주 정보 삭제
-    For i = 1 To count
-        Delete_Record shtOrder, db(i, 1)
-    Next
+'    For i = 1 To count
+'        Delete_Record shtOrder, db(i, 1)
+'    Next
 
     EstimateSearch
 End Sub
