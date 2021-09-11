@@ -325,7 +325,7 @@ Private Sub lswProductionList_ColumnClick(ByVal ColumnHeader As MSComctlLib.Colu
 End Sub
 
 Private Sub btnPaymentClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
+    If KeyCode = vbKeyTab Then
         Me.btnPaymentClose.SetFocus
     End If
 End Sub
@@ -346,11 +346,11 @@ Private Sub txtPayAmount_AfterUpdate()
 End Sub
 
 Private Sub txtPayDate_AfterUpdate()
-    Me.txtPayDate.value = Trim(Me.txtPayDate.value)
+    Me.txtPayDate.value = ConvertDateFormat(Me.txtPayDate.value)
 End Sub
 
 Private Sub txtPayDate_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then
+    If KeyCode = vbKeyEscape Then
         Unload Me
     End If
 End Sub

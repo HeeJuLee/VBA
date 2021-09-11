@@ -124,13 +124,13 @@ resetDate
 End Sub
 
 Private Sub bgNow_Click()
-Me.lblMonth.Caption = Month(Date) & "월"
+Me.lblMonth.Caption = month(Date) & "월"
 Me.lblYear.Caption = Year(Date) & "년"
 Me.scrlMonth.value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
 End Sub
 
 Private Sub lblNow_Click()
-Me.lblMonth.Caption = Month(Date) & "월"
+Me.lblMonth.Caption = month(Date) & "월"
 Me.lblYear.Caption = Year(Date) & "년"
 Me.scrlMonth.value = Left(Me.lblMonth.Caption, Len(Me.lblMonth.Caption) - 1)
 End Sub
@@ -191,8 +191,8 @@ Next
 resetYear
 
 Me.lblYear.Caption = Year(Date) & "년"
-Me.lblMonth.Caption = Month(Date) & "월"
-Me.scrlMonth.value = Month(Date)
+Me.lblMonth.Caption = month(Date) & "월"
+Me.scrlMonth.value = month(Date)
 
 End Sub
 
@@ -253,7 +253,7 @@ For i = 1 To 42
     Me.Controls("Label" & i).Enabled = True: Me.Controls("Label" & i + 41).Enabled = True
     Me.Controls("Label" & i).Caption = day(DateSerial(Y, M, i) - w + 1)
     
-    If Month(DateSerial(Y, M, i) - w + 1) <> M Then
+    If month(DateSerial(Y, M, i) - w + 1) <> M Then
         Me.Controls("Label" & i).ForeColor = RGB(222, 222, 222): Me.Controls("Label" & i).Enabled = False: Me.Controls("Label" & i + 41).Enabled = False
     ElseIf Weekday(DateSerial(Y, M, i) - w + 1) = 1 Then
         Me.Controls("Label" & i).ForeColor = RGB(255, 0, 0):
@@ -263,7 +263,7 @@ For i = 1 To 42
         Me.Controls("Label" & i).ForeColor = RGB(0, 0, 0)
     End If
     
-    If DateSerial(Y, M, Me.Controls("Label" & i).Caption) = Date And Month(DateSerial(Y, M, i) - w + 1) = M Then
+    If DateSerial(Y, M, Me.Controls("Label" & i).Caption) = Date And month(DateSerial(Y, M, i) - w + 1) = M Then
         Me.Controls("Label" & i + 42).BackColor = RGB(51, 51, 51)
         Me.Controls("Label" & i).ForeColor = RGB(255, 255, 255)
     Else

@@ -433,23 +433,23 @@ End Sub
 
 
 Private Sub btnProductionClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
+    If KeyCode = vbKeyTab Then
         Me.btnProductionClose.SetFocus
     End If
 End Sub
 
 Private Sub cboCategory_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then
+    If KeyCode = vbKeyEscape Then
         Unload Me
     End If
 End Sub
 
 Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 13 Then
+    If KeyCode = vbKeyReturn Then
         '엔터키 - 다음 입력칸으로 이동
         Me.lswOrderCustomerAutoComplete.Visible = False
         Me.txtProductionItem.SetFocus
-    ElseIf KeyCode = 9 Then
+    ElseIf KeyCode = vbKeyTab Then
         '탭키 자동완성이 하나이면 다음으로 이동
         With Me.lswOrderCustomerAutoComplete
             If .ListItems.count = 1 Then
@@ -463,7 +463,7 @@ Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger
             End If
             End If
         End With
-    ElseIf KeyCode = 40 Then
+    ElseIf KeyCode = vbKeyDown Then
         '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
         With Me.lswOrderCustomerAutoComplete
             If .ListItems.count > 0 And .Visible = True Then
@@ -471,7 +471,7 @@ Private Sub txtProductionCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger
                 .SetFocus
             End If
         End With
-    ElseIf KeyCode = 27 Then
+    ElseIf KeyCode = vbKeyEscape Then
         'ESC키 닫기
         Unload Me
     End If
@@ -518,7 +518,7 @@ End Sub
 
 Private Sub lswOrderCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
     '거래처에 값을 넣어주고 포커스는 품목으로 이동
-    If KeyCode = 13 Then
+    If KeyCode = vbKeyReturn Then
         With Me.lswOrderCustomerAutoComplete
             If Not .selectedItem Is Nothing Then
                 Me.txtProductionCustomer.value = .selectedItem.Text

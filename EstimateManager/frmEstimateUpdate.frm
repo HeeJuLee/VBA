@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmEstimateUpdate 
    Caption         =   "견적 수정"
-   ClientHeight    =   12480
+   ClientHeight    =   13110
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   19320
@@ -13,6 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
 Dim orgManagementID As Variant
@@ -21,8 +22,15 @@ Dim mouseX As Integer
 Dim headerIndex As Integer
 Dim beforeSelectedItem As ListItem
 Dim bInitialIzed As Boolean
+Dim bFocusOrderList, bFocusPaymentList As Boolean
+Dim currentEditText, currentCboText As Variant
+
+
 
 Private Sub UserForm_Activate()
+    If bInitialIzed = False Then
+        Me.txtSize.SetFocus
+    End If
     bInitialIzed = True
 End Sub
 
@@ -107,23 +115,23 @@ Private Sub UserForm_Initialize()
     InitializeCboCategory
     Me.cboCategory.value = Trim(estimate(25))   '분류1
     Me.txtDueDate.value = estimate(26)              '납기일
-    Me.txtSpecificationDate.value = estimate(27)    '거래명세서
-    Me.txtTaxInvoiceDate.value = estimate(28)    '세금계산서
-    Me.txtPaymentDate.value = estimate(29)    '결제일자
-    Me.txtExpectPaymentDate.value = estimate(30)  '예상결제일
-    Me.txtExpectPaymentMonth.value = Format(estimate(30), "mm" & "월")  '예상결제월
+'    Me.txtSpecificationDate.value = estimate(27)    '거래명세서
+'    Me.txtTaxInvoiceDate.value = estimate(28)    '세금계산서
+'    Me.txtPaymentDate.value = estimate(29)    '결제
+'    Me.txtExpectPaymentDate.value = estimate(30)  '결제월
+'    Me.txtExpectPaymentMonth.value = Format(estimate(30), "mm" & "월")  '예상결제월
     Me.txtVAT.value = Format(estimate(31), "#,##0")    '부가세
     Me.txtMemo.value = Trim(estimate(32))     '견적메모
     Me.chkVAT.value = estimate(33)      '부가세 제외 여부
     
     Me.txtPaid.value = Format(estimate(34), "#,##0")      '입금액
     Me.txtRemaining.value = Format(estimate(35), "#,##0")      '미입금액
-    Me.chkDividePay.value = estimate(36)      '분할결제 여부
-    If chkDividePay.value = True Then
-        Me.btnPayment.Enabled = True
-    Else
-        Me.btnPayment.Enabled = False
-    End If
+'    Me.chkDividePay.value = estimate(36)      '분할결제 여부
+'    If chkDividePay.value = True Then
+'        Me.btnPayment.Enabled = True
+'    Else
+'        Me.btnPayment.Enabled = False
+'    End If
     
     '예전에는 견적관리xls와 관리xls에서 메뉴가 다르게 남음
     '앞으로 견적메모와 수주메모는 같게 맞춰야 함.
@@ -155,8 +163,11 @@ Private Sub UserForm_Initialize()
     orgManagementID = Me.txtManagementID
     
     InitializeLswOrderList      '발주 현황
+    InitializeCboOrderCategory  '발주 분류2
     InitializeLswCustomerAutoComplete   '거래처 자동완성
     InitializeLswManagerAutoComplete    '담당자 자동완성
+    InitializeLswPaymentList      '결제 현황
+    InitializeCboEstimatePayMethod '결제수단-수입
     
     Me.txtSize.SetFocus
     
@@ -202,6 +213,20 @@ Sub InitializeCboCategory()
     Update_Cbo Me.cboCategory, db
 End Sub
 
+Sub InitializeCboOrderCategory()
+    Dim db As Variant
+    db = Get_DB(shtOrderCategory, True)
+
+    Update_Cbo Me.cboOrderCategory, db
+End Sub
+
+Sub InitializeCboEstimatePayMethod()
+    Dim db As Variant
+    db = Get_DB(shtEstimatePayMethod, True)
+
+    Update_Cbo Me.cboEstimatePayMethod, db
+End Sub
+
 Sub InitializeLswOrderList()
     Dim db As Variant
     Dim i, j, totalCost As Long
@@ -237,7 +262,7 @@ Sub InitializeLswOrderList()
         .ColumnHeaders.Add , , "ID", 0
         .ColumnHeaders.Add , , "ID_견적", 0
         .ColumnHeaders.Add , , "관리번호", 0
-        .ColumnHeaders.Add , , "분류", 34
+        .ColumnHeaders.Add , , "분류", 40
         .ColumnHeaders.Add , , "거래처", 50
         .ColumnHeaders.Add , , "품목", 115
         .ColumnHeaders.Add , , "재질", 60
@@ -251,7 +276,7 @@ Sub InitializeLswOrderList()
         .ColumnHeaders.Add , , "입고", 59, lvwColumnCenter
         .ColumnHeaders.Add , , "명세서", 59, lvwColumnCenter
         .ColumnHeaders.Add , , "계산서", 59, lvwColumnCenter
-        .ColumnHeaders.Add , , "결제일", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제", 59, lvwColumnCenter
         .ColumnHeaders.Add , , "수정", 30
         
         '.ColumnHeaders(1).Position = 6
@@ -277,7 +302,7 @@ Sub InitializeLswOrderList()
                 li.ListSubItems.Add , , db(i, 18)       '입고일
                 li.ListSubItems.Add , , db(i, 20)       '명세서
                 li.ListSubItems.Add , , db(i, 21)       '계산서
-                li.ListSubItems.Add , , db(i, 22)       '결제일
+                li.ListSubItems.Add , , db(i, 22)       '결제
                 li.ListSubItems.Add , , "열기"       '수정
                 li.Selected = False
                 
@@ -313,6 +338,76 @@ Sub InitializeLswManagerAutoComplete()
     End With
 End Sub
 
+Sub InitializeLswPaymentList()
+    Dim db As Variant
+    Dim i, j, totalPaid As Long
+    Dim li As ListItem
+
+    With Me.ImageList1.ListImages
+        .Add , , Me.imgListImage.Picture
+    End With
+
+     '리스트뷰 값 설정
+    With Me.lswPaymentList
+        .View = lvwReport
+        .Gridlines = True
+        .FullRowSelect = True
+        .HideColumnHeaders = False
+        .HideSelection = True
+        .FullRowSelect = True
+        .MultiSelect = True
+        .LabelEdit = lvwManual
+        .SmallIcons = Me.ImageList1
+        .Sorted = False
+
+        .ColumnHeaders.Clear
+        .ColumnHeaders.Add , , "ID", 0
+        .ColumnHeaders.Add , , "ID_견적", 0
+        .ColumnHeaders.Add , , "관리번호", 0
+        .ColumnHeaders.Add , , "명세서", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "계산서", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제월", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "입금액", 70, lvwColumnRight
+        .ColumnHeaders.Add , , "결제수단", 60, lvwColumnCenter
+        .ColumnHeaders.Add , , "메모", 110
+        .ColumnHeaders.Add , , "부가세", 60, lvwColumnRight
+
+        .ListItems.Clear
+        
+        '견적ID에 해당하는 결제 이력를 읽어옴
+        db = Get_DB(shtPayment)
+        If Not IsEmpty(db) Then
+            db = Filtered_DB(db, Me.txtID.value, 2, True)
+        End If
+
+        totalPaid = 0
+        If Not IsEmpty(db) Then
+            For i = 1 To UBound(db)
+                Set li = .ListItems.Add(, , db(i, 1))   'ID
+                li.ListSubItems.Add , , db(i, 2)       'ID_견적
+                li.ListSubItems.Add , , db(i, 3)        '관리번호
+                li.ListSubItems.Add , , db(i, 4)        '명세서
+                li.ListSubItems.Add , , db(i, 5)        '계산서
+                li.ListSubItems.Add , , db(i, 6)        '결제
+                li.ListSubItems.Add , , db(i, 7)       '결제월
+                li.ListSubItems.Add , , Format(db(i, 8), "#,##0")        '입금액
+                li.ListSubItems.Add , , db(i, 9)        '결제수단
+                li.ListSubItems.Add , , db(i, 10)       '메모
+                li.ListSubItems.Add , , Format(db(i, 11), "#,##0")       '부가세
+                li.Selected = False
+
+                If IsNumeric(db(i, 8)) Then
+                    '입금 합계 구함
+                    totalPaid = totalPaid + CLng(db(i, 8))
+                End If
+            Next
+        End If
+
+        Me.txtPaid.value = Format(totalPaid, "#,##0")
+    End With
+
+End Sub
 
 Sub UpdateEstimateValue(fieldName, fieldValue)
         
@@ -395,7 +490,7 @@ Sub UpdateOrderListValue(id, headerIndex, value)
             fieldName = "명세서"
         Case 17  '계산서
             fieldName = "계산서"
-        Case 18  '결제일
+        Case 18  '결제
             fieldName = "결제"
     End Select
     
@@ -406,6 +501,42 @@ Sub UpdateOrderListValue(id, headerIndex, value)
 
 End Sub
 
+Sub UpdatePaymentListValue(id, headerIndex, value)
+    Dim fieldName As String
+
+    Select Case headerIndex
+        Case 4
+            fieldName = "명세서"
+        Case 5
+            fieldName = "계산서"
+        Case 6
+            fieldName = "결제"
+        Case 7
+            fieldName = "결제월"
+        Case 8
+            fieldName = "입금액"
+        Case 9
+            fieldName = "결제수단"
+        Case 10
+            fieldName = "메모"
+        Case 11
+            fieldName = "부가세"
+    End Select
+    
+    If fieldName <> "" Then
+        Update_Record_Column shtPayment, id, fieldName, value
+        Update_Record_Column shtPayment, id, "수정일자", Date
+    End If
+    
+    Select Case headerIndex
+        Case 4, 5, 6, 7, 9
+            '만약 현재 선택한 행이 맨 마지막행이면 명세서/계산서/결제/결제월 데이터를 견적DB/발주DB/견적관리시트/발주관리시트에 저장
+            If lswPaymentList.ListItems(lswPaymentList.ListItems.count).Selected = True Then
+                UpdateEstimateValue fieldName, value
+            End If
+    End Select
+
+End Sub
 
 Sub SelectOrderListColumn()
     Dim ItemSel    As ListItem
@@ -414,22 +545,21 @@ Sub SelectOrderListColumn()
         If headerIndex = lswOrderList.ColumnHeaders.count Then
             frmEdit.Visible = False
             txtEdit.Visible = False
+            cboOrderCategory.Visible = False
         End If
         
-        If headerIndex > 3 And headerIndex < lswOrderList.ColumnHeaders.count Then
-        
-            Set ItemSel = lswOrderList.selectedItem
-            ItemSel.EnsureVisible
-        
+        Set ItemSel = lswOrderList.selectedItem
+        ItemSel.EnsureVisible
+            
+        If headerIndex > 4 And headerIndex < lswOrderList.ColumnHeaders.count Then
             With frmEdit
                 .Visible = True
                 .top = ItemSel.top + lswOrderList.top
                 .Left = lswOrderList.ColumnHeaders(headerIndex).Left + lswOrderList.Left
                 .Width = lswOrderList.ColumnHeaders(headerIndex).Width
-                .Height = ItemSel.Height + 3
+                .Height = ItemSel.Height + 2
                 .ZOrder msoBringToFront
             End With
-            
             With Me.txtEdit
                 .Visible = True
                 .Text = ItemSel.SubItems(headerIndex - 1)
@@ -437,8 +567,70 @@ Sub SelectOrderListColumn()
                 .SelStart = 0
                 .Left = 0
                 .top = 0
-                .Width = lswOrderList.ColumnHeaders(headerIndex).Width - 2
-                .Height = lswOrderList.selectedItem.Height + 3
+                .Width = lswOrderList.ColumnHeaders(headerIndex).Width
+                .Height = lswOrderList.selectedItem.Height + 2
+                .SelLength = Len(.Text)
+                currentEditText = .Text
+            End With
+            Me.cboOrderCategory.Visible = False
+        ElseIf headerIndex = 4 Then
+            With frmEdit
+                .Visible = True
+                .top = ItemSel.top + lswOrderList.top
+                .Left = lswOrderList.ColumnHeaders(headerIndex).Left + lswOrderList.Left
+                .Width = cboOrderCategory.Width
+                .Height = ItemSel.Height + 2
+                .ZOrder msoBringToFront
+            End With
+            With cboOrderCategory
+                .Visible = True
+                .Text = ItemSel.SubItems(headerIndex - 1)
+                .SetFocus
+                .SelStart = 0
+                .Left = 0
+                .top = 0
+                .Height = lswOrderList.selectedItem.Height + 2
+                .SelLength = Len(.Text)
+                currentCboText = .Text
+            End With
+            Me.txtEdit.Visible = False
+        End If
+    End If
+
+End Sub
+
+Sub SelectPaymentListColumn()
+    Dim ItemSel    As ListItem
+    
+    If Not lswPaymentList.selectedItem Is Nothing Then
+        If headerIndex = lswPaymentList.ColumnHeaders.count Then
+            frmPaymentEdit.Visible = False
+            txtPaymentEdit.Visible = False
+        End If
+        
+        If headerIndex > 3 And headerIndex < lswPaymentList.ColumnHeaders.count Then
+        
+            Set ItemSel = lswPaymentList.selectedItem
+            ItemSel.EnsureVisible
+        
+            With frmPaymentEdit
+                .Visible = True
+                .top = ItemSel.top + lswPaymentList.top
+                .Left = lswPaymentList.ColumnHeaders(headerIndex).Left + lswPaymentList.Left
+                .Width = lswPaymentList.ColumnHeaders(headerIndex).Width
+                .Height = ItemSel.Height + 2
+                .ZOrder msoBringToFront
+            End With
+            
+            With Me.txtPaymentEdit
+                .Visible = True
+                .Text = ItemSel.SubItems(headerIndex - 1)
+                .SetFocus
+                .SelStart = 0
+                .Left = 0
+                .top = 0
+                .Width = lswPaymentList.ColumnHeaders(headerIndex).Width
+                .Height = lswPaymentList.selectedItem.Height + 2
                 .SelLength = Len(.Text)
             End With
         End If
@@ -473,43 +665,43 @@ Sub DeleteOrderList()
         InitializeLswOrderList
     End If
 End Sub
-
-Sub UpdateShtEstimate(estimateId)
-    Dim findRow As Long
-    
-    findRow = isExistInSheet(shtEstimateAdmin.Range("B6"), estimateId)
-    If findRow <> 0 Then
-        shtEstimateAdmin.Cells(findRow, 4).value = Me.txtManagementID.value
-        shtEstimateAdmin.Cells(findRow, 5).value = Me.txtCustomer.value
-        shtEstimateAdmin.Cells(findRow, 6).value = Me.txtManager.value
-        shtEstimateAdmin.Cells(findRow, 7).value = Me.cboCategory.value
-        shtEstimateAdmin.Cells(findRow, 8).value = Me.txtEstimateName.value
-        shtEstimateAdmin.Cells(findRow, 9).value = Me.txtSize.value
-        shtEstimateAdmin.Cells(findRow, 10).value = Me.txtAmount.value
-        shtEstimateAdmin.Cells(findRow, 11).value = Me.cboUnit.value
-        shtEstimateAdmin.Cells(findRow, 12).value = Me.txtUnitPrice.value
-        shtEstimateAdmin.Cells(findRow, 13).value = Me.txtEstimatePrice.value
-        shtEstimateAdmin.Cells(findRow, 14).value = Me.txtEstimateDate.value
-        shtEstimateAdmin.Cells(findRow, 15).value = Me.txtBidDate.value
-        shtEstimateAdmin.Cells(findRow, 16).value = Me.txtAcceptedDate.value
-        shtEstimateAdmin.Cells(findRow, 17).value = Me.txtDueDate.value
-        shtEstimateAdmin.Cells(findRow, 18).value = Me.txtDeliveryDate.value
-        shtEstimateAdmin.Cells(findRow, 19).value = Me.txtInsuranceDate.value
-        shtEstimateAdmin.Cells(findRow, 20).value = Me.txtProductionTotalCost.value
-        shtEstimateAdmin.Cells(findRow, 21).value = Me.txtBidPrice.value
-        shtEstimateAdmin.Cells(findRow, 22).value = Me.txtBidMargin.value
-        shtEstimateAdmin.Cells(findRow, 23).value = Me.txtBidMarginRate.value
-        shtEstimateAdmin.Cells(findRow, 24).value = Me.txtAcceptedPrice.value
-        shtEstimateAdmin.Cells(findRow, 25).value = Me.txtAcceptedMargin.value
-        shtEstimateAdmin.Cells(findRow, 26).value = Me.txtSpecificationDate.value
-        shtEstimateAdmin.Cells(findRow, 27).value = Me.txtTaxInvoiceDate.value
-        shtEstimateAdmin.Cells(findRow, 28).value = Me.txtPaymentDate.value
-        shtEstimateAdmin.Cells(findRow, 29).value = Me.txtExpectPaymentDate.value
-        shtEstimateAdmin.Cells(findRow, 30).value = Me.txtVAT.value
-        shtEstimateAdmin.Cells(findRow, 31).value = Me.txtInsertDate.value
-        shtEstimateAdmin.Cells(findRow, 32).value = Date
-    End If
-End Sub
+'
+'Sub UpdateShtEstimate(estimateId)
+'    Dim findRow As Long
+'
+'    findRow = isExistInSheet(shtEstimateAdmin.Range("B6"), estimateId)
+'    If findRow <> 0 Then
+'        shtEstimateAdmin.Cells(findRow, 4).value = Me.txtManagementID.value
+'        shtEstimateAdmin.Cells(findRow, 5).value = Me.txtCustomer.value
+'        shtEstimateAdmin.Cells(findRow, 6).value = Me.txtManager.value
+'        shtEstimateAdmin.Cells(findRow, 7).value = Me.cboCategory.value
+'        shtEstimateAdmin.Cells(findRow, 8).value = Me.txtEstimateName.value
+'        shtEstimateAdmin.Cells(findRow, 9).value = Me.txtSize.value
+'        shtEstimateAdmin.Cells(findRow, 10).value = Me.txtAmount.value
+'        shtEstimateAdmin.Cells(findRow, 11).value = Me.cboUnit.value
+'        shtEstimateAdmin.Cells(findRow, 12).value = Me.txtUnitPrice.value
+'        shtEstimateAdmin.Cells(findRow, 13).value = Me.txtEstimatePrice.value
+'        shtEstimateAdmin.Cells(findRow, 14).value = Me.txtEstimateDate.value
+'        shtEstimateAdmin.Cells(findRow, 15).value = Me.txtBidDate.value
+'        shtEstimateAdmin.Cells(findRow, 16).value = Me.txtAcceptedDate.value
+'        shtEstimateAdmin.Cells(findRow, 17).value = Me.txtDueDate.value
+'        shtEstimateAdmin.Cells(findRow, 18).value = Me.txtDeliveryDate.value
+'        shtEstimateAdmin.Cells(findRow, 19).value = Me.txtInsuranceDate.value
+'        shtEstimateAdmin.Cells(findRow, 20).value = Me.txtProductionTotalCost.value
+'        shtEstimateAdmin.Cells(findRow, 21).value = Me.txtBidPrice.value
+'        shtEstimateAdmin.Cells(findRow, 22).value = Me.txtBidMargin.value
+'        shtEstimateAdmin.Cells(findRow, 23).value = Me.txtBidMarginRate.value
+'        shtEstimateAdmin.Cells(findRow, 24).value = Me.txtAcceptedPrice.value
+'        shtEstimateAdmin.Cells(findRow, 25).value = Me.txtAcceptedMargin.value
+'        shtEstimateAdmin.Cells(findRow, 26).value = Me.txtSpecificationDate.value
+'        shtEstimateAdmin.Cells(findRow, 27).value = Me.txtTaxinvoiceDate.value
+'        shtEstimateAdmin.Cells(findRow, 28).value = Me.txtPaymentDate.value
+'        shtEstimateAdmin.Cells(findRow, 29).value = Me.txtExpectPaymentDate.value
+'        shtEstimateAdmin.Cells(findRow, 30).value = Me.txtVAT.value
+'        shtEstimateAdmin.Cells(findRow, 31).value = Me.txtInsertDate.value
+'        shtEstimateAdmin.Cells(findRow, 32).value = Date
+'    End If
+'End Sub
 
 Sub UpdateShtEstimateField(estimateId, fieldName, value)
     Dim findRow As Long
@@ -567,7 +759,7 @@ Sub UpdateShtEstimateField(estimateId, fieldName, value)
                 colNo = 26
             Case "계산서"
                 colNo = 27
-            Case "결제일"
+            Case "결제"
                 colNo = 28
             Case "결제월"
                 colNo = 29
@@ -586,33 +778,33 @@ Sub UpdateShtEstimateField(estimateId, fieldName, value)
     
 End Sub
 
-Sub UpdateShtOrder(orderId)
-    Dim findRow As Long
-    
-    findRow = isExistInSheet(shtOrderAdmin.Range("C6"), orderId)
-    If findRow <> 0 Then
-        shtOrderAdmin.Cells(findRow, 5).value = Me.txtManagementID.value
-        shtOrderAdmin.Cells(findRow, 6).value = Me.cboCategory.value
-        shtOrderAdmin.Cells(findRow, 8).value = Me.txtCustomer.value
-        shtOrderAdmin.Cells(findRow, 9).value = Me.txtEstimateName.value
-        shtOrderAdmin.Cells(findRow, 10).value = Me.txtManager.value
-        shtOrderAdmin.Cells(findRow, 11).value = Me.txtSize.value
-        shtOrderAdmin.Cells(findRow, 12).value = Me.txtAmount.value
-        shtOrderAdmin.Cells(findRow, 13).value = Me.cboUnit.value
-        shtOrderAdmin.Cells(findRow, 14).value = Me.txtUnitPrice.value
-        shtOrderAdmin.Cells(findRow, 15).value = Me.txtEstimatePrice.value
-        shtOrderAdmin.Cells(findRow, 17).value = Me.txtAcceptedDate.value
-        shtOrderAdmin.Cells(findRow, 19).value = Me.txtDueDate.value
-        shtOrderAdmin.Cells(findRow, 21).value = Me.txtDeliveryDate.value
-        shtOrderAdmin.Cells(findRow, 22).value = Me.txtSpecificationDate.value
-        shtOrderAdmin.Cells(findRow, 23).value = Me.txtTaxInvoiceDate.value
-        shtOrderAdmin.Cells(findRow, 24).value = Me.txtPaymentDate.value
-        shtOrderAdmin.Cells(findRow, 25).value = Me.txtExpectPaymentDate.value
-        shtOrderAdmin.Cells(findRow, 27).value = Me.txtVAT.value
-        shtOrderAdmin.Cells(findRow, 28).value = Me.txtInsertDate.value
-        shtOrderAdmin.Cells(findRow, 29).value = Date
-    End If
-End Sub
+'Sub UpdateShtOrder(orderId)
+'    Dim findRow As Long
+'
+'    findRow = isExistInSheet(shtOrderAdmin.Range("C6"), orderId)
+'    If findRow <> 0 Then
+'        shtOrderAdmin.Cells(findRow, 5).value = Me.txtManagementID.value
+'        shtOrderAdmin.Cells(findRow, 6).value = Me.cboCategory.value
+'        shtOrderAdmin.Cells(findRow, 8).value = Me.txtCustomer.value
+'        shtOrderAdmin.Cells(findRow, 9).value = Me.txtEstimateName.value
+'        shtOrderAdmin.Cells(findRow, 10).value = Me.txtManager.value
+'        shtOrderAdmin.Cells(findRow, 11).value = Me.txtSize.value
+'        shtOrderAdmin.Cells(findRow, 12).value = Me.txtAmount.value
+'        shtOrderAdmin.Cells(findRow, 13).value = Me.cboUnit.value
+'        shtOrderAdmin.Cells(findRow, 14).value = Me.txtUnitPrice.value
+'        shtOrderAdmin.Cells(findRow, 15).value = Me.txtEstimatePrice.value
+'        shtOrderAdmin.Cells(findRow, 17).value = Me.txtAcceptedDate.value
+'        shtOrderAdmin.Cells(findRow, 19).value = Me.txtDueDate.value
+'        shtOrderAdmin.Cells(findRow, 21).value = Me.txtDeliveryDate.value
+'        shtOrderAdmin.Cells(findRow, 22).value = Me.txtSpecificationDate.value
+'        shtOrderAdmin.Cells(findRow, 23).value = Me.txtTaxinvoiceDate.value
+'        shtOrderAdmin.Cells(findRow, 24).value = Me.txtPaymentDate.value
+'        shtOrderAdmin.Cells(findRow, 25).value = Me.txtExpectPaymentDate.value
+'        shtOrderAdmin.Cells(findRow, 27).value = Me.txtVAT.value
+'        shtOrderAdmin.Cells(findRow, 28).value = Me.txtInsertDate.value
+'        shtOrderAdmin.Cells(findRow, 29).value = Date
+'    End If
+'End Sub
 
 Sub UpdateShtOrderHeaderIndex(orderId, headerIndex, value)
     Dim findRow, fieldNo As Long
@@ -648,7 +840,7 @@ Sub UpdateShtOrderHeaderIndex(orderId, headerIndex, value)
                 fieldNo = 22
             Case 17  '계산서
                 fieldNo = 23
-            Case 18  '결제일
+            Case 18  '결제
                 fieldNo = 24
         End Select
         
@@ -782,17 +974,19 @@ Sub CalculateAcceptedMargin()
     End If
 End Sub
 
-Sub CalculateVAT()
-
-    '부가세 계산
-    '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
-        Me.txtVAT.value = 0
+Sub CalculatePayment()
+   '미입금액, 부가세 계산
+    If Me.txtAcceptedPrice.value = "" Then
+        Me.txtRemaining.value = ""
+        Me.txtVAT.value = ""
     Else
-        '부가세는 수주금액의 10%
-        If Me.txtAcceptedPrice.value <> "" And Me.txtAcceptedPrice.value <> 0 Then
-            Me.txtVAT.value = CLng(Me.txtAcceptedPrice.value) * 0.1
-            Me.txtVAT.Text = Format(Me.txtVAT.value, "#,##0")
+        If IsNumeric(Me.txtAcceptedPrice.value) Then
+            Me.txtRemaining.value = Format(CLng(Me.txtPaid.value) - CLng(Me.txtAcceptedPrice.value), "#,##0")
+            If Me.chkVAT.value = True Then
+                Me.txtVAT.value = 0
+            Else
+                Me.txtVAT = Format(CLng(Me.txtPaid.value) * 0.1, "#,##0")
+            End If
         End If
     End If
 End Sub
@@ -840,7 +1034,7 @@ Sub CalculateEstimateUpdateCost_2()
 
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 수주금액의 10%
@@ -898,6 +1092,28 @@ Function CalculateOrderListTotalCost() As Long
     CalculateOrderListTotalCost = totalCost
 End Function
 
+Function CalculatePaymentListTotalCost() As Long
+    Dim i As Long
+    Dim cost, totalCost As Long
+    
+    With Me.lswPaymentList
+        For i = 1 To .ListItems.count
+
+            If Not IsNumeric(.ListItems(i).SubItems(7)) Then
+                If .ListItems(i).SubItems(7) <> "" Then
+                    MsgBox "금액 필드에 숫자가 아닌 값이 있어서 입금액 합계를 구할 수 없습니다.", vbExclamation
+                    CalculatePaymentListTotalCost = 0
+                    Exit Function
+                End If
+            Else
+                totalCost = totalCost + .ListItems(i).SubItems(7)
+            End If
+        Next
+    End With
+    
+    CalculatePaymentListTotalCost = totalCost
+End Function
+
 Function CalculateOrderListPrice(selectedItem As ListItem) As Long
     Dim amount, unitPrice As Variant
     Dim orderPrice As Long
@@ -915,6 +1131,24 @@ Function CalculateOrderListPrice(selectedItem As ListItem) As Long
     End If
     
     CalculateOrderListPrice = orderPrice
+End Function
+
+Function CalculatePaymentListVAT(selectedItem As ListItem) As Long
+    Dim paid As Variant
+    Dim vat As Long
+
+    '입금액 변하는 경우에 부가세 변경해야 함
+    paid = selectedItem.ListSubItems(7).Text
+    
+    If paid = "" Then
+        vat = 0
+    ElseIf IsNumeric(paid) Then
+        vat = paid * 0.1
+    Else
+        vat = 0
+    End If
+    
+    CalculatePaymentListVAT = vat
 End Function
 
 Function GetProductionTotalCost()
@@ -952,20 +1186,20 @@ Sub ConvertOrderListFormat(textBox, headerIndex)
             If IsNumeric(value) Then
                 textBox.Text = Format(value, "#,##0")
             End If
-        Case 13, 14, 15, 16, 17, 18  '발주, 납기, 입고, 명세서, 계산서, 결제일 - 날짜 변환
-            pos = InStr(value, "/")
-            If pos > 0 Then
-                M = Left(value, pos - 1)
-                If Len(value) = pos Then
-                    pos = 0
-                Else
-                    D = Mid(value, pos + 1)
-                End If
+        Case 13, 14, 15, 16, 17, 18  '발주, 납기, 입고, 명세서, 계산서, 결제 - 날짜 변환
+            textBox.Text = ConvertDateFormat(textBox.Text)
+    End Select
+    
+End Sub
+
+Sub ConvertPaymentListFormat(textBox, headerIndex)
+    Select Case headerIndex
+        Case 8, 11  '입금액, 부가세 - 1000자리 콤마
+            If IsNumeric(textBox.Text) Then
+                textBox.Text = Format(textBox.Text, "#,##0")
             End If
-            
-            If pos > 0 Then
-                textBox.Text = DateSerial(Year(Date), M, D)
-            End If
+        Case 4, 5, 6, 7  '명세서, 계산서, 결제, 결제월 - 날짜 변환
+            textBox.Text = ConvertDateFormat(textBox.Text)
     End Select
     
 End Sub
@@ -995,8 +1229,10 @@ End Function
 
 
 Private Sub lswOrderList_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
-'    shtEstimateAdmin.Range("Q12").value = x
-'    shtEstimateAdmin.Range("Q13").value = pointsPerPixelX * x
+    mouseX = pointsPerPixelX * X
+End Sub
+
+Private Sub lswPaymentList_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
     mouseX = pointsPerPixelX * X
 End Sub
 
@@ -1032,7 +1268,7 @@ Private Sub btnOrderListInsert_Click()
         li.ListSubItems.Add , , ""       '입고일
         li.ListSubItems.Add , , ""       '명세서
         li.ListSubItems.Add , , ""       '계산서
-        li.ListSubItems.Add , , ""       '결제일
+        li.ListSubItems.Add , , ""       '결제
         li.ListSubItems.Add , , "열기"       '수정
         
         .selectedItem.Selected = False
@@ -1060,14 +1296,113 @@ Private Sub btnOrderListBatchUpdate_Click()
     frmOrderDateUpdate.Show
 End Sub
 
+Private Sub btnPaymentListInsert_Click()
+    Dim lastId As Long
+    Dim li As ListItem
+    
+    '결제이력에 발주 추가
+    Insert_Record shtPayment, _
+                        currentEstimateId, currentManagementId, _
+                        Date, , , , , , , , Date, ""
+                        
+    lastId = Get_LastID(shtPayment)
+    
+    With Me.lswPaymentList
+        Set li = .ListItems.Add(, , lastId)   'ID
+        li.ListSubItems.Add , , currentEstimateId       'ID_견적
+        li.ListSubItems.Add , , currentManagementId        '관리번호
+        li.ListSubItems.Add , , Date        '명세서
+        li.ListSubItems.Add , , ""        '계산서
+        li.ListSubItems.Add , , ""        '결제
+        li.ListSubItems.Add , , ""       '결제월
+        li.ListSubItems.Add , , ""        '입금액
+        li.ListSubItems.Add , , ""       '결제수단
+        li.ListSubItems.Add , , ""       '메모
+        li.ListSubItems.Add , , ""      '부가세
+        li.ListSubItems.Add , , ""      '결제예정일(날짜포맷)
+        
+        .selectedItem.Selected = False
+        li.Selected = True
+        li.EnsureVisible
+        
+        headerIndex = 4
+        SelectPaymentListColumn
+    End With
+    
+    'DB와 시트의 명세서/계산서/결제/결제월 값 변경
+    UpdateEstimateValue "명세서", Date
+    UpdateEstimateValue "계산서", ""
+    UpdateEstimateValue "결제", ""
+    UpdateEstimateValue "결제월", ""
+    UpdateEstimateValue "결제수단", ""
+    
+End Sub
+
+Private Sub btnPaymentListDelete_Click()
+    Dim li As ListItem
+    Dim count As Long
+    Dim YN As VbMsgBoxResult
+    Dim spec, tax, paid, month, method As Variant
+    
+    count = 0
+    For Each li In Me.lswPaymentList.ListItems
+        If li.Selected = True Then
+            count = count + 1
+        End If
+    Next
+    If count = 0 Then MsgBox "삭제할 결제이력을 선택하세요.", vbInformation, "작업 확인": Exit Sub
+    
+    YN = MsgBox("선택한 " & count & "개 이력을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
+    If YN = vbNo Then Exit Sub
+
+    For Each li In Me.lswPaymentList.ListItems
+        If li.Selected = True Then
+            '이력 테이블에서 삭제
+            Delete_Record shtPayment, li.Text
+        End If
+    Next
+    
+    If count > 0 Then
+        InitializeLswPaymentList
+    End If
+    
+    '맨 마지막 이력 데이터의 명세서/계산서/결제/결제월을 견적DB에 저장
+    With Me.lswPaymentList
+        If .ListItems.count = 0 Then
+            spec = ""
+            tax = ""
+            paid = ""
+            month = ""
+            method = ""
+        Else
+            spec = .ListItems(.ListItems.count).SubItems(3)
+            tax = .ListItems(.ListItems.count).SubItems(4)
+            paid = .ListItems(.ListItems.count).SubItems(5)
+            month = .ListItems(.ListItems.count).SubItems(6)
+            method = .ListItems(.ListItems.count).SubItems(8)
+        End If
+        UpdateEstimateValue "명세서", spec
+        UpdateEstimateValue "계산서", tax
+        UpdateEstimateValue "결제", paid
+        UpdateEstimateValue "결제월", month
+        UpdateEstimateValue "결제수단", method
+    End With
+    
+End Sub
+
 
 Private Sub lswOrderList_Click()
     Me.frmEdit.Visible = False
     Me.txtEdit.value = ""
+    Me.cboOrderCategory.value = ""
+End Sub
+
+Private Sub lswPaymentList_Click()
+    Me.frmPaymentEdit.Visible = False
+    Me.txtPaymentEdit.value = ""
 End Sub
 
 Private Sub lswOrderList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
-    
     With Me.lswOrderList
         .SortKey = ColumnHeader.Index - 1
         If .SortOrder = lvwAscending Then
@@ -1077,7 +1412,18 @@ Private Sub lswOrderList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHea
         End If
         .Sorted = True
     End With
-    
+End Sub
+
+Private Sub lswPaymentList_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    With Me.lswPaymentList
+        .SortKey = ColumnHeader.Index - 1
+        If .SortOrder = lvwAscending Then
+            .SortOrder = lvwDescending
+        Else
+            .SortOrder = lvwAscending
+        End If
+        .Sorted = True
+    End With
 End Sub
 
 Private Sub btnProduction_Click()
@@ -1119,16 +1465,25 @@ End Sub
 Private Sub Frame4_Click()
     Me.frmEdit.Visible = False
     Me.txtEdit.Visible = False
+    Me.cboOrderCategory.Visible = False
+    Me.frmPaymentEdit.Visible = False
+    Me.txtPaymentEdit.Visible = False
 End Sub
 
 Private Sub frmOrder_Click()
     Me.frmEdit.Visible = False
     Me.txtEdit.Visible = False
+    Me.cboOrderCategory.Visible = False
+    Me.frmPaymentEdit.Visible = False
+    Me.txtPaymentEdit.Visible = False
 End Sub
 
 Private Sub UserForm_Click()
     Me.frmEdit.Visible = False
     Me.txtEdit.Visible = False
+    Me.cboOrderCategory.Visible = False
+    Me.frmPaymentEdit.Visible = False
+    Me.txtPaymentEdit.Visible = False
 End Sub
 
 Private Sub lswCustomerAutoComplete_DblClick()
@@ -1157,6 +1512,9 @@ Private Sub lswOrderList_DblClick()
 
     Dim i As Integer
     Dim pos As Integer
+    
+    bFocusOrderList = True
+    bFocusPaymentList = False
     
     With Me.lswOrderList
         headerIndex = 0
@@ -1192,6 +1550,39 @@ Private Sub lswOrderList_DblClick()
 
 End Sub
 
+Private Sub lswPaymentList_DblClick()
+
+    Dim i As Integer
+    Dim pos As Integer
+    
+    bFocusOrderList = False
+    bFocusPaymentList = True
+    
+    With Me.lswPaymentList
+        headerIndex = 0
+        For i = 1 To .ColumnHeaders.count
+            pos = .ColumnHeaders(i).Left
+            If mouseX < pos Then
+                headerIndex = i - 1
+                Exit For
+            End If
+        Next
+        
+        If headerIndex = 11 Then
+            '부가세는 변경할 수 없음
+        ElseIf headerIndex >= 4 Then
+            ' 현재 선택한 열을 저장해놓음
+            If Not beforeSelectedItem Is Nothing Then
+                Set beforeSelectedItem = Nothing
+            End If
+            Set beforeSelectedItem = .selectedItem
+            
+            SelectPaymentListColumn
+        End If
+    End With
+
+End Sub
+
 Private Sub txtManager_Enter()
     '자동완성 리스트에서 탭해서 넘어오는 경우
     With Me.lswCustomerAutoComplete
@@ -1214,11 +1605,11 @@ End Sub
 
 Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     With Me.lswCustomerAutoComplete
-        If KeyCode = 13 Then
+        If KeyCode = vbKeyReturn Then
             '엔터키 - 다음 입력칸으로 이동
             .Visible = False
             Me.txtManager.SetFocus
-        ElseIf KeyCode = 9 Then
+        ElseIf KeyCode = vbKeyTab Then
             '탭키일 경우에 자동완성 결과가 하나이면 다음 입력칸으로 이동
             If .ListItems.count = 1 Then
                 .Visible = False
@@ -1228,7 +1619,7 @@ Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Sh
                 .selectedItem = .ListItems(1)
                 .SetFocus
             End If
-        ElseIf KeyCode = 40 Then
+        ElseIf KeyCode = vbKeyDown Then
             '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
             If .ListItems.count > 0 And .Visible = True Then
                 .selectedItem = .ListItems(1)
@@ -1268,11 +1659,11 @@ End Sub
 
 Private Sub txtManager_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     With Me.lswManagerAutoComplete
-        If KeyCode = 13 Then
+        If KeyCode = vbKeyReturn Then
             '엔터키 - 다음 입력칸으로 이동
             .Visible = False
             Me.txtEstimateName.SetFocus
-        ElseIf KeyCode = 9 Then
+        ElseIf KeyCode = vbKeyTab Then
             '탭키일 경우에 자동완성 결과가 하나이면 다음 입력칸으로 이동
             If .ListItems.count = 1 Then
                 .Visible = False
@@ -1282,7 +1673,7 @@ Private Sub txtManager_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shi
                 .selectedItem = .ListItems(1)
                 .SetFocus
             End If
-        ElseIf KeyCode = 40 Then
+        ElseIf KeyCode = vbKeyDown Then
             '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
             If .ListItems.count > 0 And .Visible = True Then
                 .selectedItem = .ListItems(1)
@@ -1293,8 +1684,14 @@ Private Sub txtManager_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shi
     
 End Sub
 
+Private Sub txtSize_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    If KeyCode = vbKeyEscape Then
+        Unload Me
+    End If
+End Sub
+
 Private Sub chkDividePay_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
+    If KeyCode = vbKeyTab Then
         Me.btnEstimateUpdate.SetFocus
     End If
 End Sub
@@ -1330,7 +1727,7 @@ End Sub
 
 Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
     '거래처에 값을 넣어주고 포커스는 매니저로 이동
-    If KeyCode = 13 Then
+    If KeyCode = vbKeyReturn Then
         With Me.lswCustomerAutoComplete
             If Not .selectedItem Is Nothing Then
                 Me.txtCustomer.value = .selectedItem.Text
@@ -1343,7 +1740,7 @@ End Sub
 
 Private Sub lswManagerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
     '담당자 선택 후 엔터키 들어오면 이 값을 담당자명에 넣어주고 포커스는 다음(사이즈)으로 이동
-    If KeyCode = 13 Then
+    If KeyCode = vbKeyReturn Then
         With Me.lswManagerAutoComplete
             If Not .selectedItem Is Nothing Then
                 Me.txtManager.value = .selectedItem.Text
@@ -1355,43 +1752,40 @@ Private Sub lswManagerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As In
 End Sub
 
 Private Sub txtManagementID_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then
+    If KeyCode = vbKeyEscape Then
         Unload Me
     End If
 End Sub
 
-
-'Private Sub btnPayHistoryInsert_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-'    If KeyCode = 9 Then
-'        Me.btnEstimateUpdate.SetFocus
-'    End If
-'End Sub
-
 Private Sub btnProduction_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
+    If KeyCode = vbKeyTab Then
         Me.txtAcceptedDate.SetFocus
     End If
 End Sub
 
 
 Private Sub txtMemo_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 9 Then
+    If KeyCode = vbKeyTab Then
         Me.txtAcceptedDate.SetFocus
     End If
 End Sub
 
 Private Sub txtEstimateName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then Unload Me
+    If KeyCode = vbKeyEscape Then Unload Me
 End Sub
 
-Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+Sub OrderListUpdate(headerIndex)
     Dim orderPrice As Long
-    Dim findRow As Long
-    Dim li As ListItem
-    Dim i As Long
     
     With Me.lswOrderList
-        If KeyCode = 13 Or KeyCode = 9 Or KeyCode = 37 Or KeyCode = 38 Or KeyCode = 39 Or KeyCode = 40 Then
+        If headerIndex = 4 Then
+            If Me.cboOrderCategory.value <> .selectedItem.ListSubItems(headerIndex - 1).Text Then
+                '리스트뷰 값 변경
+                .selectedItem.ListSubItems(headerIndex - 1).Text = Me.cboOrderCategory.value
+                'DB 테이블 변경
+                UpdateOrderListValue .selectedItem.Text, headerIndex, Me.cboOrderCategory.value
+            End If
+        Else
             If Me.txtEdit.value <> .selectedItem.ListSubItems(headerIndex - 1).Text Then
                 '입력값 포맷 변경
                 ConvertOrderListFormat Me.txtEdit, headerIndex
@@ -1399,56 +1793,89 @@ Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift 
                 .selectedItem.ListSubItems(headerIndex - 1).Text = Me.txtEdit.value
                 'DB 테이블 변경
                 UpdateOrderListValue .selectedItem.Text, headerIndex, Me.txtEdit.value
-                '발주 관리 시트 변경
-'                UpdateShtOrderHeaderIndex .selectedItem.Text, headerIndex, Me.txtEdit.value
-    
+                
                 '수량,단가 변경한 경우에는 금액도 변경해야 함
                 If headerIndex = 9 Or headerIndex = 11 Then
                     orderPrice = CalculateOrderListPrice(.selectedItem)
                     .selectedItem.ListSubItems(11).Text = Format(orderPrice, "#,##0")
                     UpdateOrderListValue .selectedItem.Text, 12, orderPrice
-'                    UpdateShtOrderHeaderIndex .selectedItem.Text, 12, orderPrice
                 End If
                 '실행가 총액 계산
                 Me.txtExecutionCost = Format(CalculateOrderListTotalCost, "#,##0")
                 CalculateAcceptedMargin
             End If
+        End If
+    End With
+End Sub
+
+Private Sub cboOrderCategory_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    With Me.lswOrderList
+        If KeyCode = vbKeyReturn Then
+            OrderListUpdate headerIndex
+            
+            Me.cboOrderCategory.Visible = False
+            Me.frmEdit.Visible = False
+            .SetFocus
+        ElseIf KeyCode = vbKeyTab Then
+            OrderListUpdate headerIndex
+            
+            headerIndex = headerIndex + 1
+            SelectOrderListColumn
+            KeyCode = 0
+        End If
+    End With
+End Sub
+
+Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Dim i As Long
+    
+    With Me.lswOrderList
+        If KeyCode = vbKeyReturn Or KeyCode = vbKeyTab Or KeyCode = vbKeyLeft Or KeyCode = vbKeyUp Or KeyCode = vbKeyRight Or KeyCode = vbKeyDown Then
+            '변경값을 DB와 화면에 반영
+            OrderListUpdate headerIndex
             
             '엔터키 - 값만 바꿔줌. 다음칸으로 이동하지 않음
-            If KeyCode = 13 Then
+            If KeyCode = vbKeyReturn Then
                 Me.txtEdit.Visible = False
                 Me.frmEdit.Visible = False
-
-                Me.lswOrderList.SetFocus
-            ElseIf KeyCode = 9 Or KeyCode = 39 Then
+                .SetFocus
+            ElseIf KeyCode = vbKeyTab Or KeyCode = vbKeyRight Then
                 '탭키, 오른쪽 화살표키
-                If headerIndex = 11 Then
-                    headerIndex = headerIndex + 2   '금액 필드 건너뛰기 위해서 +2 해줌
+                If headerIndex = 18 Then
+                    Me.txtEdit.Visible = False
+                    Me.frmEdit.Visible = False
+                    .SetFocus
+                ElseIf headerIndex = 11 Then
+                    headerIndex = headerIndex + 2
+                    SelectOrderListColumn
+                    KeyCode = 0
                 Else
                     headerIndex = headerIndex + 1
+                    SelectOrderListColumn
+                    KeyCode = 0
                 End If
-                SelectOrderListColumn
-                
-                '포커스 안넘어가도록 함
-                KeyCode = 0
-            ElseIf KeyCode = 38 Then
+            ElseIf KeyCode = vbKeyUp Then
                 '위쪽화살표키
                 '리스트 맨 처음이 아니면 한칸위로 이동
                 With Me.lswOrderList
                     For i = 1 To .ListItems.count
                         If .ListItems(i).Selected = True Then
-                            If i <> 1 Then
+                            If i = 1 Then
+                                Me.txtEdit.Visible = False
+                                Me.frmEdit.Visible = False
+                                .SetFocus
+                            Else
                                 .ListItems(i).Selected = False
                                 .ListItems(i - 1).Selected = True
                                 Set beforeSelectedItem = .selectedItem
+                                SelectOrderListColumn
+                                KeyCode = 0
                                 Exit For
                             End If
                         End If
                     Next
                 End With
-                SelectOrderListColumn
-                KeyCode = 0
-            ElseIf KeyCode = 40 Then
+            ElseIf KeyCode = vbKeyDown Then
                 '아래화살표키
                 With Me.lswOrderList
                     For i = 1 To .ListItems.count
@@ -1457,7 +1884,7 @@ Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift 
                                 '맨 마지막이면 마무리
                                 Me.txtEdit.Visible = False
                                 Me.frmEdit.Visible = False
-                                Me.lswOrderList.SetFocus
+                                .SetFocus
                                 Exit For
                             Else
                                 '리스트 맨 마지막이 아니면 한칸 아래로 이동
@@ -1471,20 +1898,25 @@ Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift 
                     Next
                 End With
                 KeyCode = 0
-            ElseIf KeyCode = 37 Then
+            ElseIf KeyCode = vbKeyLeft Then
                 '왼쪽화살표키
                 '맨 처음이 아니면 한칸 왼쪽으로 이동
-                If headerIndex = 13 Then
-                    headerIndex = headerIndex - 2   '금액 필드 건너뛰기 위해서 -2 해줌
-                ElseIf headerIndex >= 5 Then
-                    headerIndex = headerIndex - 1
+                If headerIndex <= 4 Then
+                    Me.txtEdit.Visible = False
+                    Me.frmEdit.Visible = False
+                    .SetFocus
+                Else
+                    If headerIndex = 13 Then
+                        headerIndex = headerIndex - 2   '금액 필드 건너뛰기 위해서 -2 해줌
+                    Else
+                        headerIndex = headerIndex - 1
+                    End If
+                    SelectOrderListColumn
+                    KeyCode = 0
                 End If
-                SelectOrderListColumn
-                
-                KeyCode = 0
             End If
         
-        ElseIf KeyCode = 27 Then
+        ElseIf KeyCode = vbKeyEscape Then
             'ESC키
             Me.txtEdit.Visible = False
             Me.frmEdit.Visible = False
@@ -1492,6 +1924,122 @@ Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift 
     End With
 End Sub
 
+Sub PaymentListUpdate(headerIndex)
+    Dim vat As Variant
+    
+    With Me.lswPaymentList
+        If Me.txtPaymentEdit.value <> .selectedItem.ListSubItems(headerIndex - 1).Text Then
+            '입력값 포맷 변경
+            ConvertPaymentListFormat Me.txtPaymentEdit, headerIndex
+            '리스트뷰 값 변경
+            .selectedItem.ListSubItems(headerIndex - 1).Text = Me.txtPaymentEdit.value
+            'DB 테이블 변경
+            UpdatePaymentListValue .selectedItem.Text, headerIndex, Me.txtPaymentEdit.value
+
+            If headerIndex = 8 Then
+                '입금액 변경한 경우에는 부가세도 변경해야 함
+                vat = CalculatePaymentListVAT(.selectedItem)
+                .selectedItem.ListSubItems(10).Text = Format(vat, "#,##0")
+                UpdatePaymentListValue .selectedItem.Text, 11, vat
+            End If
+            '합계
+            Me.txtPaid.value = Format(CalculatePaymentListTotalCost, "#,##0")
+            CalculatePayment
+        End If
+    End With
+End Sub
+
+
+Private Sub txtPaymentEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Dim i As Long
+    
+    With Me.lswPaymentList
+        If KeyCode = vbKeyReturn Or KeyCode = vbKeyTab Or KeyCode = vbKeyLeft Or KeyCode = vbKeyUp Or KeyCode = vbKeyRight Or KeyCode = vbKeyDown Then
+            '변경값을 DB와 화면에 반영
+            PaymentListUpdate headerIndex
+            
+            '엔터키 - 값만 바꿔줌. 다음칸으로 이동하지 않음
+            If KeyCode = vbKeyReturn Then
+                Me.txtPaymentEdit.Visible = False
+                Me.frmPaymentEdit.Visible = False
+
+                Me.lswPaymentList.SetFocus
+            ElseIf KeyCode = vbKeyTab Or KeyCode = vbKeyRight Then
+                '탭키, 오른쪽 화살표키
+                If headerIndex = 10 Then
+                    Me.txtPaymentEdit.Visible = False
+                    Me.frmPaymentEdit.Visible = False
+                    Me.lswPaymentList.SetFocus
+                Else
+                    headerIndex = headerIndex + 1
+                    SelectPaymentListColumn
+                    KeyCode = 0
+                End If
+            ElseIf KeyCode = vbKeyUp Then
+                '위쪽화살표키
+                '리스트 맨 처음이 아니면 한칸위로 이동
+                With Me.lswPaymentList
+                    For i = 1 To .ListItems.count
+                        If .ListItems(i).Selected = True Then
+                            If i = 1 Then
+                                Me.txtPaymentEdit.Visible = False
+                                Me.frmPaymentEdit.Visible = False
+                                Me.lswPaymentList.SetFocus
+                            Else
+                                .ListItems(i).Selected = False
+                                .ListItems(i - 1).Selected = True
+                                Set beforeSelectedItem = .selectedItem
+                                SelectPaymentListColumn
+                                KeyCode = 0
+                                Exit For
+                            End If
+                        End If
+                    Next
+                End With
+            ElseIf KeyCode = vbKeyDown Then
+                '아래화살표키
+                With Me.lswPaymentList
+                    For i = 1 To .ListItems.count
+                        If .ListItems(i).Selected = True Then
+                            If i = .ListItems.count Then
+                                '맨 마지막이면 마무리
+                                Me.txtPaymentEdit.Visible = False
+                                Me.frmPaymentEdit.Visible = False
+                                Me.lswPaymentList.SetFocus
+                                Exit For
+                            Else
+                                '리스트 맨 마지막이 아니면 한칸 아래로 이동
+                                .ListItems(i).Selected = False
+                                .ListItems(i + 1).Selected = True
+                                Set beforeSelectedItem = .selectedItem
+                                SelectPaymentListColumn
+                                Exit For
+                            End If
+                        End If
+                    Next
+                End With
+                KeyCode = 0
+            ElseIf KeyCode = vbKeyLeft Then
+                '왼쪽화살표키
+                '맨 처음이 아니면 한칸 왼쪽으로 이동
+                If headerIndex <= 4 Then
+                    Me.txtPaymentEdit.Visible = False
+                    Me.frmPaymentEdit.Visible = False
+                    Me.lswPaymentList.SetFocus
+                Else
+                    headerIndex = headerIndex - 1
+                    SelectPaymentListColumn
+                    KeyCode = 0
+                End If
+            End If
+        
+        ElseIf KeyCode = vbKeyEscape Then
+            'ESC키
+            Me.txtPaymentEdit.Visible = False
+            Me.frmPaymentEdit.Visible = False
+        End If
+    End With
+End Sub
 
 Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
     '텍스트박스에 포커스를 두어야 AfterUpdate로 들어옴
@@ -1529,7 +2077,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
+    GetCalendarDate Me.txtTaxinvoiceDate
 End Sub
 
 Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
@@ -1694,10 +2242,42 @@ Private Sub txtExecutionCost_Change()
     UpdateEstimateValue "실행가", Me.txtExecutionCost.value
 End Sub
 
+Private Sub txtPaid_Change()
+    If bInitialIzed = False Then Exit Sub
+    
+    CalculatePayment
+    
+    UpdateEstimateValue "입금액", Me.txtPaid.value
+End Sub
+
+Private Sub txtRemaining_Change()
+    If bInitialIzed = False Then Exit Sub
+    
+    UpdateEstimateValue "미입금액", Me.txtRemaining.value
+End Sub
+
+Private Sub txtVAT_Change()
+    If bInitialIzed = False Then Exit Sub
+    
+    UpdateEstimateValue "부가세", Me.txtVAT.value
+End Sub
+
+Private Sub chkVAT_AfterUpdate()
+    If bInitialIzed = False Then Exit Sub
+
+    If Me.chkVAT.value = True Then
+        Me.txtVAT.value = 0
+    Else
+        CalculatePayment
+    End If
+    
+    UpdateEstimateValue "부가세제외", Me.chkVAT.value
+End Sub
+
 Private Sub txtAcceptedDate_AfterUpdate()
     If bInitialIzed = False Then Exit Sub
     
-     Me.txtAcceptedDate.value = Trim(Me.txtAcceptedDate.value)
+     Me.txtAcceptedDate.value = ConvertDateFormat(Me.txtAcceptedDate.value)
     
     UpdateEstimateValue "수주", Me.txtAcceptedDate.value
 End Sub
@@ -1748,7 +2328,7 @@ End Sub
 Private Sub txtBidDate_AfterUpdate()
     If bInitialIzed = False Then Exit Sub
     
-     Me.txtBidDate.value = Trim(Me.txtBidDate.value)
+     Me.txtBidDate.value = ConvertDateFormat(Me.txtBidDate.value)
     
     UpdateEstimateValue "입찰", Me.txtBidDate.value
 End Sub
@@ -1765,7 +2345,7 @@ End Sub
 Private Sub txtDeliveryDate_AfterUpdate()
     If bInitialIzed = False Then Exit Sub
     
-     Me.txtDeliveryDate.value = Trim(Me.txtDeliveryDate.value)
+     Me.txtDeliveryDate.value = ConvertDateFormat(Me.txtDeliveryDate.value)
     
     UpdateEstimateValue "납품", Me.txtDeliveryDate.value
 End Sub
@@ -1773,7 +2353,7 @@ End Sub
 Private Sub txtDueDate_AfterUpdate()
     If bInitialIzed = False Then Exit Sub
     
-     Me.txtDueDate.value = Trim(Me.txtDueDate.value)
+     Me.txtDueDate.value = ConvertDateFormat(Me.txtDueDate.value)
     
     UpdateEstimateValue "납기", Me.txtDueDate.value
 End Sub
@@ -1781,7 +2361,7 @@ End Sub
 Private Sub txtEstimateDate_AfterUpdate()
     If bInitialIzed = False Then Exit Sub
     
-     Me.txtEstimateDate.value = Trim(Me.txtEstimateDate.value)
+     Me.txtEstimateDate.value = ConvertDateFormat(Me.txtEstimateDate.value)
     
     UpdateEstimateValue "견적", Me.txtEstimateDate.value
 End Sub
@@ -1789,7 +2369,7 @@ End Sub
 Private Sub txtInsuranceDate_AfterUpdate()
     If bInitialIzed = False Then Exit Sub
     
-     Me.txtInsuranceDate.value = Trim(Me.txtInsuranceDate.value)
+     Me.txtInsuranceDate.value = ConvertDateFormat(Me.txtInsuranceDate.value)
     
     UpdateEstimateValue "증권", Me.txtInsuranceDate.value
 End Sub
@@ -1812,8 +2392,8 @@ End Sub
 
 
 
-Private Sub txtTaxInvoiceDate_AfterUpdate()
-    Me.txtTaxInvoiceDate.value = Trim(Me.txtTaxInvoiceDate.value)
+Private Sub txtTaxinvoiceDate_AfterUpdate()
+    Me.txtTaxinvoiceDate.value = Trim(Me.txtTaxinvoiceDate.value)
 End Sub
 
 Private Sub txtPaymentDate_AfterUpdate()
@@ -1851,45 +2431,44 @@ Private Sub txtSpecificationDate_AfterUpdate()
     Me.txtSpecificationDate.value = Trim(Me.txtSpecificationDate.value)
 End Sub
 
-Private Sub chkVAT_AfterUpdate()
-
-End Sub
-
 
 Private Sub txtEdit_AfterUpdate()
-    Dim orderPrice As Long
-    Dim findRow As Long
-    
-    If headerIndex >= 4 And headerIndex < Me.lswOrderList.ColumnHeaders.count Then
-        '탭키나 엔터키가 아닌 마우스를 클릭해서 벗어나는 경우: beforeSelectedItem을 사용해야 함
-        
+    '탭키나 엔터키가 아닌 마우스를 클릭해서 벗어나는 경우: currentEditText를 사용함
+    If headerIndex > 4 And headerIndex < Me.lswOrderList.ColumnHeaders.count Then
         If Not beforeSelectedItem Is Nothing Then
-            If Me.txtEdit.value <> beforeSelectedItem.ListSubItems(headerIndex - 1).Text Then
-                '입력값 포맷 변경
-                ConvertOrderListFormat Me.txtEdit, headerIndex
-                beforeSelectedItem.ListSubItems(headerIndex - 1).Text = Me.txtEdit.value
-                UpdateOrderListValue beforeSelectedItem.Text, headerIndex, Me.txtEdit.value
-'                UpdateShtOrderHeaderIndex beforeSelectedItem.Text, headerIndex, Me.txtEdit.value
-                            
-                '수량,단가 변경한 경우에는 금액도 변경해야 함
-                If headerIndex = 9 Or headerIndex = 11 Then
-                    orderPrice = CalculateOrderListPrice(beforeSelectedItem)
-                    beforeSelectedItem.ListSubItems(11).Text = Format(orderPrice, "#,##0")
-                    UpdateOrderListValue beforeSelectedItem.Text, 12, orderPrice
-'                    UpdateShtOrderHeaderIndex beforeSelectedItem.Text, 12, orderPrice
-                End If
-                    
-                '실행가 총액 계산
-                Me.txtExecutionCost = Format(CalculateOrderListTotalCost, "#,##0")
-                CalculateAcceptedMargin
-                    
+            If Me.txtEdit.value <> currentEditText Then
+                OrderListUpdate headerIndex
                 headerIndex = 0
+                currentEditText = ""
             End If
         End If
     End If
     
 End Sub
 
+Private Sub cboOrderCategory_AfterUpdate()
+    If headerIndex = 4 Then
+        If Not beforeSelectedItem Is Nothing Then
+            If Me.cboOrderCategory.value <> currentCboText Then
+                OrderListUpdate headerIndex
+                headerIndex = 0
+                currentCboText = ""
+            End If
+        End If
+    End If
+End Sub
+
+Private Sub txtPaymentEdit_AfterUpdate()
+    '탭키나 엔터키가 아닌 마우스를 클릭해서 벗어나는 경우: currentEditText를 사용해야 함
+    If headerIndex >= 4 And headerIndex < Me.lswPaymentList.ColumnHeaders.count Then
+        If Not beforeSelectedItem Is Nothing Then
+            If Me.txtPaymentEdit.value <> currentEditText Then
+                PaymentListUpdate headerIndex
+                headerIndex = 0
+            End If
+        End If
+    End If
+End Sub
 
 Private Sub UserForm_Layout()
     estimateUpdateFormX = Me.Left
@@ -1897,3 +2476,6 @@ Private Sub UserForm_Layout()
 End Sub
 
 
+Private Sub UserForm_Terminate()
+    bInitialIzed = False
+End Sub

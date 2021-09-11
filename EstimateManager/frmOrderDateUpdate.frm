@@ -118,7 +118,7 @@ Private Sub btnOrderDateSave_Click()
         OrderDateUpdate "명세서일자", Me.txtSpecificationDate.value
     End If
     If chkTaxinvoiceDate Then
-        OrderDateUpdate "계산서일자", Me.txtTaxInvoiceDate.value
+        OrderDateUpdate "계산서일자", Me.txtTaxinvoiceDate.value
     End If
     If chkPaymentDate Then
         OrderDateUpdate "결제일자", Me.txtPaymentDate.value
@@ -189,7 +189,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
+    GetCalendarDate Me.txtTaxinvoiceDate
     chkTaxinvoiceDate_Change
 End Sub
 
@@ -197,6 +197,31 @@ Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Int
     GetCalendarDate Me.txtPaymentDate
     chkPaymentDate_Change
 End Sub
+
+Private Sub txtDueDate_AfterUpdate()
+    Me.txtDueDate.value = ConvertDateFormat(Me.txtDueDate.value)
+End Sub
+
+Private Sub txtOrderDate_AfterUpdate()
+    Me.txtOrderDate.value = ConvertDateFormat(Me.txtOrderDate.value)
+End Sub
+
+Private Sub txtPaymentDate_AfterUpdate()
+    Me.txtPaymentDate.value = ConvertDateFormat(Me.txtPaymentDate.value)
+End Sub
+
+Private Sub txtReceivingDate_AfterUpdate()
+    Me.txtReceivingDate.value = ConvertDateFormat(Me.txtReceivingDate.value)
+End Sub
+
+Private Sub txtSpecificationDate_AfterUpdate()
+    Me.txtSpecificationDate.value = ConvertDateFormat(Me.txtSpecificationDate.value)
+End Sub
+
+Private Sub txtTaxinvoiceDate_AfterUpdate()
+    Me.txtTaxinvoiceDate.value = ConvertDateFormat(Me.txtTaxinvoiceDate.value)
+End Sub
+
 
 Private Sub chkOrderDate_Change()
     Dim i As Long
@@ -290,7 +315,7 @@ Private Sub chkTaxinvoiceDate_Change()
     With Me.lswOrderList
         If chkTaxinvoiceDate.value = True Then
             For i = 1 To .ListItems.count
-                .ListItems(i).ListSubItems(7).Text = Me.txtTaxInvoiceDate.value
+                .ListItems(i).ListSubItems(7).Text = Me.txtTaxinvoiceDate.value
             Next
         Else
             i = 1

@@ -159,11 +159,11 @@ End Sub
 
 Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     With Me.lswCustomerAutoComplete
-        If KeyCode = 13 Then
+        If KeyCode = vbKeyReturn Then
             '엔터키 - 다음 입력칸으로 이동
             .Visible = False
             Me.txtOrderName.SetFocus
-        ElseIf KeyCode = 9 Then
+        ElseIf KeyCode = vbKeyTab Then
             If .ListItems.count = 1 Then
                 If Me.txtCustomer.value <> .ListItems(1).Text Then
                     '탭키일 경우 자동완성 결과와 입력값이 다르면 포커스를 자동완성 리스트로 이동
@@ -179,7 +179,7 @@ Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Sh
                 .selectedItem = .ListItems(1)
                 .SetFocus
             End If
-        ElseIf KeyCode = 40 Then
+        ElseIf KeyCode = vbKeyDown Then
             '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
             If .ListItems.count > 0 And .Visible = True Then
                 .selectedItem = .ListItems(1)
@@ -230,7 +230,7 @@ End Sub
 
 Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
     '거래처 선택 후 엔터키 들어오면 이 값을 거래처명에 넣어주고 포커스는 다음(품명)으로 이동
-    If KeyCode = 13 Then
+    If KeyCode = vbKeyReturn Then
         With Me.lswCustomerAutoComplete
             If Not .selectedItem Is Nothing Then
                 Me.txtCustomer.value = .selectedItem.Text
@@ -242,11 +242,11 @@ Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As I
 End Sub
 
 Private Sub txtOrderName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then Unload Me
+    If KeyCode = vbKeyEscape Then Unload Me
 End Sub
 
 Private Sub txtManagementID_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then Unload Me
+    If KeyCode = vbKeyEscape Then Unload Me
 End Sub
 
 Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
@@ -350,7 +350,7 @@ Private Sub txtMaterial_AfterUpdate()
 End Sub
 
 Private Sub txtOrderDate_AfterUpdate()
-    Me.txtOrderDate.value = Trim(Me.txtOrderDate.value)
+    Me.txtOrderDate.value = ConvertDateFormat(Me.txtOrderDate.value)
 End Sub
 
 Private Sub txtSize_AfterUpdate()

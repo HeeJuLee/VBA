@@ -285,3 +285,40 @@ Private Sub InitializeCboManager()
         Update_Cbo Me.cboManager, db, 2
     End If
 End Sub
+
+Function ConvertDateFormat(value)
+    Dim pos As Long
+    Dim Y, M, D As Long
+    
+    ConvertDateFormat = ""
+    
+    If IsDate(value) = True Then
+        ConvertDateFormat = Format(value, "yyyy-mm-dd")
+    Else
+        pos = InStr(value, "/")
+        If pos > 0 Then
+            M = Left(value, pos - 1)
+            If M = "" Then
+                M = month(Date)
+            End If
+            If Len(value) = pos Then
+                D = 1
+            ElseIf IsNumeric(Mid(value, pos + 1)) Then
+                D = Mid(value, pos + 1)
+            End If
+        End If
+        
+        If pos > 0 Then
+            ConvertDateFormat = DateSerial(Year(Date), M, D)
+        ElseIf Len(value) = 4 And IsNumeric(value) Then
+            '4자리 숫자
+            M = Left(value, 2)
+            D = Right(value, 2)
+            ConvertDateFormat = DateSerial(Year(Date), M, D)
+        ElseIf Len(value) <= 2 And IsNumeric(value) Then
+            '1자리/2자리 숫자
+            M = value
+            ConvertDateFormat = DateSerial(Year(Date), M, 1)
+        End If
+    End If
+End Function

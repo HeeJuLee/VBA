@@ -99,7 +99,7 @@ Private Sub UserForm_Initialize()
     Me.txtDueDate.value = order(17)         '납기일자
     Me.txtReceivingDate.value = order(18)       '입고일자
     Me.txtSpecificationDate.value = order(20)   '명세서
-    Me.txtTaxInvoiceDate.value = order(21)      '계산서
+    Me.txtTaxinvoiceDate.value = order(21)      '계산서
     Me.txtPaymentDate.value = order(22)     '결제일자
     Me.cboPayMethod.value = Trim(order(24))       '결제수단
     Me.txtVAT.value = Format(order(25), "#,##0")             '부가세
@@ -162,7 +162,7 @@ Sub UpdateOrder()
         Me.txtOrderPrice.value, Me.txtWeight.value, _
         , Me.txtOrderDate.value, Me.txtDueDate.value, _
         Me.txtReceivingDate.value, , _
-        Me.txtSpecificationDate.value, Me.txtTaxInvoiceDate.value, Me.txtPaymentDate.value, , _
+        Me.txtSpecificationDate.value, Me.txtTaxinvoiceDate.value, Me.txtPaymentDate.value, , _
         Me.cboPayMethod.value, Me.txtVAT.value, _
         Me.txtInsertDate, Date, _
         Me.txtEstimateID.value, Me.txtMemo.value, Me.chkVAT.value
@@ -219,7 +219,7 @@ Sub CalculateOrderUpdateCost()
     
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 금액의 10%
@@ -241,11 +241,11 @@ End Sub
 
 Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     With Me.lswCustomerAutoComplete
-        If KeyCode = 13 Then
+        If KeyCode = vbKeyReturn Then
             '엔터키 - 다음 입력칸으로 이동
             .Visible = False
             Me.txtOrderName.SetFocus
-        ElseIf KeyCode = 9 Then
+        ElseIf KeyCode = vbKeyTab Then
             If .ListItems.count = 1 Then
                 If Me.txtCustomer.value <> .ListItems(1).Text Then
                     '탭키일 경우 자동완성 결과와 입력값이 다르면 포커스를 자동완성 리스트로 이동
@@ -261,7 +261,7 @@ Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Sh
                 .selectedItem = .ListItems(1)
                 .SetFocus
             End If
-        ElseIf KeyCode = 40 Then
+        ElseIf KeyCode = vbKeyDown Then
             '아래화살키 - 자동완성 결과가 있는 경우에는 포커스를 자동완성 리스트로 이동
             If .ListItems.count > 0 And .Visible = True Then
                 .selectedItem = .ListItems(1)
@@ -312,7 +312,7 @@ End Sub
 
 Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
     '거래처 선택 후 엔터키 들어오면 이 값을 거래처명에 넣어주고 포커스는 다음(품명)으로 이동
-    If KeyCode = 13 Then
+    If KeyCode = vbKeyReturn Then
         With Me.lswCustomerAutoComplete
             If Not .selectedItem Is Nothing Then
                 Me.txtCustomer.value = .selectedItem.Text
@@ -334,11 +334,11 @@ Private Sub txtOrderName_Enter()
 End Sub
 
 Private Sub txtOrderName_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then Unload Me
+    If KeyCode = vbKeyEscape Then Unload Me
 End Sub
 
 Private Sub txtManagementID_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
-    If KeyCode = 27 Then Unload Me
+    If KeyCode = vbKeyEscape Then Unload Me
 End Sub
 
 Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
@@ -358,7 +358,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
+    GetCalendarDate Me.txtTaxinvoiceDate
     CalculateOrderUpdateCost
 End Sub
 
@@ -452,7 +452,7 @@ Private Sub txtMaterial_AfterUpdate()
 End Sub
 
 Private Sub txtOrderDate_AfterUpdate()
-    Me.txtOrderDate.value = Trim(Me.txtOrderDate.value)
+    Me.txtOrderDate.value = ConvertDateFormat(Me.txtOrderDate.value)
 End Sub
 
 Private Sub txtSize_AfterUpdate()
@@ -464,23 +464,23 @@ Private Sub txtWeight_AfterUpdate()
 End Sub
 
 Private Sub txtReceivingDate_AfterUpdate()
-    Me.txtReceivingDate.value = Trim(Me.txtReceivingDate.value)
+    Me.txtReceivingDate.value = ConvertDateFormat(Me.txtReceivingDate.value)
 End Sub
 
 Private Sub txtDueDate_AfterUpdate()
-    Me.txtDueDate.value = Trim(Me.txtDueDate.value)
+    Me.txtDueDate.value = ConvertDateFormat(Me.txtDueDate.value)
 End Sub
 
 Private Sub txtPaymentDate_AfterUpdate()
-    Me.txtPaymentDate.value = Trim(Me.txtPaymentDate.value)
+    Me.txtPaymentDate.value = ConvertDateFormat(Me.txtPaymentDate.value)
 End Sub
 
 Private Sub txtSpecificationDate_AfterUpdate()
-    Me.txtSpecificationDate.value = Trim(Me.txtSpecificationDate.value)
+    Me.txtSpecificationDate.value = ConvertDateFormat(Me.txtSpecificationDate.value)
 End Sub
 
-Private Sub txtTaxInvoiceDate_AfterUpdate()
-    Me.txtTaxInvoiceDate.value = Trim(Me.txtTaxInvoiceDate.value)
+Private Sub txtTaxinvoiceDate_AfterUpdate()
+    Me.txtTaxinvoiceDate.value = ConvertDateFormat(Me.txtTaxinvoiceDate.value)
    CalculateOrderUpdateCost
 End Sub
 
