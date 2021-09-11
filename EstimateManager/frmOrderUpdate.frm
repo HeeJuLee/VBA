@@ -99,7 +99,7 @@ Private Sub UserForm_Initialize()
     Me.txtDueDate.value = order(17)         '납기일자
     Me.txtReceivingDate.value = order(18)       '입고일자
     Me.txtSpecificationDate.value = order(20)   '명세서
-    Me.txtTaxinvoiceDate.value = order(21)      '계산서
+    Me.txtTaxInvoiceDate.value = order(21)      '계산서
     Me.txtPaymentDate.value = order(22)     '결제일자
     Me.cboPayMethod.value = Trim(order(24))       '결제수단
     Me.txtVAT.value = Format(order(25), "#,##0")             '부가세
@@ -162,7 +162,7 @@ Sub UpdateOrder()
         Me.txtOrderPrice.value, Me.txtWeight.value, _
         , Me.txtOrderDate.value, Me.txtDueDate.value, _
         Me.txtReceivingDate.value, , _
-        Me.txtSpecificationDate.value, Me.txtTaxinvoiceDate.value, Me.txtPaymentDate.value, , _
+        Me.txtSpecificationDate.value, Me.txtTaxInvoiceDate.value, Me.txtPaymentDate.value, , _
         Me.cboPayMethod.value, Me.txtVAT.value, _
         Me.txtInsertDate, Date, _
         Me.txtEstimateID.value, Me.txtMemo.value, Me.chkVAT.value
@@ -219,7 +219,7 @@ Sub CalculateOrderUpdateCost()
     
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 금액의 10%
@@ -358,7 +358,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxinvoiceDate
+    GetCalendarDate Me.txtTaxInvoiceDate
     CalculateOrderUpdateCost
 End Sub
 
@@ -480,7 +480,7 @@ Private Sub txtSpecificationDate_AfterUpdate()
 End Sub
 
 Private Sub txtTaxInvoiceDate_AfterUpdate()
-    Me.txtTaxinvoiceDate.value = Trim(Me.txtTaxinvoiceDate.value)
+    Me.txtTaxInvoiceDate.value = Trim(Me.txtTaxInvoiceDate.value)
    CalculateOrderUpdateCost
 End Sub
 

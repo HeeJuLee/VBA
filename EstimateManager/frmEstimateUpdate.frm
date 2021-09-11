@@ -108,7 +108,7 @@ Private Sub UserForm_Initialize()
     Me.cboCategory.value = Trim(estimate(25))   '분류1
     Me.txtDueDate.value = estimate(26)              '납기일
     Me.txtSpecificationDate.value = estimate(27)    '거래명세서
-    Me.txtTaxinvoiceDate.value = estimate(28)    '세금계산서
+    Me.txtTaxInvoiceDate.value = estimate(28)    '세금계산서
     Me.txtPaymentDate.value = estimate(29)    '결제일자
     Me.txtExpectPaymentDate.value = estimate(30)  '예상결제일
     Me.txtExpectPaymentMonth.value = Format(estimate(30), "mm" & "월")  '예상결제월
@@ -502,7 +502,7 @@ Sub UpdateShtEstimate(estimateId)
         shtEstimateAdmin.Cells(findRow, 24).value = Me.txtAcceptedPrice.value
         shtEstimateAdmin.Cells(findRow, 25).value = Me.txtAcceptedMargin.value
         shtEstimateAdmin.Cells(findRow, 26).value = Me.txtSpecificationDate.value
-        shtEstimateAdmin.Cells(findRow, 27).value = Me.txtTaxinvoiceDate.value
+        shtEstimateAdmin.Cells(findRow, 27).value = Me.txtTaxInvoiceDate.value
         shtEstimateAdmin.Cells(findRow, 28).value = Me.txtPaymentDate.value
         shtEstimateAdmin.Cells(findRow, 29).value = Me.txtExpectPaymentDate.value
         shtEstimateAdmin.Cells(findRow, 30).value = Me.txtVAT.value
@@ -605,7 +605,7 @@ Sub UpdateShtOrder(orderId)
         shtOrderAdmin.Cells(findRow, 19).value = Me.txtDueDate.value
         shtOrderAdmin.Cells(findRow, 21).value = Me.txtDeliveryDate.value
         shtOrderAdmin.Cells(findRow, 22).value = Me.txtSpecificationDate.value
-        shtOrderAdmin.Cells(findRow, 23).value = Me.txtTaxinvoiceDate.value
+        shtOrderAdmin.Cells(findRow, 23).value = Me.txtTaxInvoiceDate.value
         shtOrderAdmin.Cells(findRow, 24).value = Me.txtPaymentDate.value
         shtOrderAdmin.Cells(findRow, 25).value = Me.txtExpectPaymentDate.value
         shtOrderAdmin.Cells(findRow, 27).value = Me.txtVAT.value
@@ -786,7 +786,7 @@ Sub CalculateVAT()
 
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 수주금액의 10%
@@ -840,7 +840,7 @@ Sub CalculateEstimateUpdateCost_2()
 
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 수주금액의 10%
@@ -1529,7 +1529,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxinvoiceDate
+    GetCalendarDate Me.txtTaxInvoiceDate
 End Sub
 
 Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
@@ -1813,7 +1813,7 @@ End Sub
 
 
 Private Sub txtTaxInvoiceDate_AfterUpdate()
-    Me.txtTaxinvoiceDate.value = Trim(Me.txtTaxinvoiceDate.value)
+    Me.txtTaxInvoiceDate.value = Trim(Me.txtTaxInvoiceDate.value)
 End Sub
 
 Private Sub txtPaymentDate_AfterUpdate()
