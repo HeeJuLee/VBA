@@ -26,12 +26,6 @@ Dim bFocusOrderList, bFocusPaymentList As Boolean
 Dim currentEditText, currentCboText As Variant
 
 
-Private Sub UserForm_Activate()
-    If bInitialIzed = False Then
-        Me.txtSize.SetFocus
-    End If
-    bInitialIzed = True
-End Sub
 
 
 Private Sub UserForm_Initialize()
@@ -59,13 +53,10 @@ Private Sub UserForm_Initialize()
     
     bInitialIzed = False
     
-     '텍스트박스 라벨 컨트롤 색상 조정
+     '텍스트박스 라벨 위치 조정
     For Each contr In Me.Controls
-        If contr.Name Like "lbl*" Then
-            If contr.Name Like "lbl2*" Then
-            Else
-                contr.BackColor = RGB(242, 242, 242)
-            End If
+        If contr.Name Like "Label*" Then
+            contr.top = contr.top + 2
         End If
     Next
     
@@ -663,7 +654,7 @@ End Sub
 Sub DeleteOrderList()
     Dim li As ListItem
     Dim count As Long
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     
     count = 0
     For Each li In Me.lswOrderList.ListItems
@@ -673,8 +664,8 @@ Sub DeleteOrderList()
     Next
     If count = 0 Then MsgBox "삭제할 발주를 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 발주를 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
-    If YN = vbNo Then Exit Sub
+    yn = MsgBox("선택한 " & count & "개 발주를 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
+    If yn = vbNo Then Exit Sub
 
     For Each li In Me.lswOrderList.ListItems
         If li.Selected = True Then
@@ -1305,7 +1296,7 @@ End Sub
 Private Sub btnOrderListBatchUpdate_Click()
     Dim li As ListItem
     Dim count As Long
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     
     count = 0
     For Each li In Me.lswOrderList.ListItems
@@ -1366,7 +1357,7 @@ End Sub
 Private Sub btnPaymentListDelete_Click()
     Dim li As ListItem
     Dim count As Long
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     Dim spec, tax, paid, month, method As Variant
     
     count = 0
@@ -1377,8 +1368,8 @@ Private Sub btnPaymentListDelete_Click()
     Next
     If count = 0 Then MsgBox "삭제할 결제이력을 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 이력을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
-    If YN = vbNo Then Exit Sub
+    yn = MsgBox("선택한 " & count & "개 이력을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
+    If yn = vbNo Then Exit Sub
 
     For Each li In Me.lswPaymentList.ListItems
         If li.Selected = True Then
@@ -1626,6 +1617,29 @@ Private Sub txtEstimateName_Enter()
             .Visible = False
         End If
     End With
+End Sub
+
+Private Sub lbl2AcceptedDate_Enter()
+    Me.txtAcceptedDate.SetFocus
+End Sub
+
+Private Sub lbl2BidDate_Enter()
+    Me.txtBidDate.SetFocus
+End Sub
+
+Private Sub lbl2DeliveryDate_Enter()
+    Me.txtDeliveryDate.SetFocus
+End Sub
+
+Private Sub lbl2EstimateDate_Enter()
+    Me.txtEstimateDate.SetFocus
+End Sub
+
+Private Sub UserForm_Activate()
+    If bInitialIzed = False Then
+        Me.txtSize.SetFocus
+    End If
+    bInitialIzed = True
 End Sub
 
 Private Sub txtCustomer_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)

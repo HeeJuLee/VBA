@@ -282,11 +282,11 @@ Private Sub cboSelectMonth_Change()
 End Sub
 
 Private Sub Worksheet_Change(ByVal Target As Range)
-    If Target.Address = "$Q$4" Then
-        dueDate = Target.value
-        
-        EstimateSearch
-    End If
+'    If Target.Address = "$Q$4" Then
+'        dueDate = Target.value
+'
+'        EstimateSearch
+'    End If
 End Sub
 
 
@@ -335,7 +335,7 @@ End Sub
 '견적삭제
 Sub EstimateDelete()
     Dim cRow As Long
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     Dim db As Variant
     Dim count As Long
     Dim estimateId As Variant
@@ -364,11 +364,11 @@ Sub EstimateDelete()
     
     '안내 문구 출력
     If count = 0 Then
-        YN = MsgBox("선택한 '" & managementId & "' 견적정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+        yn = MsgBox("선택한 '" & managementId & "' 견적정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     Else
-        YN = MsgBox("선택한 '" & managementId & "' 견적정보와 " & count & "개의 수주/발주정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+        yn = MsgBox("선택한 '" & managementId & "' 견적정보와 " & count & "개의 수주/발주정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     End If
-    If YN = vbNo Then Exit Sub
+    If yn = vbNo Then Exit Sub
     
     '견적정보 삭제
     Delete_Record shtEstimate, estimateId

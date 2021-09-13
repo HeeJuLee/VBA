@@ -214,7 +214,7 @@ End Sub
 
 '운영비 등록
 Sub InsertOperation()
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     Dim count As Long
     Dim li As ListItem
 
@@ -230,8 +230,8 @@ Sub InsertOperation()
         Insert_Record shtOperation, , Range("F6").value, , Range("G6"), , Range("H6"), Range("I6"), Range("J6"), Range("K6"), Range("L6"), Range("M6"), Range("N6"), Range("D6"), Range("E6")
     Else
         '여러개 선택 후 등록 시 대량 등록 진행
-        YN = MsgBox("선택한 " & count & "개 항목을 등록합니다.", vbYesNo)
-        If YN = vbNo Then Exit Sub
+        yn = MsgBox("선택한 " & count & "개 항목을 등록합니다.", vbYesNo)
+        If yn = vbNo Then Exit Sub
         
         For Each li In Me.lswOperationList.ListItems
             If li.Selected = True Then
@@ -268,7 +268,7 @@ End Sub
 
 '운영비 삭제
 Sub DeleteOperation()
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     Dim count As Long
     Dim li As ListItem
 
@@ -278,8 +278,8 @@ Sub DeleteOperation()
     Next
     If count = 0 Then MsgBox "삭제할 항목을 선택하세요.": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 항목을 삭제합니다.", vbYesNo)
-    If YN = vbNo Then Exit Sub
+    yn = MsgBox("선택한 " & count & "개 항목을 삭제합니다.", vbYesNo)
+    If yn = vbNo Then Exit Sub
 
     For Each li In Me.lswOperationList.ListItems
         If li.Selected = True Then

@@ -15,9 +15,8 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-
 Private Sub UserForm_Activate()
-    Me.txtManagementID.SetFocus
+    Me.txtCustomer.SetFocus
 End Sub
 
 Private Sub UserForm_Initialize()
@@ -26,7 +25,7 @@ Private Sub UserForm_Initialize()
     '텍스트박스 라벨 컨트롤 색상 조정
     For Each contr In Me.Controls
         If contr.Name Like "Label*" Then
-            contr.top = contr.top - 2
+            contr.top = contr.top + 2
         End If
     Next
 
@@ -173,6 +172,7 @@ Private Sub txtManager_Enter()
     With Me.lswCustomerAutoComplete
         If .Visible = True Then
             Me.txtCustomer.value = .selectedItem.Text
+            SetAutoManagementId .selectedItem.Text
             .Visible = False
         End If
     End With
@@ -256,8 +256,10 @@ Private Sub lswCustomerAutoComplete_DblClick()
             Me.txtCustomer.value = .selectedItem.Text
             .Visible = False
             Me.txtManager.SetFocus
+            SetAutoManagementId .selectedItem.Text
         End If
     End With
+    
 End Sub
 
 Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As Integer)
@@ -266,11 +268,13 @@ Private Sub lswCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As I
         With Me.lswCustomerAutoComplete
             If Not .selectedItem Is Nothing Then
                 Me.txtCustomer.value = .selectedItem.Text
+                SetAutoManagementId .selectedItem.Text
                 .Visible = False
                 Me.txtManager.SetFocus
             End If
         End With
     End If
+    
 End Sub
 
 Private Sub txtManager_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
@@ -404,14 +408,18 @@ End Sub
 
 
 Private Sub txtCustomer_AfterUpdate()
+    Me.txtCustomer.value = Trim(Me.txtCustomer.value)
+    
+    SetAutoManagementId Me.txtCustomer.value
+End Sub
+
+Sub SetAutoManagementId(customer)
     Dim db As Variant
     Dim day As String
     
-    Me.txtCustomer.value = Trim(Me.txtCustomer.value)
-    
-    If Me.txtCustomer.value <> "" Then
+    If customer <> "" Then
         db = Get_DB(shtEstimateCustomer, True)
-        db = Filtered_DB(db, Me.txtCustomer.value, 1, True)
+        db = Filtered_DB(db, customer, 1, True)
         If IsEmpty(db) Then
             Me.txtManagementID.value = Format(Date, "yy") & "Z" & Format(Date, "mmdd") & "-" & Format(time, "hhmm")
         Else

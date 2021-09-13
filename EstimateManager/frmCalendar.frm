@@ -333,7 +333,7 @@ Private Sub Label14_Click(): Call lblClick(Me.Label14): End Sub
 Private Sub Label15_Click(): Call lblClick(Me.Label15): End Sub
 Private Sub Label16_Click(): Call lblClick(Me.Label16): End Sub
 Private Sub Label17_Click(): Call lblClick(Me.Label17): End Sub
-Private Sub Label18_Click(): Call lblClick(Me.label18): End Sub
+Private Sub Label18_Click(): Call lblClick(Me.Label18): End Sub
 Private Sub Label19_Click(): Call lblClick(Me.Label19): End Sub
 Private Sub Label20_Click(): Call lblClick(Me.Label20): End Sub
 Private Sub Label21_Click(): Call lblClick(Me.Label21): End Sub

@@ -27,7 +27,14 @@ Private Sub UserForm_Initialize()
         Me.Left = productionCopyFormX
         Me.top = productionCopyFormY
     End If
-        
+    
+    '텍스트박스 라벨 위치 조정
+    For Each contr In Me.Controls
+        If contr.Name Like "Label*" Then
+            contr.top = contr.top + 2
+        End If
+    Next
+    
     InitializeLswEstimateList
     InitializeLswOrderList
     
@@ -290,21 +297,50 @@ Private Sub btnProductionClose_Click()
     Unload Me
 End Sub
 
+Private Sub btnProductionCopyAll_Click()
+    ProductionCopy "all"
+End Sub
+
 Private Sub btnProductionCopy_Click()
+    ProductionCopy ""
+End Sub
+
+Sub ProductionCopy(all)
+    Dim count As Long
+    Dim yn As Variant
     Dim li As ListItem
     
     If selectedEstimateId = "" Then
         MsgBox "복사할 견적을 선택하세요.", vbInformation, "작업 확인"
         Exit Sub
     End If
-
+    
+    count = 0
     For Each li In Me.lswOrderList.ListItems
-        Insert_Record shtProduction, currentEstimateId, currentManagementId, li.SubItems(2), li.SubItems(3), li.SubItems(4), li.SubItems(5), li.SubItems(6), li.SubItems(7), li.SubItems(8), li.SubItems(9), , li.SubItems(1), Date
+        If all = "all" Then
+            count = count + 1
+        Else
+            If li.Selected = True Then count = count + 1
+        End If
+    Next
+    If count = 0 Then MsgBox "복사할 항목을 선택하세요.": Exit Sub
+        
+    yn = MsgBox(count & "개 항목을 복사할까요?", vbYesNo + vbQuestion, "작업 확인")
+    If yn = vbNo Then Exit Sub
+    
+    count = 0
+    For Each li In Me.lswOrderList.ListItems
+        If li.Selected = True Or all = "all" Then
+            Insert_Record shtProduction, currentEstimateId, currentManagementId, li.SubItems(2), li.SubItems(3), li.SubItems(4), li.SubItems(5), li.SubItems(6), li.SubItems(7), li.SubItems(8), li.SubItems(9), , li.SubItems(1), Date
+            count = count + 1
+        End If
     Next
     
     If isFormLoaded("frmProductionManager") Then
         frmProductionManager.RefreshProductionTotalCost
     End If
+    
+    MsgBox count & "개 항목을 복사하였습니다.", vbInformation, "작업 확인"
     
 End Sub
 

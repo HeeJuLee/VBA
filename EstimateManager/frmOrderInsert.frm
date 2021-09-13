@@ -35,8 +35,8 @@ Private Sub UserForm_Initialize()
     
     '텍스트박스 라벨 위치 조정
     For Each contr In Me.Controls
-        If contr.Name Like "txt*" Or contr.Name Like "cbo*" Or contr.Name Like "img*" Then
-            contr.top = contr.top - 2
+        If contr.Name Like "Label*" Then
+            contr.top = contr.top + 2
         End If
     Next
     

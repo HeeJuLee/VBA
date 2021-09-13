@@ -188,7 +188,7 @@ End Sub
 
 Sub DeletePayment()
     Dim db As Variant
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     Dim count As Long
     Dim li As ListItem
 
@@ -198,8 +198,8 @@ Sub DeletePayment()
     Next
     If count = 0 Then MsgBox "삭제할 항목을 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 항목을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
-    If YN = vbNo Then Exit Sub
+    yn = MsgBox("선택한 " & count & "개 항목을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
+    If yn = vbNo Then Exit Sub
 
     For Each li In Me.lswPaymentList.ListItems
         If li.Selected = True Then

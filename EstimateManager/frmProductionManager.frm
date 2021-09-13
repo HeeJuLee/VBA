@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} frmProductionManager 
    Caption         =   "예상실행항목 관리"
-   ClientHeight    =   8295.001
+   ClientHeight    =   8760.001
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   15360
@@ -15,6 +15,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+
 Private Sub UserForm_Initialize()
     Dim contr As Control
     Dim estimate As Variant
@@ -26,15 +27,8 @@ Private Sub UserForm_Initialize()
     
     '텍스트박스 라벨 컨트롤 색상 조정
     For Each contr In Me.Controls
-        If contr.Name Like "lbl*" Then
-            If contr.Name Like "lbl2*" Then
-                'contr.BackColor = RGB(48, 84, 150)
-                'contr.ForeColor = RGB(255, 255, 255)
-            ElseIf contr.Name Like "lbl3*" Then
-                contr.BackColor = RGB(221, 235, 247)
-            Else
-                contr.BackColor = RGB(242, 242, 242)
-            End If
+        If contr.Name Like "Label*" Then
+            contr.top = contr.top + 2
         End If
     Next
     
@@ -92,20 +86,20 @@ Sub InitializeLswProductionList()
         .SmallIcons = Me.ImageList1
         
         .ColumnHeaders.Clear
-        .ColumnHeaders.Add , , "품목", 130
+        .ColumnHeaders.Add , , "품목", 120
         .ColumnHeaders.Add , , "ID", 0
         .ColumnHeaders.Add , , "ID_견적", 0
         .ColumnHeaders.Add , , "관리번호", 0
         .ColumnHeaders.Add , , "분류", 34
-        .ColumnHeaders.Add , , "거래처", 70
+        .ColumnHeaders.Add , , "거래처", 60
         .ColumnHeaders.Add , , "재질", 60
-        .ColumnHeaders.Add , , "규격", 80
+        .ColumnHeaders.Add , , "규격", 60
         .ColumnHeaders.Add , , "수량", 44, lvwColumnRight
         .ColumnHeaders.Add , , "단위", 44, lvwColumnCenter
         .ColumnHeaders.Add , , "단가", 70, lvwColumnRight
         .ColumnHeaders.Add , , "금액", 70, lvwColumnRight
-        .ColumnHeaders.Add , , "메모", 92
-        .ColumnHeaders.Add , , "등록일자", 0
+        .ColumnHeaders.Add , , "메모", 94
+        .ColumnHeaders.Add , , "발주건수", 50
         
         .ColumnHeaders(1).Position = 6
     
@@ -130,6 +124,7 @@ Sub InitializeLswProductionList()
                 li.ListSubItems.Add , , Format(db(i, 10), "#,##0")
                 li.ListSubItems.Add , , Format(db(i, 11), "#,##0")
                 li.ListSubItems.Add , , db(i, 12)
+                li.ListSubItems.Add , , db(i, 15)
                 
                 li.Selected = False
             Next
@@ -224,7 +219,7 @@ End Sub
 
 Sub DeleteProduction()
     Dim db As Variant
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     Dim count As Long
     Dim li As ListItem
 
@@ -234,8 +229,8 @@ Sub DeleteProduction()
     Next
     If count = 0 Then MsgBox "삭제할 항목을 선택하세요.", vbInformation, "작업 확인": Exit Sub
     
-    YN = MsgBox("선택한 " & count & "개 항목을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
-    If YN = vbNo Then Exit Sub
+    yn = MsgBox("선택한 " & count & "개 항목을 삭제할까요?", vbYesNo + vbQuestion, "작업 확인")
+    If yn = vbNo Then Exit Sub
 
     For Each li In Me.lswProductionList.ListItems
         If li.Selected = True Then
@@ -252,32 +247,38 @@ Sub DeleteProduction()
     
 End Sub
 
-Sub ProductionToOrder()
+Sub ProductionToOrder(all)
     Dim li As ListItem
     Dim count As Long
     Dim managementId, category, customer, Item, material, size, amount, unit, unitPrice, cost, memo As Variant
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     Dim estimate As Variant
-    
-    count = 0
-    For Each li In Me.lswProductionList.ListItems
-        If li.Selected = True Then count = count + 1
-    Next
-    If count = 0 Then MsgBox "발주할 항목을 선택하세요.": Exit Sub
+    Dim num As Long
     
     '수주 확정이 아닌 견적의 경우는 발주를 할 수 없음
     estimate = Get_Record_Array(shtEstimate, currentEstimateId)
-    If estimate(38) = "" Then
+    If estimate(37) = "" Then
         MsgBox "수주 확정을 진행해야 발주할 수 있습니다.", vbInformation, "작업 확인"
         Exit Sub
     End If
     
-    YN = MsgBox("선택한 " & count & "개 항목을 발주할까요?", vbYesNo + vbQuestion, "작업 확인")
-    If YN = vbNo Then Exit Sub
+    count = 0
+    For Each li In Me.lswProductionList.ListItems
+        If all = "all" Then
+            count = count + 1
+        Else
+            If li.Selected = True Then count = count + 1
+        End If
+    Next
+    If count = 0 Then MsgBox "발주할 항목을 선택하세요.": Exit Sub
+        
+    
+    yn = MsgBox(count & "개 항목을 발주할까요?", vbYesNo + vbQuestion, "작업 확인")
+    If yn = vbNo Then Exit Sub
     
     count = 0
     For Each li In Me.lswProductionList.ListItems
-        If li.Selected = True Then
+        If li.Selected = True Or all = "all" Then
             Item = li.Text
             managementId = li.SubItems(3)
             category = li.SubItems(4)
@@ -297,22 +298,27 @@ Sub ProductionToOrder()
                 , , , , _
                 , , _
                 Date, , currentEstimateId, memo, False
+            
+            '발주건수 +1
+            If IsNumeric(li.SubItems(13)) Then
+                num = CLng(li.SubItems(13)) + 1
+            Else
+                num = 1
+            End If
+            Update_Record_Column shtProduction, li.SubItems(1), "발주건수", num
                 
             count = count + 1
         End If
     Next
+    '예상실행항목 리스트 업데이트
+    InitializeLswProductionList
     
     'frmEstimateUpdate 폼의 발주목록을 업데이트
     If isFormLoaded("frmEstimateUpdate") Then
         frmEstimateUpdate.InitializeLswOrderList
-        frmEstimateUpdate.CalculateEstimateUpdateCost
     End If
     
     MsgBox "총 " & count & "개 항목을 발주하였습니다.", vbInformation, "작업 확인"
-    
-    shtOrderAdmin.Activate
-    shtOrderAdmin.OrderSearch
-    shtOrderAdmin.GoToEnd
 
 End Sub
 
@@ -387,7 +393,11 @@ Private Sub btnProductionUpdate_Click()
 End Sub
 
 Private Sub btnProductionToOrder_Click()
-    ProductionToOrder
+    ProductionToOrder ""
+End Sub
+
+Private Sub btnProductionToOrderAll_Click()
+    ProductionToOrder "all"
 End Sub
 
 Private Sub btnProductionCopy_Click()
@@ -431,6 +441,9 @@ Private Sub lswProductionList_ColumnClick(ByVal ColumnHeader As MSComctlLib.Colu
     End With
 End Sub
 
+Private Sub lbl3ProductionTotalCost_Enter()
+    Me.txtProductionTotalCost.SetFocus
+End Sub
 
 Private Sub btnProductionClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
     If KeyCode = vbKeyTab Then

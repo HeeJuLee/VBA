@@ -84,7 +84,7 @@ Sub OrderSearch()
         SetComment db, 29, shtOrderAdmin.Range("I6")
         
         '수주 색상 적용
-        SetContentsColor shtOrderAdmin.Range("B6"), "AC", db, 4, "수주", shtOrderAdmin.Range("AC3").Interior.color
+        SetContentsColor shtOrderAdmin.Range("B6"), "AC", db, 4, "수주", shtOrderAdmin.Range("B3").Interior.color
 
     End If
 
@@ -124,7 +124,7 @@ End Sub
 '발주삭제
 Sub OrderDelete()
     Dim cRow As Long
-    Dim YN As VbMsgBoxResult
+    Dim yn As VbMsgBoxResult
     
     '선택한 행 번호
     cRow = Selection.row
@@ -136,8 +136,8 @@ Sub OrderDelete()
     End If
 
     '안내 문구 출력
-    YN = MsgBox("선택한 발주정보를 정말로 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
-    If YN = vbNo Then Exit Sub
+    yn = MsgBox("선택한 발주정보를 정말로 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+    If yn = vbNo Then Exit Sub
     
     'DB에서 견적정보 삭제
     Delete_Record shtOrder, Range("B" & cRow).value
@@ -399,9 +399,9 @@ If KeyCode = 13 Then
 End Sub
 
 Private Sub Worksheet_Change(ByVal Target As Range)
-    If Target.Address = "$S$4" Then
-        dueDate = Target.value
-        
-        OrderSearch
-    End If
+'    If Target.Address = "$S$4" Then
+'        dueDate = Target.value
+'
+'        OrderSearch
+'    End If
 End Sub
