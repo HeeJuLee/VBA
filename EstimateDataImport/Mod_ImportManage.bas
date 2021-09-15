@@ -4,31 +4,31 @@ Option Explicit
 '관리 구조체
 Type Manage
     ID As Long
-    수입지출 As String
-    분류1 As String
-    분류2 As String
-    관리번호 As String
-    거래처 As String
-    품목 As String
-    재질 As String
-    규격 As String
-    단가 As String
-    금액 As String
-    단위 As String
-    중량 As String
-    수량 As String
-    수주 As String
-    납기 As String
-    발주 As String
-    입고 As String
-    납품 As String
-    명세서 As String
-    계산서 As String
-    결재 As String
-    결재월 As String
-    부가세 As String
-    등록일자 As String
-    수정일자 As String
+    수입지출 As Variant
+    분류1 As Variant
+    분류2 As Variant
+    관리번호 As Variant
+    거래처 As Variant
+    품목 As Variant
+    재질 As Variant
+    규격 As Variant
+    단가 As Variant
+    금액 As Variant
+    단위 As Variant
+    중량 As Variant
+    수량 As Variant
+    수주 As Variant
+    납기 As Variant
+    발주 As Variant
+    입고 As Variant
+    납품 As Variant
+    명세서 As Variant
+    계산서 As Variant
+    결재 As Variant
+    결재월 As Variant
+    부가세 As Variant
+    등록일자 As Variant
+    수정일자 As Variant
 End Type
 
 Sub ImportManage()

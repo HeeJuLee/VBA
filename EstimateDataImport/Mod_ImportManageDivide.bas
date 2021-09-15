@@ -85,11 +85,11 @@ Sub DivideManage()
                
             If man.분류2 = "수주" Then
                 '수주이면 수주 테이블에 등록
-                Insert_Record shtAcceptedData, man.ID, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.납기, man.명세서, man.계산서, man.결재, man.결재월, man.부가세, man.등록일자
+                Insert_Record shtAcceptedData, man.ID, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.수주, man.납기, man.발주, man.명세서, man.계산서, man.결재, man.결재월, man.부가세, man.등록일자
                 '수주발주 테이블에도 등록
                 Insert_Record shtOrderData, man.ID, man.분류1, man.분류2, man.관리번호, man.거래처, man.품목, man.재질, man.규격, man.수량, man.단위, man.단가, man.금액, man.중량, _
                               man.수주, man.발주, man.납기, man.입고, man.납품, man.명세서, man.계산서, man.결재, man.결재월, , man.부가세, man.등록일자
-
+                
             ElseIf man.수입지출 = "지출" And Len(man.관리번호) >= 10 Then
                 '지출이면서 관리번호가 있으면 수주발주 테이블에 등록
                 '발주인 경우에는 분류1을 결제수단 필드에 넣음
@@ -112,21 +112,21 @@ Sub ClearManageDivide()
         endCol = .Cells(1, .Columns.Count).End(xlToLeft).Column
         endRow = .Cells(.Rows.Count, 1).End(xlUp).row
         .Cells(1, endCol) = 1
-        .Range("A2").Resize(endRow, endCol).Delete
+        .Range("A2").Resize(endRow, endCol).ClearContents
     End With
     
     With shtOrderData
         endCol = .Cells(1, .Columns.Count).End(xlToLeft).Column
         endRow = .Cells(.Rows.Count, 1).End(xlUp).row
         .Cells(1, endCol) = 1
-        .Range("A2").Resize(endRow, endCol).Delete
+        .Range("A2").Resize(endRow, endCol).ClearContents
     End With
     
     With shtOperatingData
         endCol = .Cells(1, .Columns.Count).End(xlToLeft).Column
         endRow = .Cells(.Rows.Count, 1).End(xlUp).row
         .Cells(1, endCol) = 1
-        .Range("A2").Resize(endRow, endCol).Delete
+        .Range("A2").Resize(endRow, endCol).ClearContents
     End With
     
 End Sub
