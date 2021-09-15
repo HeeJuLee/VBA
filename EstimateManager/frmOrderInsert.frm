@@ -204,7 +204,7 @@ Private Sub txtCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shif
             .ListItems.Clear
             db = Get_DB(shtOrderCustomer, True)
             db = Filtered_DB(db, Me.txtCustomer.value, 1, False)
-            If IsEmpty(db) Then
+            If isEmpty(db) Then
                 .Visible = False
             Else
                 For i = 1 To UBound(db)
@@ -249,7 +249,7 @@ Private Sub txtManagementID_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVa
     If KeyCode = vbKeyEscape Then Unload Me
 End Sub
 
-Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtOrderDate
 End Sub
 
@@ -279,7 +279,7 @@ Private Sub txtManagementID_AfterUpdate()
     If Me.txtManagementID.value <> "" Then
         db = Get_DB(shtEstimate)
         db = Filtered_DB(db, Me.txtManagementID.value, 2, True)
-        If IsEmpty(db) Then
+        If isEmpty(db) Then
             MsgBox "관리번호에 해당하는 견적(수주) 정보가 없습니다.", vbInformation, "작업 확인"
             Exit Sub
         Else

@@ -102,7 +102,9 @@ Sub InsertEstimate()
                   , , , , _
                   , , , , , , _
                   Date, , _
-                  , , , , , , , , False, , , False
+                  , , _
+                  , , , , _
+                  , , False
             
     Unload Me
     
@@ -236,7 +238,7 @@ Private Sub txtCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shif
             .ListItems.Clear
             db = Get_DB(shtEstimateCustomer, True)
             db = Filtered_DB(db, Me.txtCustomer.value, 1, False)
-            If IsEmpty(db) Then
+            If isEmpty(db) Then
                 .Visible = False
             Else
                 For i = 1 To UBound(db)
@@ -326,7 +328,7 @@ Private Sub txtManager_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift
             .ListItems.Clear
             db = Get_DB(shtEstimateManager, True)
             db = Filtered_DB(db, Me.txtManager.value, 1, False)
-            If IsEmpty(db) Then
+            If isEmpty(db) Then
                 .Visible = False
             Else
                 For i = 1 To UBound(db)
@@ -363,7 +365,7 @@ Private Sub lswManagerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift As In
     End If
 End Sub
 
-Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgEstimateDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtEstimateDate
 End Sub
 
@@ -420,7 +422,7 @@ Sub SetAutoManagementId(customer)
     If customer <> "" Then
         db = Get_DB(shtEstimateCustomer, True)
         db = Filtered_DB(db, customer, 1, True)
-        If IsEmpty(db) Then
+        If isEmpty(db) Then
             Me.txtManagementID.value = Format(Date, "yy") & "Z" & Format(Date, "mmdd") & "-" & Format(time, "hhmm")
         Else
             Me.txtManagementID.value = Format(Date, "yy") & db(1, 2) & Format(Date, "mmdd") & "-" & Format(time, "hhmm")

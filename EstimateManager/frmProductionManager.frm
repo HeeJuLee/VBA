@@ -15,6 +15,11 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+Dim mouseX As Integer
+Dim headerIndex As Integer
+Dim beforeSelectedItem As ListItem
+Dim currentEditText As Variant
+
 
 Private Sub UserForm_Initialize()
     Dim contr As Control
@@ -41,7 +46,7 @@ Private Sub UserForm_Initialize()
     
     'currentEstimateId로 견적데이터 읽어오기 (확인용)
     estimate = Get_Record_Array(shtEstimate, currentEstimateId)
-    If IsEmpty(estimate) Then
+    If isEmpty(estimate) Then
         MsgBox "currentEstimateId에 해당하는 견적 데이터가 없습니다.", vbInformation, "작업 확인"
         End
     End If
@@ -81,17 +86,18 @@ Sub InitializeLswProductionList()
         .HideSelection = True
         .FullRowSelect = True
         .MultiSelect = True
-        .LabelEdit = lvwAutomatic
+        .LabelEdit = lvwManual
         .CheckBoxes = False
         .SmallIcons = Me.ImageList1
+        .Sorted = False
         
         .ColumnHeaders.Clear
-        .ColumnHeaders.Add , , "품목", 120
         .ColumnHeaders.Add , , "ID", 0
         .ColumnHeaders.Add , , "ID_견적", 0
         .ColumnHeaders.Add , , "관리번호", 0
         .ColumnHeaders.Add , , "분류", 34
         .ColumnHeaders.Add , , "거래처", 60
+        .ColumnHeaders.Add , , "품목", 120
         .ColumnHeaders.Add , , "재질", 60
         .ColumnHeaders.Add , , "규격", 60
         .ColumnHeaders.Add , , "수량", 44, lvwColumnRight
@@ -101,22 +107,20 @@ Sub InitializeLswProductionList()
         .ColumnHeaders.Add , , "메모", 94
         .ColumnHeaders.Add , , "발주건수", 50
         
-        .ColumnHeaders(1).Position = 6
-    
         .ListItems.Clear
-        If Not IsEmpty(db) Then
+        If Not isEmpty(db) Then
             For i = 1 To UBound(db)
                 If IsNumeric(db(i, 11)) Then
                     '비용 합계 구함
                     totalCost = totalCost + CLng(db(i, 11))
                 End If
                 
-                Set li = .ListItems.Add(, , db(i, 5))
-                li.ListSubItems.Add , , db(i, 1)
+                Set li = .ListItems.Add(, , db(i, 1))
                 li.ListSubItems.Add , , db(i, 2)
                 li.ListSubItems.Add , , db(i, 3)
                 li.ListSubItems.Add , , db(i, 13)
                 li.ListSubItems.Add , , db(i, 4)
+                li.ListSubItems.Add , , db(i, 5)
                 li.ListSubItems.Add , , db(i, 6)
                 li.ListSubItems.Add , , db(i, 7)
                 li.ListSubItems.Add , , db(i, 8)
@@ -124,7 +128,11 @@ Sub InitializeLswProductionList()
                 li.ListSubItems.Add , , Format(db(i, 10), "#,##0")
                 li.ListSubItems.Add , , Format(db(i, 11), "#,##0")
                 li.ListSubItems.Add , , db(i, 12)
-                li.ListSubItems.Add , , db(i, 15)
+                If db(i, 15) = "" Then
+                    li.ListSubItems.Add , , 0
+                Else
+                    li.ListSubItems.Add , , db(i, 15)
+                End If
                 
                 li.Selected = False
             Next
@@ -171,12 +179,14 @@ Sub InsertProduction()
     '예상실행가를 포함한 곳에 업데이트
     RefreshProductionTotalCost
     
+    '예상실행항목 리스트박스 새로고침
+    InitializeLswProductionList
+    
     '등록한 아이템 선택
     Me.txtProductionID.value = Get_LastID(shtProduction)
     SelectItemLswProduction Me.txtProductionID.value
     
 End Sub
-
 
 Sub UpdateProduction()
     Dim cost As Variant
@@ -194,6 +204,9 @@ Sub UpdateProduction()
     '예상실행가를 포함한 곳에 업데이트
     RefreshProductionTotalCost
     
+    '예상실행항목 리스트박스 새로고침
+    InitializeLswProductionList
+    
     SelectItemLswProduction Me.txtProductionID.value
     
 End Sub
@@ -207,14 +220,8 @@ Sub RefreshProductionTotalCost()
     
     '예상실행가를 frmEstimateUpdate 폼 값도 업데이트
     If isFormLoaded("frmEstimateUpdate") Then
-        'frmEstimateUpdate.txtProductionTotalCost = Me.txtProductionTotalCost.value
         frmEstimateUpdate.UpdateProductionTotalCost Me.txtProductionTotalCost.value
-'        frmEstimateUpdate.CalculateEstimateUpdateCost
-'        frmEstimateUpdate.UpdateShtEstimateField currentEstimateId, "예상실행가", Me.txtProductionTotalCost.value
     End If
-    
-    '예상실행항목 리스트박스 새로고침
-    InitializeLswProductionList
 End Sub
 
 Sub DeleteProduction()
@@ -235,13 +242,16 @@ Sub DeleteProduction()
     For Each li In Me.lswProductionList.ListItems
         If li.Selected = True Then
             '예상실행항목 테이블에서 삭제
-            Delete_Record shtProduction, li.SubItems(1)
+            Delete_Record shtProduction, li.Text
         End If
     Next
     
     '예상실행가를 포함한 곳에 업데이트
     RefreshProductionTotalCost
-        
+    
+    '예상실행항목 리스트박스 새로고침
+    InitializeLswProductionList
+    
     Me.txtProductionID.value = ""
     ClearProductionInput
     
@@ -250,7 +260,7 @@ End Sub
 Sub ProductionToOrder(all)
     Dim li As ListItem
     Dim count As Long
-    Dim managementId, category, customer, Item, material, size, amount, unit, unitPrice, cost, memo As Variant
+    Dim managementId, category, customer, item, material, size, amount, unit, unitPrice, cost, memo As Variant
     Dim yn As VbMsgBoxResult
     Dim estimate As Variant
     Dim num As Long
@@ -264,10 +274,8 @@ Sub ProductionToOrder(all)
     
     count = 0
     For Each li In Me.lswProductionList.ListItems
-        If all = "all" Then
+        If li.Selected = True Or all = "all" Then
             count = count + 1
-        Else
-            If li.Selected = True Then count = count + 1
         End If
     Next
     If count = 0 Then MsgBox "발주할 항목을 선택하세요.": Exit Sub
@@ -279,10 +287,10 @@ Sub ProductionToOrder(all)
     count = 0
     For Each li In Me.lswProductionList.ListItems
         If li.Selected = True Or all = "all" Then
-            Item = li.Text
-            managementId = li.SubItems(3)
-            category = li.SubItems(4)
-            customer = li.SubItems(5)
+            managementId = li.SubItems(2)
+            category = li.SubItems(3)
+            customer = li.SubItems(4)
+            item = li.SubItems(5)
             material = li.SubItems(6)
             size = li.SubItems(7)
             amount = li.SubItems(8)
@@ -293,7 +301,7 @@ Sub ProductionToOrder(all)
             
             '선택한 예상실행항목을 발주 테이블에 등록
             Insert_Record shtOrder, _
-                , , category, managementId, customer, Item, material, size, amount, unit, unitPrice, cost, , _
+                , , category, managementId, customer, item, material, size, amount, unit, unitPrice, cost, , _
                 , , , , , _
                 , , , , _
                 , , _
@@ -305,7 +313,7 @@ Sub ProductionToOrder(all)
             Else
                 num = 1
             End If
-            Update_Record_Column shtProduction, li.SubItems(1), "발주건수", num
+            Update_Record_Column shtProduction, li.Text, "발주건수", num
                 
             count = count + 1
         End If
@@ -333,7 +341,7 @@ Function GetProductionTotalCost()
     
     'DB에 값이 있을 경우
     totalCost = 0
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         For i = 1 To UBound(db)
             If IsNumeric(db(i, 11)) Then
                 '비용 합계 구함
@@ -351,7 +359,7 @@ Sub SelectItemLswProduction(selectedID As Variant)
     With Me.lswProductionList
         If Not IsMissing(selectedID) Then
             For i = 1 To .ListItems.count
-                If selectedID = .ListItems(i).SubItems(1) Then
+                If selectedID = .ListItems(i).Text Then
                     .SetFocus
                     .selectedItem = .ListItems(i)
                     .selectedItem.EnsureVisible
@@ -374,6 +382,178 @@ Sub ClearProductionInput()
     Me.txtProductionUnitPrice.value = ""
     Me.txtProductionCost.value = ""
     Me.txtProductionMemo.value = ""
+End Sub
+
+Sub SelectProductionListColumn()
+    Dim ItemSel    As ListItem
+    
+    If Not lswProductionList.selectedItem Is Nothing Then
+        If headerIndex = lswProductionList.ColumnHeaders.count Then
+            frmEdit.Visible = False
+            txtEdit.Visible = False
+        End If
+        
+        Set ItemSel = lswProductionList.selectedItem
+        ItemSel.EnsureVisible
+            
+        If headerIndex >= 4 And headerIndex < lswProductionList.ColumnHeaders.count Then
+            With frmEdit
+                .Visible = True
+                .top = ItemSel.top + lswProductionList.top
+                .Left = lswProductionList.ColumnHeaders(headerIndex).Left + lswProductionList.Left
+                .Width = lswProductionList.ColumnHeaders(headerIndex).Width
+                .Height = ItemSel.Height + 2
+                .ZOrder msoBringToFront
+            End With
+            With Me.txtEdit
+                .Visible = True
+                .Text = ItemSel.SubItems(headerIndex - 1)
+                .SetFocus
+                .SelStart = 0
+                .Left = 0
+                .top = 0
+                .Width = lswProductionList.ColumnHeaders(headerIndex).Width
+                .Height = lswProductionList.selectedItem.Height + 2
+                .SelLength = Len(.Text)
+                currentEditText = .Text
+            End With
+        End If
+    End If
+End Sub
+
+Sub ProductionListUpdate(headerIndex)
+    Dim productionPrice As Long
+    
+    With Me.lswProductionList
+        If .selectedItem Is Nothing Then
+            Exit Sub
+        End If
+        
+        If Me.txtEdit.value <> .selectedItem.ListSubItems(headerIndex - 1).Text Then
+            '입력값 포맷 변경
+            ConvertProductionListFormat Me.txtEdit, headerIndex
+            '리스트뷰 값 변경
+            .selectedItem.ListSubItems(headerIndex - 1).Text = Me.txtEdit.value
+            'DB 테이블 변경
+            UpdateProductionListValue .selectedItem.Text, headerIndex, Me.txtEdit.value
+            
+            '수량,단가 변경한 경우에는 금액도 변경해야 함
+            If headerIndex = 9 Or headerIndex = 11 Then
+                productionPrice = CalculateProductionListPrice(.selectedItem)
+                .selectedItem.ListSubItems(11).Text = Format(productionPrice, "#,##0")
+                UpdateProductionListValue .selectedItem.Text, 12, productionPrice
+            End If
+            '예상실행가 업데이트
+            RefreshProductionTotalCost
+        End If
+    End With
+End Sub
+
+Sub ConvertProductionListFormat(textBox, headerIndex)
+    Dim value As Variant
+    Dim pos As Long
+    Dim Y, M, D As Long
+    
+    value = Trim(textBox.Text)
+    
+    Select Case headerIndex
+        Case 9, 11, 12  '수량, 단가, 금액 - 1000자리 콤마
+            If IsNumeric(value) Then
+                textBox.Text = Format(value, "#,##0")
+            End If
+    End Select
+End Sub
+
+Function CalculateProductionListPrice(selectedItem As ListItem) As Long
+    Dim amount, unitPrice As Variant
+    Dim productionPrice As Long
+
+    '수량, 단가가 변하는 경우에는 금액 계산해서 변경해야 함
+    amount = selectedItem.ListSubItems(8).Text
+    unitPrice = selectedItem.ListSubItems(10).Text
+    
+    If amount = "" Then
+        If IsNumeric(unitPrice) Then
+            productionPrice = unitPrice
+        End If
+    ElseIf IsNumeric(amount) And IsNumeric(unitPrice) Then
+        productionPrice = amount * unitPrice
+    End If
+    
+    CalculateProductionListPrice = productionPrice
+End Function
+
+Function CalculateProductionListTotalCost() As Long
+    Dim i As Long
+    Dim cost, totalCost As Long
+    
+    With Me.lswProductionList
+        For i = 1 To .ListItems.count
+
+            If Not IsNumeric(.ListItems(i).SubItems(11)) Then
+                If .ListItems(i).SubItems(11) <> "" Then
+                    MsgBox "금액 필드에 숫자가 아닌 값이 있어서 실행가 합계를 구할 수 없습니다.", vbExclamation
+                    CalculateProductionListTotalCost = 0
+                    Exit Function
+                End If
+            Else
+                totalCost = totalCost + .ListItems(i).SubItems(11)
+            End If
+        Next
+    End With
+    
+    CalculateProductionListTotalCost = totalCost
+End Function
+
+Sub UpdateProductionListValue(id, headerIndex, value)
+    Dim fieldName As String
+
+    Select Case headerIndex
+        Case 4  '분류
+            fieldName = "분류"
+        Case 5  '거래처
+            fieldName = "거래처"
+        Case 6  '품목
+            fieldName = "품목"
+        Case 7  '재질
+            fieldName = "재질"
+        Case 8  '규격
+            fieldName = "규격"
+        Case 9  '수량
+            fieldName = "수량"
+        Case 10  '단위
+            fieldName = "단위"
+        Case 11  '단가
+            fieldName = "단가"
+        Case 12  '금액
+            fieldName = "금액"
+        Case 13  '메모
+            fieldName = "메모"
+    End Select
+    
+    If fieldName <> "" Then
+        Update_Record_Column shtProduction, id, fieldName, value
+        Update_Record_Column shtProduction, id, "수정일자", Date
+    End If
+End Sub
+
+Sub AddProductionList()
+    
+    '예상실행항목에 저장
+    Insert_Record shtProduction, CLng(currentEstimateId), Me.txtManagementID.value, , , _
+            , , _
+            , , , , , "발주", Date
+    
+    '예상실행항목 리스트박스 새로고침
+    InitializeLswProductionList
+    
+    '등록한 아이템 선택
+    Me.txtProductionID.value = Get_LastID(shtProduction)
+    SelectItemLswProduction Me.txtProductionID.value
+    
+    '분류 컬럼 에디트 선택
+    headerIndex = 4
+    SelectProductionListColumn
 End Sub
 
 Private Sub btnProductionClear_Click()
@@ -400,6 +580,10 @@ Private Sub btnProductionToOrderAll_Click()
     ProductionToOrder "all"
 End Sub
 
+Private Sub btnProductionListAdd_Click()
+    AddProductionList
+End Sub
+
 Private Sub btnProductionCopy_Click()
     If isFormLoaded("frmProductionCopy") Then
         Unload frmProductionCopy
@@ -414,10 +598,10 @@ End Sub
 Private Sub lswProductionList_Click()
     With Me.lswProductionList
         If Not .selectedItem Is Nothing Then
-            Me.txtProductionItem.value = .selectedItem.Text
-            Me.txtProductionID.value = .selectedItem.ListSubItems(1)
-            Me.cboCategory.value = .selectedItem.ListSubItems(4)
-            Me.txtProductionCustomer.value = .selectedItem.ListSubItems(5)
+            Me.txtProductionID.value = .selectedItem.Text
+            Me.cboCategory.value = .selectedItem.ListSubItems(3)
+            Me.txtProductionCustomer.value = .selectedItem.ListSubItems(4)
+            Me.txtProductionItem.value = .selectedItem.ListSubItems(5)
             Me.txtProductionMaterial.value = .selectedItem.ListSubItems(6)
             Me.txtProductionSize.value = .selectedItem.ListSubItems(7)
             Me.txtProductionAmount.value = .selectedItem.ListSubItems(8)
@@ -425,6 +609,49 @@ Private Sub lswProductionList_Click()
             Me.txtProductionUnitPrice.value = .selectedItem.ListSubItems(10)
             Me.txtProductionCost.value = .selectedItem.ListSubItems(11)
             Me.txtProductionMemo.value = .selectedItem.ListSubItems(12)
+        End If
+    End With
+    
+    Me.frmEdit.Visible = False
+    Me.txtEdit.value = ""
+End Sub
+
+Private Sub lswProductionList_DblClick()
+    Dim i As Integer
+    Dim pos As Integer
+    
+    With Me.lswProductionList
+        headerIndex = 0
+        For i = 1 To .ColumnHeaders.count
+            pos = .ColumnHeaders(i).Left
+            If mouseX < pos Then
+                headerIndex = i - 1
+                Exit For
+            End If
+        Next
+        
+        If headerIndex = 12 Then
+            '금액은 변경할 수 없음
+        Else
+            ' 현재 선택한 열을 저장해놓음
+            If Not beforeSelectedItem Is Nothing Then
+                Set beforeSelectedItem = Nothing
+            End If
+            Set beforeSelectedItem = .selectedItem
+            
+            SelectProductionListColumn
+        End If
+    End With
+End Sub
+
+
+Private Sub lswOrderCustomerAutoComplete_DblClick()
+    '거래처에 값을 넣어주고 포커스는 품목으로 이동
+    With Me.lswOrderCustomerAutoComplete
+        If Not .selectedItem Is Nothing Then
+            Me.txtProductionCustomer.value = .selectedItem.Text
+            .Visible = False
+            Me.txtProductionItem.SetFocus
         End If
     End With
 End Sub
@@ -441,8 +668,121 @@ Private Sub lswProductionList_ColumnClick(ByVal ColumnHeader As MSComctlLib.Colu
     End With
 End Sub
 
-Private Sub lbl3ProductionTotalCost_Enter()
-    Me.txtProductionTotalCost.SetFocus
+Private Sub lswProductionList_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
+    mouseX = pointsPerPixelX * x
+End Sub
+
+Private Sub txtEdit_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+    Dim i As Long
+    
+    With Me.lswProductionList
+        If KeyCode = vbKeyReturn Or KeyCode = vbKeyTab Or KeyCode = vbKeyLeft Or KeyCode = vbKeyUp Or KeyCode = vbKeyRight Or KeyCode = vbKeyDown Then
+            '변경값을 DB와 화면에 반영
+            ProductionListUpdate headerIndex
+            
+            
+            '엔터키 - 값만 바꿔줌. 다음칸으로 이동하지 않음
+            If KeyCode = vbKeyReturn Then
+                Me.txtEdit.Visible = False
+                Me.frmEdit.Visible = False
+                .SetFocus
+            ElseIf KeyCode = vbKeyTab Or KeyCode = vbKeyRight Then
+                '탭키, 오른쪽 화살표키
+                If headerIndex = 13 Then
+                    Me.txtEdit.Visible = False
+                    Me.frmEdit.Visible = False
+                    .SetFocus
+                ElseIf headerIndex = 11 Then
+                    headerIndex = headerIndex + 2
+                    SelectProductionListColumn
+                    KeyCode = 0
+                Else
+                    headerIndex = headerIndex + 1
+                    SelectProductionListColumn
+                    KeyCode = 0
+                End If
+            ElseIf KeyCode = vbKeyUp Then
+                '위쪽화살표키
+                '리스트 맨 처음이 아니면 한칸위로 이동
+                With Me.lswProductionList
+                    For i = 1 To .ListItems.count
+                        If .ListItems(i).Selected = True Then
+                            If i = 1 Then
+                                Me.txtEdit.Visible = False
+                                Me.frmEdit.Visible = False
+                                .SetFocus
+                            Else
+                                .ListItems(i).Selected = False
+                                .ListItems(i - 1).Selected = True
+                                Set beforeSelectedItem = .selectedItem
+                                SelectProductionListColumn
+                                KeyCode = 0
+                                Exit For
+                            End If
+                        End If
+                    Next
+                End With
+            ElseIf KeyCode = vbKeyDown Then
+                '아래화살표키
+                With Me.lswProductionList
+                    For i = 1 To .ListItems.count
+                        If .ListItems(i).Selected = True Then
+                            If i = .ListItems.count Then
+                                '맨 마지막이면 마무리
+                                Me.txtEdit.Visible = False
+                                Me.frmEdit.Visible = False
+                                .SetFocus
+                                Exit For
+                            Else
+                                '리스트 맨 마지막이 아니면 한칸 아래로 이동
+                                .ListItems(i).Selected = False
+                                .ListItems(i + 1).Selected = True
+                                Set beforeSelectedItem = .selectedItem
+                                SelectProductionListColumn
+                                Exit For
+                            End If
+                        End If
+                    Next
+                End With
+                KeyCode = 0
+            ElseIf KeyCode = vbKeyLeft Then
+                '왼쪽화살표키
+                '맨 처음이 아니면 한칸 왼쪽으로 이동
+                If headerIndex <= 4 Then
+                    Me.txtEdit.Visible = False
+                    Me.frmEdit.Visible = False
+                    .SetFocus
+                Else
+                    If headerIndex = 13 Then
+                        headerIndex = headerIndex - 2   '금액 필드 건너뛰기 위해서 -2 해줌
+                    Else
+                        headerIndex = headerIndex - 1
+                    End If
+                    SelectProductionListColumn
+                    KeyCode = 0
+                End If
+            End If
+        
+        ElseIf KeyCode = vbKeyEscape Then
+            'ESC키
+            Me.txtEdit.Visible = False
+            Me.frmEdit.Visible = False
+        End If
+    End With
+End Sub
+
+Private Sub txtEdit_AfterUpdate()
+    '탭키나 엔터키가 아닌 마우스를 클릭해서 벗어나는 경우: currentEditText를 사용함
+    If headerIndex > 4 And headerIndex < Me.lswProductionList.ColumnHeaders.count Then
+        If Not beforeSelectedItem Is Nothing Then
+            If Me.txtEdit.value <> currentEditText Then
+                ProductionListUpdate headerIndex
+                headerIndex = 0
+                currentEditText = ""
+            End If
+        End If
+    End If
+    
 End Sub
 
 Private Sub btnProductionClear_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
@@ -505,7 +845,7 @@ Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, 
             .ListItems.Clear
             db = Get_DB(shtOrderCustomer, True)
             db = Filtered_DB(db, Me.txtProductionCustomer.value, 1, False)
-            If IsEmpty(db) Then
+            If isEmpty(db) Then
                 .Visible = False
             Else
                 For i = 1 To UBound(db)
@@ -514,17 +854,6 @@ Private Sub txtProductionCustomer_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, 
                 Next
             End If
             
-        End If
-    End With
-End Sub
-
-Private Sub lswOrderCustomerAutoComplete_DblClick()
-    '거래처에 값을 넣어주고 포커스는 품목으로 이동
-    With Me.lswOrderCustomerAutoComplete
-        If Not .selectedItem Is Nothing Then
-            Me.txtProductionCustomer.value = .selectedItem.Text
-            .Visible = False
-            Me.txtProductionItem.SetFocus
         End If
     End With
 End Sub
@@ -542,6 +871,9 @@ Private Sub lswOrderCustomerAutoComplete_KeyDown(KeyCode As Integer, ByVal Shift
     End If
 End Sub
 
+Private Sub lbl3ProductionTotalCost_Enter()
+    Me.txtProductionTotalCost.SetFocus
+End Sub
 
 Private Sub txtProductionItem_Enter()
     If Me.lswOrderCustomerAutoComplete.Visible = True Then
@@ -551,7 +883,6 @@ Private Sub txtProductionItem_Enter()
         End With
     End If
 End Sub
-
 
 Private Sub txtProductionCustomer_AfterUpdate()
     Me.txtProductionCustomer.value = Trim(Me.txtProductionCustomer.value)

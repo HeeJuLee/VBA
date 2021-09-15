@@ -6,6 +6,46 @@ Dim searchResultCount As Long
 Dim isEnd As Boolean
 Dim dueDate As String
 Dim isFilterOn As Boolean
+Dim bDelivery, bReceiving, bWorking As Boolean
+
+Private Sub btnDelivery_Click()
+    If btnDelivery.value = True Then
+        bDelivery = True
+        If optLast2Year.value = True Then
+            Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+            Me.txtToDate.value = Date
+            OrderSearch
+        Else
+            optLast2Year.value = True
+        End If
+    End If
+End Sub
+
+Private Sub btnReceiving_Click()
+    If btnReceiving.value = True Then
+        bReceiving = True
+        If optLast2Year.value = True Then
+            Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+            Me.txtToDate.value = Date
+            OrderSearch
+        Else
+            optLast2Year.value = True
+        End If
+    End If
+End Sub
+
+Private Sub btnWorking_Click()
+    If btnWorking.value = True Then
+        bWorking = True
+        If optLast2Year.value = True Then
+            Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+            Me.txtToDate.value = Date
+            OrderSearch
+        Else
+            optLast2Year.value = True
+        End If
+    End If
+End Sub
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -28,32 +68,51 @@ Sub OrderSearch()
     
 '    startTime = Timer
     
-    
     '필터가 걸려있으면 지움
-    If isFilterOn Then
-        ToggleFilter
-    End If
+'    If isFilterOn Then
+'        ToggleFilter
+'    End If
     
     '발주 데이터를 읽어옴
     db = Get_DB(shtOrder, False, False)
       
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         If txtFromDate.value <> "" Then db = Filtered_DB(db, ">=" & txtFromDate.value, 26)    '등록일자 필드와 날짜 비교
     End If
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         If txtToDate.value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.value, 26)    '등록일자 필드와 날짜 비교
     End If
-    If Not IsEmpty(db) Then
-        dueDate = shtOrderAdmin.Range("S4").value
-        If dueDate <> "" Then db = Filtered_DB(db, dueDate, 17, True)
+'    If Not IsEmpty(db) Then
+'        dueDate = shtOrderAdmin.Range("S4").value
+'        If dueDate <> "" Then db = Filtered_DB(db, dueDate, 17, True)
+'    End If
+    If Not isEmpty(db) Then
+        If bDelivery = True Then
+            db = Get_Delivery_DB(db)   '수주값이 있고 납품값이 없는 경우
+            Me.txtKeyword.value = ""
+            Me.txtKeyword2.value = ""
+            Me.btnReceiving.value = False
+            Me.btnWorking.value = False
+        ElseIf bReceiving = True Then
+            db = Get_Receiving_DB(db)
+            Me.txtKeyword.value = ""
+            Me.txtKeyword2.value = ""
+            Me.btnWorking.value = False
+            Me.btnDelivery.value = False
+        ElseIf bWorking = True Then
+            db = Get_Working_DB(db)
+            Me.txtKeyword.value = ""
+            Me.txtKeyword2.value = ""
+            Me.btnReceiving.value = False
+            Me.btnDelivery.value = False
+        Else
+            Me.btnReceiving.value = False
+            Me.btnDelivery.value = False
+            Me.btnWorking.value = False
+        End If
     End If
     
-'    If Not IsEmpty(db) Then
-'        '견적테이블에서 견적정보를 추가로 읽어옴
-'        db = Join_DB(db, 25, shtEstimate, "ID", "거래처, 담당자, 견적명", False)
-'    End If
-    
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         If Me.txtKeyword.value <> "" Then db = Filtered_DB(db, Me.txtKeyword.value)     '모든 필드에서 키워드 검색
         If Me.txtKeyword2.value <> "" Then db = Filtered_DB(db, Me.txtKeyword2.value)     '모든 필드에서 키워드 검색
 '        If Me.txtKeyword.Value <> "" Then db = Filtered_DB(db, Me.txtKeyword.Value, "3,4,5,6,7,8,9,29")     '문자열 필드에서만 키워드 검색
@@ -63,11 +122,14 @@ Sub OrderSearch()
 '    endTime = Timer
 '    ActiveSheet.Range("U3").Value = Format(endTime - startTime, "#0.00")
     
+    '시트 보호 해제
+    ActiveSheet.Unprotect
+        
     '기존 검색결과를 화면에서 지움
     ClearOrderSearchResult
     
     '검색결과를 화면에 출력
-    If IsEmpty(db) Then
+    If isEmpty(db) Then
         searchResultCount = 0     '검색결과 건수는 0
     Else
         '검색결과 건수를 저장
@@ -76,18 +138,24 @@ Sub OrderSearch()
         '검색결과 라인 서식 적용
         SetContentsLine shtOrderAdmin.Range("B6"), "AC", searchResultCount
         
-       '순번 출력
-        SequenceToRng shtOrderAdmin.Range("D6"), UBound(db, 1)
+        '순번 출력
+        SequenceToRng shtOrderAdmin.Range("C6"), UBound(db, 1)
         '검색결과 출력
-        ArrayToRng shtOrderAdmin.Range("B6"), db, "1,28, ,5,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
+        ArrayToRng shtOrderAdmin.Range("B6"), db, "1, ,28,5,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
         '메모 출력
-        SetComment db, 29, shtOrderAdmin.Range("I6")
+        SetComment db, 29, shtOrderAdmin.Range("J6")
+        '관리번호/품명에 하이퍼링크
+        'SetHyperLink2 db, 5, 7, shtOrderAdmin.Range("E6"), shtOrderAdmin.Range("I6")
         
         '수주 색상 적용
         SetContentsColor shtOrderAdmin.Range("B6"), "AC", db, 4, "수주", shtOrderAdmin.Range("B3").Interior.color
-
+        
+        '입고 예정 색상 적용
+        If bWorking = True Or bReceiving = True Then
+            SetReceivingColor shtOrderAdmin.Range("T6"), db, 16, 18, shtOrderAdmin.Range("B4").Interior.color
+        End If
     End If
-
+    
     If dueDate <> "" Then
         shtOrderAdmin.Range("S6").Select
         shtOrderAdmin.Range("S4").Select
@@ -107,7 +175,14 @@ Sub OrderSearch()
     End If
     
     isEnd = False
+    bWorking = False
+    bReceiving = False
+    bDelivery = False
     
+    '시트 보호
+    ActiveSheet.Protect DrawingObjects:=False, Contents:=True, Scenarios:= _
+        True, AllowFormattingCells:=True, AllowFormattingColumns:=True, _
+        AllowFormattingRows:=True, AllowFiltering:=True
 End Sub
 
 '발주 검색결과를 화면에서 지움
@@ -178,7 +253,7 @@ Sub GoToEnd()
     With shtOrderAdmin
         .Activate
         If isEnd = False Then
-            .Range("I" & .Range("D5").End(xlDown).row).Select
+            .Range("I" & .Range("B5").End(xlDown).row).Select
             isEnd = True
         Else
             .Range("I6").Select
@@ -301,11 +376,16 @@ Private Sub optThisMonth_Click()
     txtToDate.value = DateSerial(Y, M + 1, 0)
     
     Me.cboSelectYear.value = Y & "년"
-    Me.cboSelectMonth.value = M & "월"      '실제 검색은 cboSelectMonth_change()에서 검색 됨
+    If Me.cboSelectMonth.value = M & "월" Then
+        Me.cboSelectMonth.value = M & "월"
+        OrderSearch
+    Else
+        Me.cboSelectMonth.value = M & "월"        '실제 검색은 cboSelectMonth_change()에서 검색 됨
+    End If
     
 End Sub
 
-'조회기간 - 이전달
+'조회기간 - 지난달
 Private Sub optLastMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = month(Date)
@@ -318,9 +398,22 @@ Private Sub optLastMonth_Click()
         Me.cboSelectMonth.value = "12월"
     Else
         Me.cboSelectYear.value = Y & "년"
-        Me.cboSelectMonth.value = M - 1 & "월"
+        If Me.cboSelectMonth.value = M - 1 & "월" Then
+            Me.cboSelectMonth.value = M - 1 & "월"
+            OrderSearch
+        Else
+            Me.cboSelectMonth.value = M - 1 & "월"
+        End If
     End If
     
+End Sub
+
+'조회기간 - 최근2년
+Private Sub optLast2Year_Click()
+    txtFromDate.value = DateAdd("yyyy", -2, Date)
+    txtToDate.value = Date
+    
+    OrderSearch
 End Sub
 
 Private Sub cboSelectMonth_DropButtonClick()
@@ -336,44 +429,8 @@ Private Sub cboSelectYear_DropButtonClick()
 End Sub
 
 
-
-'시트 더블클릭 시 발주수정 폼 열기
-Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
-    Dim cRow As Long
+Private Sub HyperLink(ByVal target As Range, Cancel As Boolean)
     
-    '선택한 행 번호
-    cRow = Target.row
-    selectionRow = cRow
-    
-    '데이터가 있는 행이 아닐 경우는 중지
-    If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).value = "" Then
-        End
-    End If
-    
-    '관리번호를 더블클릭한 경우 관리번호로 검색
-    If Target.Column = 5 Then
-        Me.txtKeyword.value = Target.value
-        Range("S4").value = ""
-        OrderSearch
-    Else
-        '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
-        Range("D" & Target.row).Select
-        
-        '수주 데이터를 클릭한 경우에는 EstimateUpdate 폼을 띄움, 그렇지 않은 경우는 발주 수정 화면 띄움
-        If shtOrderAdmin.Range("G" & cRow).value = "수주" Then
-            clickEstimateId = shtOrderAdmin.Range("C" & cRow).value
-            
-            If isFormLoaded("frmEstimateUpdate") Then
-                Unload frmEstimateUpdate
-            End If
-            frmEstimateUpdate.Show (False)
-        Else
-            If isFormLoaded("frmOrderUpdate") Then
-                Unload frmOrderUpdate
-            End If
-            frmOrderUpdate.Show (False)
-        End If
-    End If
 End Sub
 
 '키워드 검색 입력 시
@@ -398,10 +455,149 @@ If KeyCode = 13 Then
     End If
 End Sub
 
-Private Sub Worksheet_Change(ByVal Target As Range)
-'    If Target.Address = "$S$4" Then
-'        dueDate = Target.value
-'
-'        OrderSearch
-'    End If
+Private Sub Worksheet_BeforeDoubleClick(ByVal target As Range, Cancel As Boolean)
+    Dim cRow, cCol As Long
+
+    '선택한 행 번호
+    'cRow = Selection.row
+    cRow = target.row
+    cCol = target.Column
+    
+    '데이터가 있는 행이 아닐 경우는 중지
+    If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).value = "" Then
+        End
+    End If
+    
+    If cCol = 5 Then
+        '관리번호를 더블클릭한 경우 관리번호로 검색
+        Me.txtKeyword.value = Cells(cRow, 5).value
+        If Me.cboSelectYear.value <> "전체" Then
+            Me.cboSelectYear.value = "전체"
+        Else
+            Me.txtFromDate.value = ""
+            Me.txtToDate.value = ""
+            OrderSearch
+        End If
+    ElseIf cCol = 9 Then
+        '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
+        Range("D" & cRow).Select
+        
+        '수주 데이터를 클릭한 경우에는 EstimateUpdate 폼을 띄움, 그렇지 않은 경우는 발주 수정 화면 띄움
+        If shtOrderAdmin.Range("G" & cRow).value = "수주" Then
+            clickEstimateId = shtOrderAdmin.Range("D" & cRow).value
+            
+            If isFormLoaded("frmEstimateUpdate") Then
+                Unload frmEstimateUpdate
+            End If
+            frmEstimateUpdate.Show (False)
+        Else
+            If isFormLoaded("frmOrderUpdate") Then
+                Unload frmOrderUpdate
+            End If
+            frmOrderUpdate.Show (False)
+        End If
+    End If
+End Sub
+
+Private Sub Worksheet_Change(ByVal target As Range)
+    Dim cRow, cCol As Long
+    Dim value As Variant
+    
+    If target.Cells.count > 1 Then
+        If InStr(target.Address, "$6") = 0 Then
+            MsgBox "여러 셀을 한번에 변경할 수 없습니다.", vbInformation, "작업 확인"
+            UndoLastAction
+        End If
+        Exit Sub
+    End If
+    
+    cRow = target.row
+    cCol = target.Column
+    
+    Select Case cCol
+        Case 18     '발주
+            If Range("G" & cRow).value = "수주" Then
+                target.value = ""       '수주에서는 발주 일자가 의미 없음
+            Else
+                value = ConvertDateFormat(target.value)
+                Update_Record_Column shtOrder, Range("B" & cRow).value, "발주", value
+            End If
+        Case 19     '납기
+            value = ConvertDateFormat(target.value)
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "납기", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "납기", value
+        Case 20     '입고
+            If Range("G" & cRow).value = "수주" Then
+                target.value = ""       '수주에서는 입고 일자가 의미 없음
+            Else
+                value = ConvertDateFormat(target.value)
+                Update_Record_Column shtOrder, Range("B" & cRow).value, "입고", value
+            End If
+        Case 21     '납품
+            If Range("G" & cRow).value = "수주" Then
+                value = ConvertDateFormat(target.value)
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "납품", value
+                Update_Record_Column shtOrder, Range("B" & cRow).value, "납품", value
+            Else
+                target.value = ""       '발주에서는 납품 일자가 의미 없음
+            End If
+        Case 22     '명세서
+            value = ConvertDateFormat(target.value)
+            If Range("G" & cRow).value = "수주" Then
+                '수주테이블에 업데이트
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "명세서", value
+                '결제이력에도 업데이트
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "명세서", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "명세서", value
+        Case 23     '계산서
+            value = ConvertDateFormat(target.value)
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "계산서", value
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "계산서", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "계산서", value
+        Case 24     '결제
+            value = ConvertDateFormat(target.value)
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제", value
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제", value
+        Case 25     '결제월
+            value = ConvertDateFormat(target.value)
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제월", value
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제월", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제월", value
+        Case 26     '결제수단
+    End Select
+    
+End Sub
+
+Sub UpdateLastPayment(estimateId, managementId, fieldName, value)
+    Dim db As Variant
+    Dim lastId As Variant
+    
+    db = Get_DB(shtPayment)
+    db = Filtered_DB(db, estimateId, 2, True)
+    If isEmpty(db) Then
+        '기존 결제이력이 없으면 결제이력을 하나 추가함
+        Insert_Record shtPayment, estimateId, managementId, , , , , , , , , Date
+        lastId = Get_LastID(shtPayment)
+    Else
+        '결제이력이 있으면 맨 마지막 결제이력에 값을 업데이트함
+        lastId = db(UBound(db), 1)
+    End If
+    
+    Update_Record_Column shtPayment, lastId, fieldName, value
+End Sub
+
+Private Sub Worksheet_FollowHyperlink(ByVal target As HyperLink)
+    If target.Address = "" Then
+
+    End If
 End Sub

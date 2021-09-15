@@ -385,7 +385,7 @@ End Function
 ' 특정 배열에서 Value를 포함하는 레코드만 찾아 다시 배열로 반환
 ' Array = Filtered_DB(Array, "검색값", 2, False)
 '########################
-Function Filtered_DB(db, value, Optional FilterCol, Optional ExactMatch As Boolean = False) As Variant
+Function Filtered_DB(db, value, Optional filterCol, Optional ExactMatch As Boolean = False) As Variant
 
 Dim cRow As Long
 Dim cCol As Long
@@ -410,10 +410,10 @@ If value <> "" Then
         vArr(i) = s
     Next
     
-    If IsMissing(FilterCol) Then
+    If IsMissing(filterCol) Then
         filterArr = vArr
     Else
-        Cols = Split(FilterCol, ",")
+        Cols = Split(filterCol, ",")
         ReDim filterArr(1 To cRow)
         For i = 1 To cRow
             s = ""
@@ -515,6 +515,202 @@ If value <> "" Then
 Else
     Filtered_DB = db
 End If
+
+End Function
+
+'########################
+' hjlee.2021.09.14 추가
+' 특정 열 값이 공백인지 아닌지 체크해서 리턴
+' Array = Filtered_DB_Empty(Array, "검색값", 2, False)
+'########################
+Function Filtered_DB_Empty(db, filterCol, isEmpty As Boolean) As Variant
+    Dim cRow As Long
+    Dim cCol As Long
+    Dim vArr As Variant
+    Dim vResult As Variant
+    Dim i, j, k As Long
+    Dim bMatch As Boolean
+
+    cRow = UBound(db, 1)
+    cCol = UBound(db, 2)
+    
+    ReDim vArr(1 To cRow, 1 To cCol)
+    
+    j = 1
+    For i = 1 To cRow
+        If isEmpty = True Then
+            If db(i, filterCol) = "" Then bMatch = True Else bMatch = False
+        Else
+            If db(i, filterCol) = "" Then bMatch = False Else bMatch = True
+        End If
+        
+        If bMatch = True Then
+            For k = 1 To cCol
+                vArr(j, k) = db(i, k)
+            Next
+            j = j + 1
+        End If
+    Next
+    
+    If j > 1 Then
+        ReDim vResult(1 To j - 1, 1 To cCol)
+        For i = 1 To j - 1
+            For k = 1 To cCol
+                vResult(i, k) = vArr(i, k)
+            Next
+        Next
+        Filtered_DB_Empty = vResult
+    Else
+        Filtered_DB_Empty = db
+    End If
+
+End Function
+
+'########################
+' hjlee.2021.09.14 추가
+' 입고 대상 바룾 데이터 읽어오기
+' Array = Get_Receiving_DB(Array)
+'########################
+Function Get_Receiving_DB(db) As Variant
+    Dim cRow As Long
+    Dim cCol As Long
+    Dim vArr As Variant
+    Dim vResult As Variant
+    Dim i, j, k, M As Long
+    Dim bMatch As Boolean
+    Dim order As Variant
+
+    cRow = UBound(db, 1)
+    cCol = UBound(db, 2)
+    
+    ReDim vArr(1 To cRow, 1 To cCol)
+    
+    j = 1
+    For i = 1 To cRow
+        If db(i, 4) <> "수주" Then
+            If db(i, 16) <> "" And db(i, 18) = "" Then   '발주필드가 있고 입고필드가 없으면 진행 중인 작업
+                For k = 1 To cCol
+                    vArr(j, k) = db(i, k)
+                Next
+                j = j + 1
+            End If
+        End If
+    Next
+    
+    If j > 1 Then
+        ReDim vResult(1 To j - 1, 1 To cCol)
+        For i = 1 To j - 1
+            For k = 1 To cCol
+                vResult(i, k) = vArr(i, k)
+            Next
+        Next
+        Get_Receiving_DB = vResult
+    Else
+        Get_Receiving_DB = db
+    End If
+
+End Function
+
+'########################
+' hjlee.2021.09.14 추가
+' 납품 대상 수주 데이터 읽어오기
+' Array = Get_Delivery_DB(Array)
+'########################
+Function Get_Delivery_DB(db) As Variant
+    Dim cRow As Long
+    Dim cCol As Long
+    Dim vArr As Variant
+    Dim vResult As Variant
+    Dim i, j, k, M As Long
+    Dim bMatch As Boolean
+    Dim order As Variant
+
+    cRow = UBound(db, 1)
+    cCol = UBound(db, 2)
+    
+    ReDim vArr(1 To cRow, 1 To cCol)
+    
+    j = 1
+    For i = 1 To cRow
+        If db(i, 4) = "수주" Then
+            If db(i, 15) <> "" And db(i, 19) = "" Then   '수주필드가 있고 납품필드가 없으면 진행 중인 작업
+                For k = 1 To cCol
+                    vArr(j, k) = db(i, k)
+                Next
+                j = j + 1
+            End If
+        End If
+    Next
+    
+    If j > 1 Then
+        ReDim vResult(1 To j - 1, 1 To cCol)
+        For i = 1 To j - 1
+            For k = 1 To cCol
+                vResult(i, k) = vArr(i, k)
+            Next
+        Next
+        Get_Delivery_DB = vResult
+    Else
+        Get_Delivery_DB = db
+    End If
+
+End Function
+
+'########################
+' hjlee.2021.09.14 추가
+' 수주/납품 체크 후 관련 발주 데이터 읽어오기
+' Array = Get_Working_DB(Array)
+'########################
+Function Get_Working_DB(db) As Variant
+    Dim cRow As Long
+    Dim cCol As Long
+    Dim vArr As Variant
+    Dim vResult As Variant
+    Dim i, j, k, M As Long
+    Dim bMatch As Boolean
+    Dim order As Variant
+
+    cRow = UBound(db, 1)
+    cCol = UBound(db, 2)
+    
+    ReDim vArr(1 To cRow, 1 To cCol)
+    
+    j = 1
+    For i = 1 To cRow
+        If db(i, 4) = "수주" Then
+            If db(i, 15) <> "" And db(i, 19) = "" Then   '수주필드가 있고 납품필드가 없으면 진행 중인 작업
+                For k = 1 To cCol
+                    vArr(j, k) = db(i, k)
+                Next
+                j = j + 1
+                
+                '관련 발주 데이터를 가져옴
+                order = Filtered_DB(db, db(i, 5), 5, True)
+                If Not isEmpty(order) Then
+                    For M = 1 To UBound(order)
+                        If order(M, 4) <> "수주" Then
+                            For k = 1 To cCol
+                                vArr(j, k) = order(M, k)
+                            Next
+                            j = j + 1
+                        End If
+                    Next
+                End If
+            End If
+        End If
+    Next
+    
+    If j > 1 Then
+        ReDim vResult(1 To j - 1, 1 To cCol)
+        For i = 1 To j - 1
+            For k = 1 To cCol
+                vResult(i, k) = vArr(i, k)
+            Next
+        Next
+        Get_Working_DB = vResult
+    Else
+        Get_Working_DB = db
+    End If
 
 End Function
 

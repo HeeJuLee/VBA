@@ -53,7 +53,7 @@ Sub Update_List(lstBox As MSForms.ListBox, db As Variant, Widths As String)
 With lstBox
     .Clear
     .ColumnWidths = Widths
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         .ColumnCount = UBound(db, 2)
         .List = db
     End If

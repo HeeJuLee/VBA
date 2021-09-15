@@ -49,7 +49,7 @@ Private Sub UserForm_Initialize()
     
     'currentEstimateId로 견적데이터 읽어오기 (확인용)
     estimate = Get_Record_Array(shtEstimate, currentEstimateId)
-    If IsEmpty(estimate) Then
+    If isEmpty(estimate) Then
         MsgBox "currentEstimateId에 해당하는 견적 데이터가 없습니다.", vbInformation, "작업 확인"
         End
     End If
@@ -94,7 +94,7 @@ Sub InitializeLswPaymentList()
         '.ColumnHeaders(1).Position = 1
     
         .ListItems.Clear
-        If Not IsEmpty(db) Then
+        If Not isEmpty(db) Then
             For i = 1 To UBound(db)
                 If IsNumeric(db(i, 5)) Then
                     '비용 합계 구함
@@ -243,7 +243,7 @@ Function GetPaymentTotalCost()
     
     'DB에 값이 있을 경우
     totalCost = 0
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         For i = 1 To UBound(db)
             If IsNumeric(db(i, 5)) Then
                 '비용 합계 구함

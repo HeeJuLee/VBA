@@ -6,9 +6,100 @@ Dim headerIndex As Integer
 Dim beforeSelectedItem As ListItem
 Dim currentEditText, currentCboText As Variant
 
+Sub InitializeLswOrderList()
+    Dim db As Variant
+    Dim i, j, totalCost As Long
+    Dim li As ListItem
+    
+    '견적ID에 해당하는 발주 정보를 읽어옴
+    db = Get_DB(shtOrder)
+    If Not isEmpty(db) Then
+        db = Filtered_DB(db, Me.txtID.value, 28, True)
+    End If
+    If Not isEmpty(db) Then
+        db = Filtered_DB(db, "<>" & "수주", 4)
+    End If
+    
+    With Me.ImageList1.ListImages
+        .Add , , Me.imgListImage.Picture
+    End With
+    
+     '리스트뷰 값 설정
+    With Me.lswOrderList
+        .View = lvwReport
+        .Gridlines = True
+        .FullRowSelect = True
+        .HideColumnHeaders = False
+        .HideSelection = True
+        .FullRowSelect = True
+        .MultiSelect = True
+        .LabelEdit = lvwManual
+        .SmallIcons = Me.ImageList1
+        .Sorted = False
+        
+        .ColumnHeaders.Clear
+        .ColumnHeaders.Add , , "ID", 0
+        .ColumnHeaders.Add , , "ID_견적", 0
+        .ColumnHeaders.Add , , "관리번호", 0
+        .ColumnHeaders.Add , , "분류", 34
+        .ColumnHeaders.Add , , "거래처", 50
+        .ColumnHeaders.Add , , "품목", 115
+        .ColumnHeaders.Add , , "재질", 60
+        .ColumnHeaders.Add , , "규격", 62
+        .ColumnHeaders.Add , , "수량", 30, lvwColumnRight
+        .ColumnHeaders.Add , , "단위", 30, lvwColumnCenter
+        .ColumnHeaders.Add , , "단가", 60, lvwColumnRight
+        .ColumnHeaders.Add , , "금액", 60, lvwColumnRight
+        .ColumnHeaders.Add , , "발주", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "납기", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "입고", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "명세서", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "계산서", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제", 59, lvwColumnCenter
+        .ColumnHeaders.Add , , "수정", 30
+        
+        '.ColumnHeaders(1).Position = 6
+    
+        .ListItems.Clear
+        totalCost = 0
+        If Not isEmpty(db) Then
+            For i = 1 To UBound(db)
+                Set li = .ListItems.Add(, , db(i, 1))   'ID
+                li.ListSubItems.Add , , db(i, 28)       'ID_견적
+                li.ListSubItems.Add , , db(i, 5)        '관리번호
+                li.ListSubItems.Add , , db(i, 4)        '분류
+                li.ListSubItems.Add , , db(i, 6)        '거래처
+                li.ListSubItems.Add , , db(i, 7)        '품목
+                li.ListSubItems.Add , , db(i, 8)        '재질
+                li.ListSubItems.Add , , db(i, 9)        '규격
+                li.ListSubItems.Add , , db(i, 10)        '수량
+                li.ListSubItems.Add , , db(i, 11)       '단위
+                li.ListSubItems.Add , , Format(db(i, 12), "#,##0")      '단가
+                li.ListSubItems.Add , , Format(db(i, 13), "#,##0")      '금액
+                li.ListSubItems.Add , , db(i, 16)       '발주일
+                li.ListSubItems.Add , , db(i, 17)       '납기일
+                li.ListSubItems.Add , , db(i, 18)       '입고일
+                li.ListSubItems.Add , , db(i, 20)       '명세서
+                li.ListSubItems.Add , , db(i, 21)       '계산서
+                li.ListSubItems.Add , , db(i, 22)       '결제
+                li.ListSubItems.Add , , "열기"       '수정
+                li.Selected = False
+                
+                If IsNumeric(db(i, 13)) Then
+                    '비용 합계 구함
+                    totalCost = totalCost + CLng(db(i, 13))
+                End If
+            Next
+        End If
+        
+        If totalCost <> 0 Then
+            Me.txtExecutionCost.value = Format(totalCost, "#,##0")
+        End If
+    End With
+End Sub
 
-Private Sub lswOrderList_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
-    mouseX = pointsPerPixelX * X
+Private Sub lswOrderList_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
+    mouseX = pointsPerPixelX * x
 End Sub
 
 Private Sub lswOrderList_Click()
@@ -396,6 +487,48 @@ Private Sub btnOrderListInsert_Click()
     End With
 End Sub
 
+Sub UpdateOrderListValue(id, headerIndex, value)
+    Dim fieldName As String
+
+    Select Case headerIndex
+        Case 4  '분류
+            fieldName = "분류2"
+        Case 5  '거래처
+            fieldName = "거래처"
+        Case 6  '품목
+            fieldName = "품목"
+        Case 7  '재질
+            fieldName = "재질"
+        Case 8  '규격
+            fieldName = "규격"
+        Case 9  '수량
+            fieldName = "수량"
+        Case 10  '단위
+            fieldName = "단위"
+        Case 11  '단가
+            fieldName = "단가"
+        Case 12  '금액
+            fieldName = "금액"
+        Case 13  '발주
+            fieldName = "발주"
+        Case 14  '납기
+            fieldName = "납기"
+        Case 15  '입고
+            fieldName = "입고"
+        Case 16  '명세서
+            fieldName = "명세서"
+        Case 17  '계산서
+            fieldName = "계산서"
+        Case 18  '결제
+            fieldName = "결제"
+    End Select
+    
+    If fieldName <> "" Then
+        Update_Record_Column shtOrder, id, fieldName, value
+        Update_Record_Column shtOrder, id, "수정일자", Date
+    End If
+
+End Sub
 
 
 Private Sub Frame4_Click()

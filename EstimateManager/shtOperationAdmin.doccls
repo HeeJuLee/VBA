@@ -4,6 +4,31 @@ Dim isKeyworldSearch As Boolean
 Dim searchResultCount As Long
 Dim isEnd As Boolean
 Dim isListInit As Boolean
+Dim mouseX As Integer
+
+Private Sub btnClear_Click()
+    ClearOperationInput
+End Sub
+
+Private Sub btnInsert_Click()
+    InsertOperation
+End Sub
+
+Private Sub btnUpdate_Click()
+    UpdateOperation
+End Sub
+
+Private Sub btnDelete_Click()
+    DeleteOperation
+End Sub
+
+Private Sub btnCopyFixedCost_Click()
+    CopyFixedCost
+End Sub
+
+Private Sub lswOperationList_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
+    mouseX = pointsPerPixelX * x
+End Sub
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -31,14 +56,14 @@ Sub OperationSearch()
     '운영비 데이터를 읽어옴
     db = Get_DB(shtOperation, False, False)
       
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         If txtFromDate.value <> "" Then db = Filtered_DB(db, ">=" & txtFromDate.value, 14)    '등록일자 필드와 날짜 비교
     End If
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         If txtToDate.value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.value, 14)    '등록일자 필드와 날짜 비교
     End If
     
-    If Not IsEmpty(db) Then
+    If Not isEmpty(db) Then
         If Me.txtKeyword.value <> "" Then db = Filtered_DB(db, Me.txtKeyword.value)     '모든 필드에서 키워드 검색
     End If
     
@@ -46,7 +71,7 @@ Sub OperationSearch()
     ClearOperationSearchResult
     
     '검색결과를 화면에 출력
-    If IsEmpty(db) Then
+    If isEmpty(db) Then
         searchResultCount = 0     '검색결과 건수는 0
     Else
         '검색결과 건수를 저장
@@ -103,6 +128,7 @@ Sub SetOperationList(db)
         .ColumnHeaders.Add , , "명세서", 80, lvwColumnCenter
         .ColumnHeaders.Add , , "계산서", 80, lvwColumnCenter
         .ColumnHeaders.Add , , "결제", 80, lvwColumnCenter
+        .ColumnHeaders.Add , , "결제수단", 66, lvwColumnCenter
         .ColumnHeaders.Add , , "부가세", 80, lvwColumnRight
     
         income = 0
@@ -122,6 +148,7 @@ Sub SetOperationList(db)
             li.ListSubItems.Add , , db(i, 10)
             li.ListSubItems.Add , , db(i, 11)
             li.ListSubItems.Add , , db(i, 12)
+            li.ListSubItems.Add , , db(i, 4)
             li.ListSubItems.Add , , Format(db(i, 13), "#,##0")
             
             If db(i, 3) = "수입" Then
@@ -130,10 +157,11 @@ Sub SetOperationList(db)
                 expense = expense + db(i, 9)
             End If
         Next
+        
     End With
     
-    shtOperationAdmin.Range("Q6").value = income
-    shtOperationAdmin.Range("T6").value = expense
+    shtOperationAdmin.Range("R6").value = income
+    shtOperationAdmin.Range("U6").value = expense
     
 End Sub
 
@@ -148,47 +176,6 @@ Sub ClearOperationSearchResult()
     
 End Sub
 
-Sub InitializeLswOperationList()
-    Dim db As Variant
-    Dim i, j, totalCost As Long
-    Dim li As ListItem
-    Dim fullPath As String
-    
-    With Me.ImageList1.ListImages
-        .Add , , Me.Image1.Picture
-    End With
-    
-     '리스트뷰 값 설정
-    With Me.lswOperationList
-        .View = lvwReport
-        .Gridlines = True
-        .FullRowSelect = True
-        .HideColumnHeaders = False
-        .HideSelection = True
-        .FullRowSelect = True
-        .MultiSelect = True
-        .LabelEdit = lvwManual
-        .SmallIcons = Me.ImageList1
-        
-        .ColumnHeaders.Clear
-
-        .ColumnHeaders.Add , , "ID", 0
-        .ColumnHeaders.Add , , "No", 40, lvwColumnCenter
-        .ColumnHeaders.Add , , "등록일자", 80, lvwColumnCenter
-        .ColumnHeaders.Add , , "고정비", 60, lvwColumnCenter
-        .ColumnHeaders.Add , , "수입지출", 70, lvwColumnCenter
-        .ColumnHeaders.Add , , "분류", 55, lvwColumnCenter
-        .ColumnHeaders.Add , , "거래처", 100
-        .ColumnHeaders.Add , , "품목", 250
-        .ColumnHeaders.Add , , "금액", 80, lvwColumnRight
-        .ColumnHeaders.Add , , "명세서", 80, lvwColumnCenter
-        .ColumnHeaders.Add , , "계산서", 80, lvwColumnCenter
-        .ColumnHeaders.Add , , "결제", 80, lvwColumnCenter
-        .ColumnHeaders.Add , , "부가세", 80, lvwColumnRight
-    End With
-    
-    isListInit = True
-End Sub
 
 Sub SelectItemLswOperation(selectedID As Variant)
     Dim i As Long
@@ -203,12 +190,13 @@ Sub SelectItemLswOperation(selectedID As Variant)
                     .ListItems(i).Selected = False
                 End If
             Next
+            .Activate
         End If
     End With
 End Sub
 
 Sub ClearOperationInput()
-    Range("D6:N6") = ""
+    Range("D6:O6") = ""
     Range("D6").value = Date
 End Sub
 
@@ -223,11 +211,11 @@ Sub InsertOperation()
         If li.Selected = True Then count = count + 1
     Next
     If count <= 1 Then
-        If Range("I6").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
-        If Range("D6") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
+        If Range("I20").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
+        If Range("D20") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
         
         '운영비에 저장
-        Insert_Record shtOperation, , Range("F6").value, , Range("G6"), , Range("H6"), Range("I6"), Range("J6"), Range("K6"), Range("L6"), Range("M6"), Range("N6"), Range("D6"), Range("E6")
+        Insert_Record shtOperation, , Range("F20").value, Range("N20"), Range("G20"), , Range("H20"), Range("I20"), Range("J20"), Range("K20"), Range("L20"), Range("M20"), Range("O20"), Range("D20"), Range("E20")
     Else
         '여러개 선택 후 등록 시 대량 등록 진행
         yn = MsgBox("선택한 " & count & "개 항목을 등록합니다.", vbYesNo)
@@ -235,7 +223,7 @@ Sub InsertOperation()
         
         For Each li In Me.lswOperationList.ListItems
             If li.Selected = True Then
-                Insert_Record shtOperation, , li.SubItems(4), , li.SubItems(5), , li.SubItems(6), li.SubItems(7), li.SubItems(8), li.SubItems(9), li.SubItems(10), li.SubItems(11), li.SubItems(12), Date, li.SubItems(3)
+                Insert_Record shtOperation, , li.SubItems(4), li.SubItems(12), li.SubItems(5), , li.SubItems(6), li.SubItems(7), li.SubItems(8), li.SubItems(9), li.SubItems(10), li.SubItems(11), li.SubItems(13), Date, li.SubItems(3)
             End If
         Next
     End If
@@ -248,17 +236,66 @@ Sub InsertOperation()
 
 End Sub
 
+'고정비 복사
+Sub CopyFixedCost()
+    Dim db As Variant
+    Dim Y, M As Variant
+    Dim fromDate, toDate As Date
+    Dim i, count As Long
+    Dim yn As VbMsgBoxResult
+
+    M = month(Date)
+    If M = 1 Then
+        Y = Year(Date) - 1
+        M = 12
+    Else
+        Y = Year(Date)
+        M = M - 1
+    End If
+    
+    fromDate = DateSerial(Y, M, 1)
+    toDate = DateSerial(Year(Date), month(Date), 1)
+
+    db = Get_DB(shtOperation)
+    If Not isEmpty(db) Then
+        db = Filtered_DB(db, "고정비", 15)
+    End If
+    If Not isEmpty(db) Then
+        db = Filtered_DB(db, ">=" & fromDate, 14)
+    End If
+    If Not isEmpty(db) Then
+        db = Filtered_DB(db, "<" & toDate, 14)
+    End If
+    
+    count = UBound(db)
+    If count = 0 Then
+        MsgBox Y & "년 " & M & "월에 고정비 항목이 없습니다.", vbInformation, "작업확인"
+    Else
+        yn = MsgBox(Y & "년 " & M & "월에서 " & count & "개의 고정비 항목을 복사합니다.", vbYesNo, "작업확인")
+        If yn = vbNo Then Exit Sub
+        
+        For i = 1 To count
+            Insert_Record shtOperation, , db(i, 3), db(i, 4), db(i, 5), db(i, 6), db(i, 7), db(i, 8), db(i, 9), db(i, 10), db(i, 11), db(i, 12), db(i, 13), toDate, db(i, 15)
+        Next
+    End If
+    
+    OperationSearch
+
+    isEnd = False
+    GoToEnd
+End Sub
+
 '운영비 수정
 Sub UpdateOperation()
     Dim cost As Variant
 
     If Me.txtOperationID.value = "" Then MsgBox "수정할 항목을 선택하세요.": Exit Sub
     
-    If Range("I6").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
-    If Range("D6") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
+    If Range("I20").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
+    If Range("D20") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
     
     '기존 운영비 업데이트
-    Update_Record shtOperation, Me.txtOperationID.value, , Range("F6").value, , Range("G6"), , Range("H6"), Range("I6"), Range("J6"), Range("K6"), Range("L6"), Range("M6"), Range("N6"), Range("D6"), Range("E6")
+    Update_Record shtOperation, Me.txtOperationID.value, Range("N20"), Range("F20").value, , Range("G20"), , Range("H20"), Range("I20"), Range("J20"), Range("K20"), Range("L20"), Range("M20"), Range("O20"), Range("D20"), Range("E20")
     
     OperationSearch
     
@@ -300,10 +337,12 @@ End Sub
 Sub GoToEnd()
     With Me.lswOperationList
         If .ListItems.count > 0 Then
+            .selectedItem.Selected = False
             If isEnd = False Then
                 .selectedItem = .ListItems(.ListItems.count)
                 .selectedItem.EnsureVisible
                 isEnd = True
+                ClearOperationInput
             Else
                 .selectedItem = .ListItems(1)
                 .selectedItem.EnsureVisible
@@ -312,7 +351,6 @@ Sub GoToEnd()
         End If
     End With
     
-    lswOperationList_Click
 End Sub
 
 '전체 선택 시 '월'만 전체로 바꿈
@@ -361,24 +399,25 @@ Private Sub lswOperationList_Click()
     With Me.lswOperationList
         If Not .selectedItem Is Nothing Then
             Me.txtOperationID.value = .selectedItem.Text
-            Range("D6") = Format(.selectedItem.ListSubItems(2), "mm/dd")
-            Range("E6") = .selectedItem.ListSubItems(3)
-            Range("F6") = .selectedItem.ListSubItems(4)
-            Range("G6") = .selectedItem.ListSubItems(5)
-            Range("H6") = .selectedItem.ListSubItems(6)
-            Range("I6") = .selectedItem.ListSubItems(7)
+            Range("D20") = Format(.selectedItem.ListSubItems(2), "mm/dd")
+            Range("E20") = .selectedItem.ListSubItems(3)
+            Range("F20") = .selectedItem.ListSubItems(4)
+            Range("G20") = .selectedItem.ListSubItems(5)
+            Range("H20") = .selectedItem.ListSubItems(6)
+            Range("I20") = .selectedItem.ListSubItems(7)
             If IsNumeric(.selectedItem.ListSubItems(8)) Then
-                Range("J6") = CLng(.selectedItem.ListSubItems(8))
+                Range("J20") = CLng(.selectedItem.ListSubItems(8))
             Else
-                Range("J6") = .selectedItem.ListSubItems(8)
+                Range("J20") = .selectedItem.ListSubItems(8)
             End If
-            Range("K6") = Format(.selectedItem.ListSubItems(9), "mm/dd")
-            Range("L6") = Format(.selectedItem.ListSubItems(10), "mm/dd")
-            Range("M6") = Format(.selectedItem.ListSubItems(11), "mm/dd")
-            If IsNumeric(.selectedItem.ListSubItems(12)) Then
-                Range("N6") = CLng(.selectedItem.ListSubItems(12))
+            Range("K20") = Format(.selectedItem.ListSubItems(9), "mm/dd")
+            Range("L20") = Format(.selectedItem.ListSubItems(10), "mm/dd")
+            Range("M20") = Format(.selectedItem.ListSubItems(11), "mm/dd")
+            Range("N20") = .selectedItem.ListSubItems(12)
+            If IsNumeric(.selectedItem.ListSubItems(13)) Then
+                Range("O20") = CLng(.selectedItem.ListSubItems(13))
             Else
-                Range("N6") = .selectedItem.ListSubItems(12)
+                Range("O20") = .selectedItem.ListSubItems(13)
             End If
         End If
     End With
@@ -507,12 +546,12 @@ Private Sub cboSelectMonth_Change()
 End Sub
 
 
-Private Sub Worksheet_Change(ByVal Target As Range)
-    If Target.Address = "$J$6" Then
-        If Target.value = "" Then
+Private Sub Worksheet_Change(ByVal target As Range)
+    If target.Address = "$J$6" Then
+        If target.value = "" Then
             Range("N6").value = ""
-        ElseIf IsNumeric(Target.value) Then
-            Range("N6").value = Target.value * 0.1
+        ElseIf IsNumeric(target.value) Then
+            Range("N6").value = target.value * 0.1
         End If
     End If
 End Sub

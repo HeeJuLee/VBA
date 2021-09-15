@@ -98,22 +98,22 @@ End Sub
 
 Private Sub btnOrderDateSave_Click()
     If chkOrderDate Then
-        OrderDateUpdate "발주일자", Me.txtOrderDate.value
+        OrderDateUpdate "발주", Me.txtOrderDate.value
     End If
     If chkDueDate Then
-        OrderDateUpdate "납기일자", Me.txtDueDate.value
+        OrderDateUpdate "납기", Me.txtDueDate.value
     End If
     If chkReceivingDate Then
-        OrderDateUpdate "입고일자", Me.txtReceivingDate.value
+        OrderDateUpdate "입고", Me.txtReceivingDate.value
     End If
     If chkSpecificationDate Then
-        OrderDateUpdate "명세서일자", Me.txtSpecificationDate.value
+        OrderDateUpdate "명세서", Me.txtSpecificationDate.value
     End If
     If chkTaxinvoiceDate Then
-        OrderDateUpdate "계산서일자", Me.txtTaxInvoiceDate.value
+        OrderDateUpdate "계산서", Me.txtTaxinvoiceDate.value
     End If
     If chkPaymentDate Then
-        OrderDateUpdate "결제일자", Me.txtPaymentDate.value
+        OrderDateUpdate "결제", Me.txtPaymentDate.value
     End If
 
     Unload Me
@@ -123,69 +123,77 @@ End Sub
 
 Sub OrderDateUpdate(fieldName, value)
     Dim subItemNo, orderColNo, findRow As Long
-    Dim orgItem As ListItem
+    Dim item As ListItem
     
     Select Case fieldName
-        Case "발주일자"
+        Case "발주"
             orderColNo = 13  'shtOrder의 열 번호
             subItemNo = 12  'frmEstimateUpdate orderList의 subitem no
-        Case "납기일자"
+        Case "납기"
             orderColNo = 14
             subItemNo = 13
-        Case "입고일자"
+        Case "입고"
             orderColNo = 15
             subItemNo = 14
-        Case "명세서일자"
+        Case "명세서"
             orderColNo = 16
             subItemNo = 15
-        Case "계산서일자"
+        Case "계산서"
             orderColNo = 17
             subItemNo = 16
-        Case "결제일자"
+        Case "결제"
             orderColNo = 18
             subItemNo = 17
     End Select
     
-    For Each orgItem In frmEstimateUpdate.lswOrderList.ListItems
-        If orgItem.Selected = True Then
-            'DB 업데이트
-            Update_Record_Column shtOrder, orgItem.Text, fieldName, value
-            'shtOrderAdmin 시트 업데이트
-            frmEstimateUpdate.UpdateShtOrderColNo orgItem.Text, orderColNo, value
-        End If
+    For Each item In Me.lswOrderList.ListItems
+        Update_Record_Column shtOrder, item.Text, fieldName, value
+        UpdateShtOrderField item.Text, fieldName, value
     Next
+    
+    frmEstimateUpdate.InitializeLswOrderList
+    
+'
+'    For Each item In frmEstimateUpdate.lswOrderList.ListItems
+'        If item.Selected = True Then
+'            'DB 업데이트
+'            Update_Record_Column shtOrder, item.Text, fieldName, value
+'            'shtOrderAdmin 시트 업데이트
+'            frmEstimateUpdate.UpdateShtOrderColNo item.Text, orderColNo, value
+'        End If
+'    Next
 End Sub
 
 Private Sub btnOrderDateClose_Click()
     Unload Me
 End Sub
 
-Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtOrderDate
     chkOrderDate_Change
 End Sub
 
-Private Sub imgDueDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgDueDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtDueDate
     chkDueDate_Change
 End Sub
 
-Private Sub imgReceivingDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgReceivingDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtReceivingDate
     chkReceivingDate_Change
 End Sub
 
-Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtSpecificationDate
     chkSpecificationDate_Change
 End Sub
 
-Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
+Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtTaxinvoiceDate
     chkTaxinvoiceDate_Change
 End Sub
 
-Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtPaymentDate
     chkPaymentDate_Change
 End Sub
@@ -211,7 +219,7 @@ Private Sub txtSpecificationDate_AfterUpdate()
 End Sub
 
 Private Sub txtTaxinvoiceDate_AfterUpdate()
-    Me.txtTaxInvoiceDate.value = ConvertDateFormat(Me.txtTaxInvoiceDate.value)
+    Me.txtTaxinvoiceDate.value = ConvertDateFormat(Me.txtTaxinvoiceDate.value)
 End Sub
 
 
@@ -307,7 +315,7 @@ Private Sub chkTaxinvoiceDate_Change()
     With Me.lswOrderList
         If chkTaxinvoiceDate.value = True Then
             For i = 1 To .ListItems.count
-                .ListItems(i).ListSubItems(7).Text = Me.txtTaxInvoiceDate.value
+                .ListItems(i).ListSubItems(7).Text = Me.txtTaxinvoiceDate.value
             Next
         Else
             i = 1

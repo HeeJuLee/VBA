@@ -83,13 +83,13 @@ Sub SetLswEstimateList()
     If Me.txtKeyword.value <> "" Then
         db = Get_DB(shtEstimate)
         db = Filtered_DB(db, Me.txtKeyword.value)
-        If Not IsEmpty(db) Then
+        If Not isEmpty(db) Then
             db = Filtered_DB(db, Me.txtKeyword2.value)
         End If
         
         With Me.lswEstimateList
             .ListItems.Clear
-            If Not IsEmpty(db) Then
+            If Not isEmpty(db) Then
                 For i = 1 To UBound(db)
                     Set li = .ListItems.Add(, , db(i, 1))
                     li.ListSubItems.Add , , db(i, 2)
@@ -158,7 +158,7 @@ Sub SetLswOrderList(estimateId)
     With Me.lswOrderList
     
         .ListItems.Clear
-        If Not IsEmpty(db) Then
+        If Not isEmpty(db) Then
             For i = 1 To UBound(db)
                 If db(i, 4) <> "수주" Then
                     Set li = .ListItems.Add(, , db(i, 1))
@@ -233,7 +233,7 @@ Sub SetLswProductionList(estimateId)
     With Me.lswProductionList
     
         .ListItems.Clear
-        If Not IsEmpty(db) Then
+        If Not isEmpty(db) Then
             For i = 1 To UBound(db)
                 Set li = .ListItems.Add(, , db(i, 1))
                 li.ListSubItems.Add , , db(i, 13)
@@ -338,6 +338,7 @@ Sub ProductionCopy(all)
     
     If isFormLoaded("frmProductionManager") Then
         frmProductionManager.RefreshProductionTotalCost
+        frmProductionManager.InitializeLswProductionList
     End If
     
     MsgBox count & "개 항목을 복사하였습니다.", vbInformation, "작업 확인"
