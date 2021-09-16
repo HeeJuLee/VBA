@@ -196,8 +196,8 @@ Sub SelectItemLswOperation(selectedID As Variant)
 End Sub
 
 Sub ClearOperationInput()
-    Range("D6:O6") = ""
-    Range("D6").value = Date
+    Range("D20:O20") = ""
+    Range("D20").value = Date
 End Sub
 
 '운영비 등록
@@ -547,21 +547,23 @@ End Sub
 
 
 Private Sub Worksheet_Change(ByVal target As Range)
-    If target.Address = "$J$6" Then
+    If target.Address = "$L$20" Then
         If target.value = "" Then
-            Range("N6").value = ""
-        ElseIf IsNumeric(target.value) Then
-            Range("N6").value = target.value * 0.1
+            Range("O20").value = ""
+        Else
+            If IsNumeric(Range("$J$20").value <> "") Then
+                Range("O20").value = Range("$J$20") * 0.1
+            End If
         End If
     End If
 End Sub
 
 Sub DeleteKeyword1()
     Me.txtKeyword.value = ""
-    OrderSearch
+    OperationSearch
 End Sub
 
 Sub DeleteKeyword2()
     Me.txtKeyword2.value = ""
-    OrderSearch
+    OperationSearch
 End Sub

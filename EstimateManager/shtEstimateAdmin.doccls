@@ -6,6 +6,7 @@ Dim searchResultCount As Long
 Dim isEnd As Boolean
 Dim dueDate As String
 Dim isFilterOn As Boolean
+Dim bEnableEvent As Boolean
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
@@ -18,6 +19,7 @@ Private Sub Worksheet_Activate()
     isKeyworldSearch = False
     isKeyworldSearch2 = False
     isEnd = False
+    bEnableEvent = True
 End Sub
 
 Sub EstimateSearch()
@@ -49,7 +51,7 @@ Sub EstimateSearch()
     End If
     
     '시트 보호 해제
-    ActiveSheet.Unprotect
+    'ActiveSheet.Unprotect
     
     '기존 검색결과를 화면에서 지움
     ClearEstimateSearchResult
@@ -90,9 +92,10 @@ Sub EstimateSearch()
     End If
     
     isEnd = False
+    bEnableEvent = True
 
     '시트 보호
-    ActiveSheet.Protect DrawingObjects:=False, Contents:=True, Scenarios:= _
+    'ActiveSheet.Protect DrawingObjects:=False, Contents:=True, Scenarios:= _
         True, AllowFormattingCells:=True, AllowFormattingColumns:=True, _
         AllowFormattingRows:=True, AllowFiltering:=True
         
@@ -136,12 +139,11 @@ End Sub
 
 '전체 선택 시 '월'만 전체로 바꿈
 Private Sub optAll_Click()
-    If Me.cboSelectMonth.value = "전체" Then
-        EstimateSearch
-    Else
-        Me.cboSelectMonth.value = "전체"
+    If bEnableEvent = False Then
+        Exit Sub
     End If
     
+    Me.cboSelectMonth.value = "전체"    '검색은 cboSelectMonth_Change에서 진행이 됨
 End Sub
 
 '조회기간 - 이번달
@@ -149,21 +151,36 @@ Private Sub optThisMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = month(Date)
     
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     txtFromDate.value = DateSerial(Y, M, 1)
     txtToDate.value = DateSerial(Y, M + 1, 0)
     
+    bEnableEvent = False
+    
     Me.cboSelectYear.value = Y & "년"
-    Me.cboSelectMonth.value = M & "월"      '실제 검색은 cboSelectMonth_change()에서 검색 됨
+    Me.cboSelectMonth.value = M & "월"
+    EstimateSearch
+    
+    bEnableEvent = True
     
 End Sub
 
-'조회기간 - 이전달
+'조회기간 - 지난달
 Private Sub optLastMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = month(Date)
     
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     txtFromDate.value = DateSerial(Y, M - 1, 1)
     txtToDate.value = DateSerial(Y, M, 0)
+
+    bEnableEvent = False
     
     If M = 1 Then
         Me.cboSelectYear.value = Y - 1 & "년"
@@ -172,7 +189,9 @@ Private Sub optLastMonth_Click()
         Me.cboSelectYear.value = Y & "년"
         Me.cboSelectMonth.value = M - 1 & "월"
     End If
+    EstimateSearch
     
+    bEnableEvent = True
 End Sub
 
 '키워드 검색 입력 시
@@ -203,25 +222,25 @@ Private Sub cboSelectYear_Change()
     Dim M As Long: M = month(Date)
     Dim pos As Long
     
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     If Me.cboSelectYear.value = "전체" Then
         txtFromDate.value = ""
         txtToDate.value = ""
-        
-        If Me.cboSelectMonth.value = "전체" Then
-            '월 선택이 전체로 선택되어 있으면 바로 검색 실행
-            EstimateSearch
-        Else
-            '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
-            'Me.cboSelectMonth.Value = "전체"
-            Me.optAll.value = True
-        End If
+
+        bEnableEvent = False
+        Me.cboSelectMonth.value = "전체"
+        Me.optAll.value = True
+        bEnableEvent = True
     Else
         '년도를 선택한 경우
         pos = InStr(Me.cboSelectYear.value, "년")
         If pos <> 0 Then
             Y = Left(Me.cboSelectYear.value, pos - 1)
         End If
-    
+
         If Me.cboSelectMonth.value = "전체" Then
             txtFromDate.value = DateSerial(Y, 1, 1)
             txtToDate.value = DateSerial(Y, 12, 31)
@@ -229,15 +248,14 @@ Private Sub cboSelectYear_Change()
             pos = InStr(Me.cboSelectMonth.value, "월")
             If pos <> 0 Then
                 M = Left(Me.cboSelectMonth.value, pos - 1)
-                
+
                 txtFromDate.value = DateSerial(Y, M, 1)
                 txtToDate.value = DateSerial(Y, M + 1, 0)
             End If
         End If
-        
-        EstimateSearch
     End If
     
+    EstimateSearch
 End Sub
 
 '월 선택
@@ -246,16 +264,17 @@ Private Sub cboSelectMonth_Change()
     Dim M As Long: M = month(Date)
     Dim pos As Long
     
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     If Me.cboSelectYear.value = "전체" Then
         txtFromDate.value = ""
         txtToDate.value = ""
         
-         If Me.cboSelectMonth.value = "전체" Then
-             '월 선택이 전체로 선택되어 있으면 바로 검색 실행
-            EstimateSearch
-        Else
-            Me.cboSelectMonth.value = "전체"
-        End If
+        bEnableEvent = False
+        Me.cboSelectMonth.value = "전체"
+        bEnableEvent = True
     Else
         pos = InStr(Me.cboSelectYear.value, "년")
         If pos <> 0 Then
@@ -266,11 +285,9 @@ Private Sub cboSelectMonth_Change()
             txtFromDate.value = DateSerial(Y, 1, 1)
             txtToDate.value = DateSerial(Y, 12, 31)
             
-            If Me.optAll.value = False Then
-                Me.optAll.value = True
-            Else
-                EstimateSearch
-            End If
+            bEnableEvent = False
+            Me.optAll.value = True
+            bEnableEvent = True
         Else
             pos = InStr(Me.cboSelectMonth.value, "월")
             If pos <> 0 Then
@@ -279,11 +296,12 @@ Private Sub cboSelectMonth_Change()
                 txtFromDate.value = DateSerial(Y, M, 1)
                 txtToDate.value = DateSerial(Y, M + 1, 0)
             End If
-            
-            EstimateSearch
         End If
     End If
+    
+    EstimateSearch
 End Sub
+
 
 Private Sub Worksheet_Change(ByVal target As Range)
 '    If Target.Address = "$Q$4" Then
@@ -357,7 +375,7 @@ Sub EstimateDelete()
         End
     End If
 
-    estimateId = Range("B" & cRow).value
+    estimateId = Range("C" & cRow).value
     managementId = Range("D" & cRow).value
     
     '견적 관련 수주/발주가 있는지 확인
@@ -370,9 +388,9 @@ Sub EstimateDelete()
     
     '안내 문구 출력
     If count = 0 Then
-        yn = MsgBox("선택한 '" & managementId & "' 견적정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+        yn = MsgBox("선택한 '" & estimateId & "' 견적정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     Else
-        yn = MsgBox("선택한 '" & managementId & "' 견적정보와 " & count & "개의 수주/발주정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+        yn = MsgBox("선택한 '" & estimateId & "' 견적정보와 " & count & "개의 수주/발주정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     End If
     If yn = vbNo Then Exit Sub
     

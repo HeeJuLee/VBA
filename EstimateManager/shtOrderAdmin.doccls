@@ -7,44 +7,75 @@ Dim isEnd As Boolean
 Dim dueDate As String
 Dim isFilterOn As Boolean
 Dim bDelivery, bReceiving, bWorking As Boolean
+Dim bEnableEvent As Boolean
 
 Private Sub btnDelivery_Click()
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     If btnDelivery.value = True Then
         bDelivery = True
-        If optLast2Year.value = True Then
-            Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
-            Me.txtToDate.value = Date
-            OrderSearch
-        Else
-            optLast2Year.value = True
-        End If
+        bWorking = False
+        bReceiving = False
+            
+        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+        Me.txtToDate.value = Date
+        
+        bEnableEvent = False
+        optLast2Year.value = True
+        bEnableEvent = True
+    Else
+        bDelivery = False
     End If
+    
+    OrderSearch
 End Sub
 
 Private Sub btnReceiving_Click()
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     If btnReceiving.value = True Then
         bReceiving = True
-        If optLast2Year.value = True Then
-            Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
-            Me.txtToDate.value = Date
-            OrderSearch
-        Else
-            optLast2Year.value = True
-        End If
+        bWorking = False
+        bDelivery = False
+        
+        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+        Me.txtToDate.value = Date
+        
+        bEnableEvent = False
+        optLast2Year.value = True
+        bEnableEvent = True
+    Else
+        bReceiving = False
     End If
+    
+    OrderSearch
 End Sub
 
 Private Sub btnWorking_Click()
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     If btnWorking.value = True Then
         bWorking = True
-        If optLast2Year.value = True Then
-            Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
-            Me.txtToDate.value = Date
-            OrderSearch
-        Else
-            optLast2Year.value = True
-        End If
+        bDelivery = False
+        bReceiving = False
+        
+        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+        Me.txtToDate.value = Date
+        
+        bEnableEvent = False
+        optLast2Year.value = True
+        bEnableEvent = True
+    Else
+        bWorking = False
     End If
+    
+    OrderSearch
 End Sub
 
 '최초 로드 시
@@ -58,6 +89,7 @@ Private Sub Worksheet_Activate()
     isKeyworldSearch = False
     isKeyworldSearch2 = False
     isEnd = False
+    bEnableEvent = True
 End Sub
 
 '발주 데이터를 검색해서 시트에 출력
@@ -89,26 +121,22 @@ Sub OrderSearch()
     If Not isEmpty(db) Then
         If bDelivery = True Then
             db = Get_Delivery_DB(db)   '수주값이 있고 납품값이 없는 경우
-            Me.txtKeyword.value = ""
-            Me.txtKeyword2.value = ""
+            bEnableEvent = False
             Me.btnReceiving.value = False
             Me.btnWorking.value = False
+            bEnableEvent = True
         ElseIf bReceiving = True Then
             db = Get_Receiving_DB(db)
-            Me.txtKeyword.value = ""
-            Me.txtKeyword2.value = ""
+            bEnableEvent = False
             Me.btnWorking.value = False
             Me.btnDelivery.value = False
+            bEnableEvent = True
         ElseIf bWorking = True Then
             db = Get_Working_DB(db)
-            Me.txtKeyword.value = ""
-            Me.txtKeyword2.value = ""
+            bEnableEvent = False
             Me.btnReceiving.value = False
             Me.btnDelivery.value = False
-        Else
-            Me.btnReceiving.value = False
-            Me.btnDelivery.value = False
-            Me.btnWorking.value = False
+            bEnableEvent = True
         End If
     End If
     
@@ -123,7 +151,7 @@ Sub OrderSearch()
 '    ActiveSheet.Range("U3").Value = Format(endTime - startTime, "#0.00")
     
     '시트 보호 해제
-    ActiveSheet.Unprotect
+    'ActiveSheet.Unprotect
         
     '기존 검색결과를 화면에서 지움
     ClearOrderSearchResult
@@ -175,12 +203,10 @@ Sub OrderSearch()
     End If
     
     isEnd = False
-    bWorking = False
-    bReceiving = False
-    bDelivery = False
+    bEnableEvent = True
     
     '시트 보호
-    ActiveSheet.Protect DrawingObjects:=False, Contents:=True, Scenarios:= _
+    'ActiveSheet.Protect DrawingObjects:=False, Contents:=True, Scenarios:= _
         True, AllowFormattingCells:=True, AllowFormattingColumns:=True, _
         AllowFormattingRows:=True, AllowFiltering:=True
 End Sub
@@ -280,24 +306,25 @@ Private Sub cboSelectYear_Change()
     Dim M As Long: M = month(Date)
     Dim pos As Long
     
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     If Me.cboSelectYear.value = "전체" Then
         txtFromDate.value = ""
         txtToDate.value = ""
-        
-        If Me.cboSelectMonth.value = "전체" Then
-            '월 선택이 전체로 선택되어 있으면 바로 검색 실행
-            OrderSearch
-        Else
-            '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
-            Me.cboSelectMonth.value = "전체"
-        End If
+
+        bEnableEvent = False
+        Me.cboSelectMonth.value = "전체"
+        Me.optAll.value = True
+        bEnableEvent = True
     Else
         '년도를 선택한 경우
         pos = InStr(Me.cboSelectYear.value, "년")
         If pos <> 0 Then
             Y = Left(Me.cboSelectYear.value, pos - 1)
         End If
-    
+
         If Me.cboSelectMonth.value = "전체" Then
             txtFromDate.value = DateSerial(Y, 1, 1)
             txtToDate.value = DateSerial(Y, 12, 31)
@@ -305,14 +332,48 @@ Private Sub cboSelectYear_Change()
             pos = InStr(Me.cboSelectMonth.value, "월")
             If pos <> 0 Then
                 M = Left(Me.cboSelectMonth.value, pos - 1)
-                
+
                 txtFromDate.value = DateSerial(Y, M, 1)
                 txtToDate.value = DateSerial(Y, M + 1, 0)
             End If
         End If
-        
-        OrderSearch
     End If
+    
+    OrderSearch
+
+'    If Me.cboSelectYear.value = "전체" Then
+'        txtFromDate.value = ""
+'        txtToDate.value = ""
+'
+'        If Me.cboSelectMonth.value = "전체" Then
+'            '월 선택이 전체로 선택되어 있으면 바로 검색 실행
+'            OrderSearch
+'        Else
+'            '월 선택이 변경되면서 cboSelectMonth_Change()에서 검색 실행
+'            Me.cboSelectMonth.value = "전체"
+'        End If
+'    Else
+'        '년도를 선택한 경우
+'        pos = InStr(Me.cboSelectYear.value, "년")
+'        If pos <> 0 Then
+'            Y = Left(Me.cboSelectYear.value, pos - 1)
+'        End If
+'
+'        If Me.cboSelectMonth.value = "전체" Then
+'            txtFromDate.value = DateSerial(Y, 1, 1)
+'            txtToDate.value = DateSerial(Y, 12, 31)
+'        Else
+'            pos = InStr(Me.cboSelectMonth.value, "월")
+'            If pos <> 0 Then
+'                M = Left(Me.cboSelectMonth.value, pos - 1)
+'
+'                txtFromDate.value = DateSerial(Y, M, 1)
+'                txtToDate.value = DateSerial(Y, M + 1, 0)
+'            End If
+'        End If
+'
+'        OrderSearch
+'    End If
     
 End Sub
 
@@ -322,16 +383,17 @@ Private Sub cboSelectMonth_Change()
     Dim M As Long: M = month(Date)
     Dim pos As Long
     
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     If Me.cboSelectYear.value = "전체" Then
         txtFromDate.value = ""
         txtToDate.value = ""
         
-         If Me.cboSelectMonth.value = "전체" Then
-             '월 선택이 전체로 선택되어 있으면 바로 검색 실행
-            OrderSearch
-        Else
-            Me.cboSelectMonth.value = "전체"
-        End If
+        bEnableEvent = False
+        Me.cboSelectMonth.value = "전체"
+        bEnableEvent = True
     Else
         pos = InStr(Me.cboSelectYear.value, "년")
         If pos <> 0 Then
@@ -342,7 +404,9 @@ Private Sub cboSelectMonth_Change()
             txtFromDate.value = DateSerial(Y, 1, 1)
             txtToDate.value = DateSerial(Y, 12, 31)
             
-            If Me.optAll.value = False Then Me.optAll.value = True Else OrderSearch
+            bEnableEvent = False
+            Me.optAll.value = True
+            bEnableEvent = True
         Else
             pos = InStr(Me.cboSelectMonth.value, "월")
             If pos <> 0 Then
@@ -351,19 +415,27 @@ Private Sub cboSelectMonth_Change()
                 txtFromDate.value = DateSerial(Y, M, 1)
                 txtToDate.value = DateSerial(Y, M + 1, 0)
             End If
-            
-            OrderSearch
         End If
     End If
+    
+    OrderSearch
 End Sub
 
 '전체 선택 시 '월'만 전체로 바꿈
 Private Sub optAll_Click()
-    If Me.cboSelectMonth.value = "전체" Then
-        OrderSearch
-    Else
-        Me.cboSelectMonth.value = "전체"
+    If bEnableEvent = False Then
+        Exit Sub
     End If
+    
+    Me.cboSelectMonth.value = "전체"
+    
+    'OrderSearch
+    
+'    If Me.cboSelectMonth.value = "전체" Then
+'        OrderSearch
+'    Else
+'        Me.cboSelectMonth.value = "전체"
+'    End If
     
 End Sub
 
@@ -372,16 +444,26 @@ Private Sub optThisMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = month(Date)
     
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     txtFromDate.value = DateSerial(Y, M, 1)
     txtToDate.value = DateSerial(Y, M + 1, 0)
     
+    bEnableEvent = False
     Me.cboSelectYear.value = Y & "년"
-    If Me.cboSelectMonth.value = M & "월" Then
-        Me.cboSelectMonth.value = M & "월"
-        OrderSearch
-    Else
-        Me.cboSelectMonth.value = M & "월"        '실제 검색은 cboSelectMonth_change()에서 검색 됨
-    End If
+    Me.cboSelectMonth.value = M & "월"
+    OrderSearch
+    bEnableEvent = True
+    
+'    Me.cboSelectYear.value = Y & "년"
+'    If Me.cboSelectMonth.value = M & "월" Then
+'        Me.cboSelectMonth.value = M & "월"
+'        OrderSearch
+'    Else
+'        Me.cboSelectMonth.value = M & "월"        '실제 검색은 cboSelectMonth_change()에서 검색 됨
+'    End If
     
 End Sub
 
@@ -390,28 +472,51 @@ Private Sub optLastMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = month(Date)
     
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     txtFromDate.value = DateSerial(Y, M - 1, 1)
     txtToDate.value = DateSerial(Y, M, 0)
-    
+
+    bEnableEvent = False
     If M = 1 Then
         Me.cboSelectYear.value = Y - 1 & "년"
         Me.cboSelectMonth.value = "12월"
     Else
         Me.cboSelectYear.value = Y & "년"
-        If Me.cboSelectMonth.value = M - 1 & "월" Then
-            Me.cboSelectMonth.value = M - 1 & "월"
-            OrderSearch
-        Else
-            Me.cboSelectMonth.value = M - 1 & "월"
-        End If
+        Me.cboSelectMonth.value = M - 1 & "월"
     End If
+    OrderSearch
+    bEnableEvent = True
+'
+'    txtFromDate.value = DateSerial(Y, M - 1, 1)
+'    txtToDate.value = DateSerial(Y, M, 0)
+'
+'    If M = 1 Then
+'        Me.cboSelectYear.value = Y - 1 & "년"
+'        Me.cboSelectMonth.value = "12월"
+'    Else
+'        Me.cboSelectYear.value = Y & "년"
+'        If Me.cboSelectMonth.value = M - 1 & "월" Then
+'            Me.cboSelectMonth.value = M - 1 & "월"
+'            OrderSearch
+'        Else
+'            Me.cboSelectMonth.value = M - 1 & "월"
+'        End If
+'    End If
     
 End Sub
 
 '조회기간 - 최근2년
 Private Sub optLast2Year_Click()
+
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
     txtFromDate.value = DateAdd("yyyy", -2, Date)
-    txtToDate.value = Date
+    txtToDate.value = ""
     
     OrderSearch
 End Sub
