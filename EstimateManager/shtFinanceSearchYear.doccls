@@ -1,0 +1,8 @@
+﻿Option Explicit
+
+Sub SetSearchDate(fromDate, toDate)
+
+    Range("T3").value = fromDate
+    Range("U3").value = toDate
+    
+End Sub

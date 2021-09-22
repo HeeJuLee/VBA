@@ -471,11 +471,17 @@ If value <> "" Then
                     Next
                 Case ">=", "=>"
                     For i = 1 To cRow
-                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) >= CDate(Right(value, Len(value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        'hjlee 2021.09.16 수정
+                        If Left(filterArr(i), Len(filterArr(i)) - 2) <> "" Then
+                            If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) >= CDate(Right(value, Len(value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        End If
                     Next
                  Case "<=", "=<"
                     For i = 1 To cRow
-                        If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDate(Right(value, Len(value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        'hjlee 2021.09.16 수정
+                        If Left(filterArr(i), Len(filterArr(i)) - 2) <> "" Then
+                            If CDate(Left(filterArr(i), Len(filterArr(i)) - 2)) <= CDate(Right(value, Len(value) - 2)) Then: vArr(i) = Left(vArr(i), Len(vArr(i)) - 2): vReturn = Split(vArr(i), "|^"): Dict.Add i, vReturn
+                        End If
                     Next
                 
             End Select

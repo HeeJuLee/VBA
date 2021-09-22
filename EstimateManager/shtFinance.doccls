@@ -1,0 +1,466 @@
+﻿Option Explicit
+
+Dim bEnableEvent As Boolean
+
+'최초 로드 시
+Private Sub Worksheet_Activate()
+    Me.cboSelectYear.List = Array("2021년")
+    Me.cboSelectMonth.List = Array("1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
+
+    Me.txtFromDate.Visible = False
+    Me.txtToDate.Visible = False
+    
+    bEnableEvent = True
+End Sub
+
+Sub FinanceSearch()
+    Dim thisMonth As Date
+    
+    If Me.txtFromDate.value = "" Then
+        Me.txtFromDate.value = Date
+        Me.txtToDate.value = DateAdd("d", 1, Date)
+    End If
+
+    thisMonth = DateSerial(Year(Date), month(Date), 1)
+
+    If Me.txtFromDate.value = thisMonth Then
+        shtFinanceSearchCurrent.SetSearchDate Me.txtFromDate.value, Me.txtToDate.value
+        
+        '수입
+        '수주액
+        Range("F7").value = "='비용검색-이번달'!L9"
+        '입금예상액
+        Range("E8").value = Format(Me.txtFromDate.value, "mm" & "월")
+        Range("E9").value = Format(DateAdd("m", 1, Me.txtFromDate.value), "mm" & "월")
+        Range("E10").value = Format(DateAdd("m", 2, Me.txtFromDate.value), "mm" & "월")
+        Range("F8").value = "='비용검색-이번달'!L18"
+        Range("F9").value = "='비용검색-이번달'!L27"
+        Range("F10").value = "='비용검색-이번달'!L34"
+        '미입금액
+        Range("F11").value = "='비용검색-이번달'!L51"
+        '입금액
+        Range("F12").value = "='비용검색-이번달'!L50"
+        
+        '지출
+        '정기결제
+        Range("I7").value = "='비용검색-이번달'!L71"
+        Range("I8").value = "='비용검색-이번달'!L63"
+        '현금결제
+        Range("I9").value = "='비용검색-이번달'!L90"
+        Range("I10").value = "='비용검색-이번달'!L80"
+        '카드결제
+        Range("I11").value = "='비용검색-이번달'!L123"
+        Range("I12").value = "='비용검색-이번달'!L105"
+        '결제총액
+        Range("I13").value = "='비용검색-이번달'!L125"
+        Range("I14").value = "='비용검색-이번달'!L126"
+        '당월 결제액 (AX3)
+        Range("I16").value = "='비용검색-이번달'!L136"
+        '총 지출 예상액 (AO3)
+        Range("I17").value = "='비용검색-이번달'!L145"
+        
+        '부가세
+        Range("L7").value = "='비용검색-이번달'!L154"
+        Range("L8").value = "='비용검색-이번달'!L161"
+        
+        '수입-지출총액
+        Range("O9").value = "=O11-O10-L9-I17"
+        
+        '카드내역
+        Range("R8").value = "='비용검색-이번달'!L121"
+        Range("S8").value = "='비용검색-이번달'!L118"
+        Range("T8").value = "='비용검색-이번달'!L103"
+        Range("R9").value = "='비용검색-이번달'!L122"
+        Range("S9").value = "='비용검색-이번달'!L119"
+        Range("T9").value = "='비용검색-이번달'!L104"
+        
+    Else
+        shtFinanceSearchBefore.SetSearchDate Me.txtFromDate.value, Me.txtToDate.value
+        
+        '수입
+        '수주액
+        Range("F7").value = "='비용검색-지난달'!L9"
+        '입금예상액
+        Range("E8").value = Format(Me.txtFromDate.value, "mm" & "월")
+        Range("E9").value = Format(DateAdd("m", 1, Me.txtFromDate.value), "mm" & "월")
+        Range("E10").value = Format(DateAdd("m", 2, Me.txtFromDate.value), "mm" & "월")
+        Range("F8").value = "='비용검색-지난달'!L18"
+        Range("F9").value = "='비용검색-지난달'!L27"
+        Range("F10").value = "='비용검색-지난달'!L34"
+        '미입금액
+        Range("F11").value = "='비용검색-지난달'!L51"
+        '입금액
+        Range("F12").value = "='비용검색-지난달'!L50"
+        
+        '지출
+        '정기결제
+        Range("I7").value = ""
+        Range("I8").value = ""
+        '현금결제
+        Range("I9").value = ""
+        Range("I10").value = ""
+        '카드결제
+        Range("I11").value = ""
+        Range("I12").value = ""
+        '결제총액
+        Range("I13").value = ""
+        Range("I14").value = ""
+        '당월 결제 총액 (AX3)
+        Range("I16").value = "='비용검색-지난달'!L136"
+        '총 지출 예상액 (AO3)
+        Range("I17").value = ""
+        
+        '부가세
+        Range("L7").value = "='비용검색-지난달'!L154"
+        Range("L8").value = "='비용검색-지난달'!L161"
+        
+        '수입-지출총액
+        Range("O9").value = ""
+        
+        '카드내역
+        Range("R8").value = "='비용검색-지난달'!L121"
+        Range("S8").value = "='비용검색-지난달'!L118"
+        Range("T8").value = "='비용검색-지난달'!L103"
+        Range("R9").value = "='비용검색-지난달'!L122"
+        Range("S9").value = "='비용검색-지난달'!L119"
+        Range("T9").value = "='비용검색-지난달'!L104"
+    End If
+
+    '이월부가세 세팅
+    Range("L11").value = SetLastVAT
+    '납부할 부가세 저장
+    SaveDueVAT Range("L9").value
+    '납부한 부가세 세팅
+    Range("L10").value = SetPaidVAT
+    '전자어음 세팅
+    Range("O8").value = SetElectronicBill
+    '이월금액 세팅
+    Range("O12").value = SetCarriedOver
+    '통장잔액 저장
+    SaveBalance Range("O7").value
+    '차입금 세팅
+    Range("O10").value = SetBorrowedMoney
+        
+    Range("J3").value = Format(Me.txtFromDate, "yyyy년 mm월 관리대장")
+    
+    ActiveCell.Activate
+    
+    bEnableEvent = True
+End Sub
+
+Function SetLastVAT()
+    Dim db As Variant
+    Dim id As Long
+    Dim lastVAT, dueVAT As Variant
+        
+    db = Get_DB(shtFinanceData)
+    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    If isEmpty(db) Then
+        Insert_Record shtFinanceData, Me.txtFromDate.value
+        id = Get_LastID(shtFinanceData)
+        lastVAT = ""
+    Else
+        id = CLng(db(1, 1))
+        lastVAT = db(1, 3)
+    End If
+    
+    If lastVAT = "" Then
+        '만약 이월부가세값이 없으면 지난달 납부할 부가세에서 가져옴
+        If id > 1 Then
+            id = id - 1
+            db = Get_Record_Array(shtFinanceData, id)
+            lastVAT = db(4)
+        End If
+    End If
+    
+    SetLastVAT = lastVAT
+End Function
+
+Sub SaveDueVAT(dueVAT)
+    Dim db As Variant
+    Dim id As Long
+    
+    db = Get_DB(shtFinanceData)
+    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    If isEmpty(db) Then
+        Insert_Record shtFinanceData, Me.txtFromDate.value
+        id = Get_LastID(shtFinanceData)
+    Else
+        id = CLng(db(1, 1))
+    End If
+    
+    Update_Record_Column shtFinanceData, id, "납부할부가세", dueVAT
+End Sub
+
+Function SetPaidVAT()
+    Dim db As Variant
+    Dim id As Long
+        
+    db = Get_DB(shtFinanceData)
+    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    If isEmpty(db) Then
+        Insert_Record shtFinanceData, Me.txtFromDate.value
+        id = Get_LastID(shtFinanceData)
+    Else
+        id = CLng(db(1, 1))
+    End If
+    
+    SetPaidVAT = db(1, 5)
+End Function
+
+Function SetElectronicBill()
+    Dim db As Variant
+    Dim id As Long
+        
+    db = Get_DB(shtFinanceData)
+    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    If isEmpty(db) Then
+        Insert_Record shtFinanceData, Me.txtFromDate.value
+        id = Get_LastID(shtFinanceData)
+    Else
+        id = CLng(db(1, 1))
+    End If
+    
+    SetElectronicBill = db(1, 7)
+End Function
+
+Sub SaveBalance(balance)
+    Dim db As Variant
+    Dim id As Long
+    
+    db = Get_DB(shtFinanceData)
+    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    If isEmpty(db) Then
+        Insert_Record shtFinanceData, Me.txtFromDate.value
+        id = Get_LastID(shtFinanceData)
+    Else
+        id = CLng(db(1, 1))
+    End If
+    
+    Update_Record_Column shtFinanceData, id, "통장잔액", balance
+End Sub
+
+Function SetBorrowedMoney()
+    Dim db As Variant
+    Dim id As Long
+        
+    db = Get_DB(shtFinanceData)
+    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    If isEmpty(db) Then
+        Insert_Record shtFinanceData, Me.txtFromDate.value
+        id = Get_LastID(shtFinanceData)
+    Else
+        id = CLng(db(1, 1))
+    End If
+    
+    SetBorrowedMoney = db(1, 9)
+End Function
+
+Function SetCarriedOver()
+    Dim db As Variant
+    Dim id As Long
+    Dim balance As Variant
+        
+    db = Get_DB(shtFinanceData)
+    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    If isEmpty(db) Then
+        Insert_Record shtFinanceData, Me.txtFromDate.value
+        id = Get_LastID(shtFinanceData)
+        balance = ""
+    Else
+        id = CLng(db(1, 1))
+        balance = db(1, 6)
+    End If
+    
+    If balance = "" Then
+        '만약 이월금액이 없으면 지난달 통장잔액+전자어음에서 가져옴
+        If id > 1 Then
+            id = id - 1
+            db = Get_Record_Array(shtFinanceData, id)
+            balance = CLng(db(7)) + CLng(db(8))
+        End If
+    End If
+    
+    SetCarriedOver = balance
+End Function
+
+'년 선택
+Private Sub cboSelectYear_Change()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = month(Date)
+    Dim pos As Long
+    
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    '년도를 선택한 경우
+    pos = InStr(Me.cboSelectYear.value, "년")
+    If pos <> 0 Then
+        Y = Left(Me.cboSelectYear.value, pos - 1)
+    End If
+
+    pos = InStr(Me.cboSelectMonth.value, "월")
+    If pos <> 0 Then
+        M = Left(Me.cboSelectMonth.value, pos - 1)
+
+        txtFromDate.value = DateSerial(Y, M, 1)
+        txtToDate.value = DateSerial(Y, M + 1, 1)
+    End If
+    
+    FinanceSearch
+End Sub
+
+'월 선택
+Private Sub cboSelectMonth_Change()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = month(Date)
+    Dim pos As Long
+
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    pos = InStr(Me.cboSelectYear.value, "년")
+    If pos <> 0 Then
+        Y = Left(Me.cboSelectYear.value, pos - 1)
+    End If
+
+    pos = InStr(Me.cboSelectMonth.value, "월")
+    If pos <> 0 Then
+        M = Left(Me.cboSelectMonth.value, pos - 1)
+        
+        txtFromDate.value = DateSerial(Y, M, 1)
+        txtToDate.value = DateSerial(Y, M + 1, 1)
+    End If
+    
+    bEnableEvent = False
+    Me.optThisMonth = False
+    Me.optLastMonth = False
+    bEnableEvent = True
+    
+    FinanceSearch
+End Sub
+
+
+'조회기간 - 이번달
+Private Sub optThisMonth_Click()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = month(Date)
+    
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    txtFromDate.value = DateSerial(Y, M, 1)
+    txtToDate.value = DateSerial(Y, M + 1, 1)
+    
+    bEnableEvent = False
+    Me.cboSelectYear.value = Y & "년"
+    Me.cboSelectMonth.value = M & "월"
+    bEnableEvent = True
+    
+    FinanceSearch
+End Sub
+
+'조회기간 - 지난달
+Private Sub optLastMonth_Click()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = month(Date)
+    
+    txtFromDate.value = DateSerial(Y, M - 1, 1)
+    txtToDate.value = DateSerial(Y, M, 1)
+
+    bEnableEvent = False
+    
+    If M = 1 Then
+        Me.cboSelectYear.value = Y - 1 & "년"
+        Me.cboSelectMonth.value = "12월"
+    Else
+        Me.cboSelectYear.value = Y & "년"
+        Me.cboSelectMonth.value = M - 1 & "월"
+    End If
+    bEnableEvent = True
+    
+    FinanceSearch
+End Sub
+
+Private Sub Worksheet_Change(ByVal Target As Range)
+    Dim db As Variant
+    Dim id As Long
+
+    If Target.Cells.count > 1 Then
+        Exit Sub
+    End If
+    
+    '이월부가세
+    If Target.Address = "$L$11" Then
+        db = Get_DB(shtFinanceData)
+        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        If isEmpty(db) Then
+            Insert_Record shtFinanceData, Me.txtFromDate.value
+            id = Get_LastID(shtFinanceData)
+        Else
+            id = CLng(db(1, 1))
+        End If
+        
+        Update_Record_Column shtFinanceData, id, "이월부가세", Target.value
+    End If
+    
+    '납부한부가세
+    If Target.Address = "$L$10" Then
+        db = Get_DB(shtFinanceData)
+        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        If isEmpty(db) Then
+            Insert_Record shtFinanceData, Me.txtFromDate.value
+            id = Get_LastID(shtFinanceData)
+        Else
+            id = CLng(db(1, 1))
+        End If
+        
+        Update_Record_Column shtFinanceData, id, "납부한부가세", Target.value
+        Update_Record_Column shtFinanceData, id, "납부할부가세", Range("L9").value
+    End If
+    
+    '이월금액
+    If Target.Address = "$O$12" Then
+        db = Get_DB(shtFinanceData)
+        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        If isEmpty(db) Then
+            Insert_Record shtFinanceData, Me.txtFromDate.value
+            id = Get_LastID(shtFinanceData)
+        Else
+            id = CLng(db(1, 1))
+        End If
+        
+        Update_Record_Column shtFinanceData, id, "이월금액", Target.value
+    End If
+
+    '전자어음
+    If Target.Address = "$O$8" Then
+        db = Get_DB(shtFinanceData)
+        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        If isEmpty(db) Then
+            Insert_Record shtFinanceData, Me.txtFromDate.value
+            id = Get_LastID(shtFinanceData)
+        Else
+            id = CLng(db(1, 1))
+        End If
+        
+        Update_Record_Column shtFinanceData, id, "전자어음", Target.value
+    End If
+
+    '차입금
+    If Target.Address = "$O$10" Then
+        db = Get_DB(shtFinanceData)
+        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        If isEmpty(db) Then
+            Insert_Record shtFinanceData, Me.txtFromDate.value
+            id = Get_LastID(shtFinanceData)
+        Else
+            id = CLng(db(1, 1))
+        End If
+        
+        Update_Record_Column shtFinanceData, id, "차입금", Target.value
+    End If
+End Sub

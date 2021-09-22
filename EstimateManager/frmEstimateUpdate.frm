@@ -524,7 +524,7 @@ Sub UpdatePaymentListValue(id, headerIndex, value)
     End If
     
     Select Case headerIndex
-        Case 4, 5, 6, 7, 10
+        Case 4, 5, 6, 7, 10, 12
             '만약 현재 선택한 행이 맨 마지막행이면 명세서/계산서/결제/결제월 데이터를 견적DB/발주DB/견적관리시트/발주관리시트에 저장
             If lswPaymentList.ListItems(lswPaymentList.ListItems.count).Selected = True Then
                 UpdateEstimateValue fieldName, value
@@ -724,7 +724,7 @@ Sub UpdateShtEstimateField(estimateId, fieldName, value)
     Dim findRow As Long
     Dim colNo As Long
     
-    findRow = isExistInSheet(shtEstimateAdmin.Range("B6"), estimateId)
+    findRow = isExistInSheet(shtEstimateAdmin.Range("C6"), estimateId)
     If findRow > 0 Then
         colNo = 0
         Select Case fieldName
@@ -991,7 +991,7 @@ Sub CalculateEstimateUpdateCost_2()
 
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 수주금액의 10%
@@ -1094,12 +1094,21 @@ Function CalculatePaymentListVAT(selectedItem As ListItem) As Long
     Dim paid As Variant
     Dim vat As Long
 
+    '계산서 값이 없으면 0
+    If selectedItem.ListSubItems(4).Text = "" Then
+        CalculatePaymentListVAT = 0
+        Exit Function
+    End If
+    
     '입금액 변하는 경우에 부가세 변경해야 함
     paid = selectedItem.ListSubItems(7).Text
     
     If paid = "" Then
-        vat = 0
-    ElseIf IsNumeric(paid) Then
+        '입금액이 없는 경우에 입금예정액으로 함
+        paid = selectedItem.ListSubItems(8).Text
+    End If
+    
+    If IsNumeric(paid) Then
         vat = paid * 0.1
     Else
         vat = 0
@@ -1242,7 +1251,7 @@ Private Sub btnPaymentListInsert_Click()
     '결제이력에 발주 추가
     Insert_Record shtPayment, _
                         currentEstimateId, currentManagementId, _
-                        Date, , , , , , , , Date, ""
+                        Date, , , , , , , , , Date, ""
                         
     lastId = Get_LastID(shtPayment)
     
@@ -1306,6 +1315,9 @@ Private Sub btnPaymentListDelete_Click()
         InitializeLswPaymentList
     End If
     
+    '삭제 플래그 세팅해서 결제이력이 추가되지 않도록 함
+    bDeleteFlag = True
+    
     '맨 마지막 이력 데이터의 명세서/계산서/결제/결제월을 견적DB에 저장
     With Me.lswPaymentList
         If .ListItems.count = 0 Then
@@ -1328,6 +1340,7 @@ Private Sub btnPaymentListDelete_Click()
         UpdateEstimateValue "결제수단", method
     End With
     
+    bDeleteFlag = False
 End Sub
 
 
@@ -1914,11 +1927,11 @@ Sub PaymentListUpdate(headerIndex)
                     '결제월인 경우에 화면에 '10월' 이런식으로 보여줌
                     .selectedItem.ListSubItems(6).Text = Format(Me.txtPaymentEdit.value, "mm" & "월")
                     .selectedItem.ListSubItems(11).Text = Me.txtPaymentEdit.value
-                ElseIf headerIndex = 8 Then
+                ElseIf headerIndex = 5 Or headerIndex = 8 Or headerIndex = 9 Then
                     '입금액 변경한 경우에는 부가세도 변경해야 함
                     vat = CalculatePaymentListVAT(.selectedItem)
-                    .selectedItem.ListSubItems(10).Text = Format(vat, "#,##0")
-                    UpdatePaymentListValue .selectedItem.Text, 11, vat
+                    .selectedItem.ListSubItems(11).Text = Format(vat, "#,##0")
+                    UpdatePaymentListValue .selectedItem.Text, 12, vat
                 End If
                 '합계
                 Me.txtPaid.value = Format(CalculatePaymentListTotalCost, "#,##0")
@@ -2074,7 +2087,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxinvoiceDate
+    GetCalendarDate Me.txtTaxInvoiceDate
 End Sub
 
 Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
@@ -2211,6 +2224,7 @@ Private Sub txtAcceptedPrice_AfterUpdate()
     End If
     
     CalculateAcceptedMargin
+    CalculatePayment
     
     UpdateEstimateValue "수주금액", Me.txtAcceptedPrice.value
 End Sub
@@ -2390,7 +2404,7 @@ End Sub
 
 
 Private Sub txtTaxinvoiceDate_AfterUpdate()
-    Me.txtTaxinvoiceDate.value = Trim(Me.txtTaxinvoiceDate.value)
+    Me.txtTaxInvoiceDate.value = Trim(Me.txtTaxInvoiceDate.value)
 End Sub
 
 Private Sub txtPaymentDate_AfterUpdate()

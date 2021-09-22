@@ -10,8 +10,18 @@ Dim bEnableEvent As Boolean
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
-    Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+    Dim i As Long
+    Dim Y As Long
+    
+    Y = Year(Date)
+    
+    'Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+    Me.cboSelectYear.List = Array("전체")
     Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
+    
+    For i = 0 To Y - 2005
+        Me.cboSelectYear.AddItem Y - i & "년"
+    Next
     
     Me.txtFromDate.Visible = False
     Me.txtToDate.Visible = False
@@ -132,8 +142,16 @@ Private Sub cboSelectMonth_DropButtonClick()
 End Sub
 
 Private Sub cboSelectYear_DropButtonClick()
+    Dim i As Long
+    Dim Y As Long
+    
     If Me.cboSelectYear.ListCount = 0 Then
-        Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+        Me.cboSelectYear.List = Array("전체")
+        
+        Y = Year(Date)
+        For i = 0 To Y - 2005
+            Me.cboSelectYear.AddItem Y - i & "년"
+        Next
     End If
 End Sub
 
@@ -303,7 +321,7 @@ Private Sub cboSelectMonth_Change()
 End Sub
 
 
-Private Sub Worksheet_Change(ByVal target As Range)
+Private Sub Worksheet_Change(ByVal Target As Range)
 '    If Target.Address = "$Q$4" Then
 '        dueDate = Target.value
 '
@@ -332,12 +350,12 @@ End Sub
 
 
 '시트 더블클릭 시 견적수정 폼 열기
-Private Sub Worksheet_BeforeDoubleClick(ByVal target As Range, Cancel As Boolean)
+Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
     Dim cRow, cCol As Long
     
     '선택한 행 번호
-    cRow = target.row
-    cCol = target.Column
+    cRow = Target.row
+    cCol = Target.Column
     
     '데이터가 있는 행이 아닐 경우는 중지
     If cRow < 6 Or shtEstimateAdmin.Range("B" & cRow).value = "" Then
@@ -427,3 +445,4 @@ Sub ToggleFilter()
         
     If isFilterOn = True Then isFilterOn = False Else isFilterOn = True
 End Sub
+

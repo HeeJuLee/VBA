@@ -13,6 +13,7 @@ Public operationFormX, operationFormY As Long
 Public orderDateUpdateFormX, orderDateUpdateFormY As Long
 Public productionCopyFormX, productionCopyFormY As Long
 Public selectionRow As Long
+Public bDeleteFlag As Boolean
 
 Sub GetCalendarDate(textBox As MSForms.textBox)
     Dim vDate As Date
@@ -110,6 +111,12 @@ End Sub
 Sub MoveToOperationAdmin()
     
     shtOperationAdmin.Activate
+    
+End Sub
+
+Sub MoveToFinance()
+    
+    shtFinance.Activate
     
 End Sub
 

@@ -1,0 +1,86 @@
+﻿Option Explicit
+
+Dim bEnableEvent As Boolean
+
+'최초 로드 시
+Private Sub Worksheet_Activate()
+    Me.cboSelectYear.List = Array("2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+
+    Me.txtFromDate.Visible = False
+    Me.txtToDate.Visible = False
+    
+    bEnableEvent = True
+End Sub
+
+Sub FinanceSearchYear()
+    Dim thisMonth As Date
+    
+    If Me.txtFromDate.value = "" Then
+        Me.txtFromDate.value = DateSerial(Year(Date), 1, 1)
+        Me.txtToDate.value = DateSerial(Year(Date) + 1, 1, 1)
+    End If
+    
+    shtFinanceSearchYear.SetSearchDate Me.txtFromDate.value, Me.txtToDate.value
+    
+    Range("J3").value = Format(Me.txtFromDate, "yyyy년 비용현황")
+    
+    ActiveCell.Activate
+    
+    bEnableEvent = True
+End Sub
+
+'년 선택
+Private Sub cboSelectYear_Change()
+    Dim Y As Long: Y = Year(Date)
+    Dim M As Long: M = month(Date)
+    Dim pos As Long
+    
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    '년도를 선택한 경우
+    pos = InStr(Me.cboSelectYear.value, "년")
+    If pos <> 0 Then
+        Y = Left(Me.cboSelectYear.value, pos - 1)
+    End If
+
+    txtFromDate.value = DateSerial(Y, 1, 1)
+    txtToDate.value = DateSerial(Y + 1, 1, 1)
+    
+    FinanceSearchYear
+End Sub
+
+'조회기간 - 올해
+Private Sub optThisYear_Click()
+    Dim Y As Long
+    
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    Y = Year(Date)
+    txtFromDate.value = DateSerial(Y, 1, 1)
+    txtToDate.value = DateSerial(Y + 1, 1, 1)
+    
+    bEnableEvent = False
+    Me.cboSelectYear.value = Y & "년"
+    bEnableEvent = True
+    
+    FinanceSearchYear
+End Sub
+
+'조회기간 - 작년
+Private Sub optLastYear_Click()
+    Dim Y As Long
+    
+    Y = Year(Date)
+    txtFromDate.value = DateSerial(Y - 1, 1, 1)
+    txtToDate.value = DateSerial(Y, 1, 1)
+
+    bEnableEvent = False
+    Me.cboSelectYear.value = Y - 1 & "년"
+    bEnableEvent = True
+    
+    FinanceSearchYear
+End Sub

@@ -9,82 +9,25 @@ Dim isFilterOn As Boolean
 Dim bDelivery, bReceiving, bWorking As Boolean
 Dim bEnableEvent As Boolean
 
-Private Sub btnDelivery_Click()
-    If bEnableEvent = False Then
-        Exit Sub
-    End If
-    
-    If btnDelivery.value = True Then
-        bDelivery = True
-        bWorking = False
-        bReceiving = False
-            
-        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
-        Me.txtToDate.value = Date
-        
-        bEnableEvent = False
-        optLast2Year.value = True
-        bEnableEvent = True
-    Else
-        bDelivery = False
-    End If
-    
-    OrderSearch
-End Sub
-
-Private Sub btnReceiving_Click()
-    If bEnableEvent = False Then
-        Exit Sub
-    End If
-    
-    If btnReceiving.value = True Then
-        bReceiving = True
-        bWorking = False
-        bDelivery = False
-        
-        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
-        Me.txtToDate.value = Date
-        
-        bEnableEvent = False
-        optLast2Year.value = True
-        bEnableEvent = True
-    Else
-        bReceiving = False
-    End If
-    
-    OrderSearch
-End Sub
-
-Private Sub btnWorking_Click()
-    If bEnableEvent = False Then
-        Exit Sub
-    End If
-    
-    If btnWorking.value = True Then
-        bWorking = True
-        bDelivery = False
-        bReceiving = False
-        
-        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
-        Me.txtToDate.value = Date
-        
-        bEnableEvent = False
-        optLast2Year.value = True
-        bEnableEvent = True
-    Else
-        bWorking = False
-    End If
-    
-    OrderSearch
-End Sub
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
-    Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+    Dim i As Long
+    Dim Y As Long
+    
+    Y = Year(Date)
+    
+    Me.cboSelectYear.List = Array("전체")
     Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
+    
+    For i = 0 To Y - 2005
+        Me.cboSelectYear.AddItem Y - i & "년"
+    Next
     
     Me.txtFromDate.Visible = False
     Me.txtToDate.Visible = False
+    Me.txtFromDueDate.Visible = False
+    Me.txtToDueDate.Visible = False
     
     isKeyworldSearch = False
     isKeyworldSearch2 = False
@@ -113,6 +56,12 @@ Sub OrderSearch()
     End If
     If Not isEmpty(db) Then
         If txtToDate.value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.value, 26)    '등록일자 필드와 날짜 비교
+    End If
+    If Not isEmpty(db) Then
+        If txtFromDueDate.value <> "" Then db = Filtered_DB(db, ">=" & txtFromDueDate.value, 17)    '납기일자 필드와 날짜 비교
+    End If
+    If Not isEmpty(db) Then
+        If txtToDueDate.value <> "" Then db = Filtered_DB(db, "<=" & txtToDueDate.value, 17)    '납기일자 필드와 날짜 비교
     End If
 '    If Not IsEmpty(db) Then
 '        dueDate = shtOrderAdmin.Range("S4").value
@@ -521,6 +470,158 @@ Private Sub optLast2Year_Click()
     OrderSearch
 End Sub
 
+Private Sub btnDelivery_Click()
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    If btnDelivery.value = True Then
+        bDelivery = True
+        bWorking = False
+        bReceiving = False
+            
+        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+        Me.txtToDate.value = Date
+        
+        bEnableEvent = False
+        optLast2Year.value = True
+        bEnableEvent = True
+    Else
+        bDelivery = False
+        
+        bEnableEvent = False
+        optDueDateAll = True
+        Me.txtFromDueDate.value = ""
+        Me.txtToDueDate.value = ""
+        bEnableEvent = True
+    End If
+    
+    OrderSearch
+End Sub
+
+Private Sub btnReceiving_Click()
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    If btnReceiving.value = True Then
+        bReceiving = True
+        bWorking = False
+        bDelivery = False
+        
+        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+        Me.txtToDate.value = Date
+        
+        bEnableEvent = False
+        optLast2Year.value = True
+        bEnableEvent = True
+    Else
+        bReceiving = False
+        
+        bEnableEvent = False
+        optDueDateAll = True
+        Me.txtFromDueDate.value = ""
+        Me.txtToDueDate.value = ""
+        bEnableEvent = True
+    End If
+    
+    OrderSearch
+End Sub
+
+Private Sub btnWorking_Click()
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    If btnWorking.value = True Then
+        bWorking = True
+        bDelivery = False
+        bReceiving = False
+        
+        Me.txtFromDate.value = DateAdd("yyyy", -2, Date)
+        Me.txtToDate.value = Date
+        
+        bEnableEvent = False
+        optLast2Year.value = True
+        bEnableEvent = True
+    Else
+        bWorking = False
+        
+        bEnableEvent = False
+        optDueDateAll = True
+        Me.txtFromDueDate.value = ""
+        Me.txtToDueDate.value = ""
+        bEnableEvent = True
+    End If
+    
+    OrderSearch
+End Sub
+
+
+Private Sub optDueDateAll_Click()
+    Dim Y, M, D As Long
+    
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+        
+    txtFromDueDate.value = ""
+    txtToDueDate.value = ""
+    
+    OrderSearch
+End Sub
+
+Private Sub optDueDate1Week_Click()
+    Dim Y, M, D As Long
+    
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    Y = Year(Date)
+    M = month(Date)
+    D = day(Date)
+    
+    txtFromDueDate.value = DateSerial(Y, M, D - 7)
+    txtToDueDate.value = DateSerial(Y, M, D + 7)
+    
+    OrderSearch
+End Sub
+
+Private Sub optDueDate2Week_Click()
+    Dim Y, M, D As Long
+    
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    Y = Year(Date)
+    M = month(Date)
+    D = day(Date)
+    
+    txtFromDueDate.value = DateSerial(Y, M, D - 7)
+    txtToDueDate.value = DateSerial(Y, M, D + 14)
+    
+    OrderSearch
+End Sub
+
+Private Sub optDueDate1Month_Click()
+    Dim Y, M, D As Long
+    
+    If bEnableEvent = False Then
+        Exit Sub
+    End If
+    
+    Y = Year(Date)
+    M = month(Date)
+    D = day(Date)
+    
+    txtFromDueDate.value = DateSerial(Y, M, D - 7)
+    txtToDueDate.value = DateSerial(Y, M + 1, D)
+    
+    OrderSearch
+End Sub
+
 Private Sub cboSelectMonth_DropButtonClick()
     If Me.cboSelectMonth.LineCount = 0 Then
         Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
@@ -528,13 +629,21 @@ Private Sub cboSelectMonth_DropButtonClick()
 End Sub
 
 Private Sub cboSelectYear_DropButtonClick()
+    Dim i As Long
+    Dim Y As Long
+    
     If Me.cboSelectYear.ListCount = 0 Then
-        Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+        Me.cboSelectYear.List = Array("전체")
+        
+        Y = Year(Date)
+        For i = 0 To Y - 2005
+            Me.cboSelectYear.AddItem Y - i & "년"
+        Next
     End If
 End Sub
 
 
-Private Sub HyperLink(ByVal target As Range, Cancel As Boolean)
+Private Sub HyperLink(ByVal Target As Range, Cancel As Boolean)
     
 End Sub
 
@@ -560,13 +669,13 @@ If KeyCode = 13 Then
     End If
 End Sub
 
-Private Sub Worksheet_BeforeDoubleClick(ByVal target As Range, Cancel As Boolean)
+Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean)
     Dim cRow, cCol As Long
 
     '선택한 행 번호
     'cRow = Selection.row
-    cRow = target.row
-    cCol = target.Column
+    cRow = Target.row
+    cCol = Target.Column
     
     '데이터가 있는 행이 아닐 경우는 중지
     If cRow < 6 Or shtOrderAdmin.Range("B" & cRow).value = "" Then
@@ -604,52 +713,52 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal target As Range, Cancel As Boolean
     End If
 End Sub
 
-Private Sub Worksheet_Change(ByVal target As Range)
+Private Sub Worksheet_Change(ByVal Target As Range)
     Dim cRow, cCol As Long
     Dim value As Variant
     
-    If target.Cells.count > 1 Then
-        If InStr(target.Address, "$6") = 0 Then
+    If Target.Cells.count > 1 Then
+        If InStr(Target.Address, "$6") = 0 Then
             MsgBox "여러 셀을 한번에 변경할 수 없습니다.", vbInformation, "작업 확인"
             UndoLastAction
         End If
         Exit Sub
     End If
     
-    cRow = target.row
-    cCol = target.Column
+    cRow = Target.row
+    cCol = Target.Column
     
     Select Case cCol
         Case 18     '발주
             If Range("G" & cRow).value = "수주" Then
-                target.value = ""       '수주에서는 발주 일자가 의미 없음
+                Target.value = ""       '수주에서는 발주 일자가 의미 없음
             Else
-                value = ConvertDateFormat(target.value)
+                value = ConvertDateFormat(Target.value)
                 Update_Record_Column shtOrder, Range("B" & cRow).value, "발주", value
             End If
         Case 19     '납기
-            value = ConvertDateFormat(target.value)
+            value = ConvertDateFormat(Target.value)
             If Range("G" & cRow).value = "수주" Then
                 Update_Record_Column shtEstimate, Range("D" & cRow).value, "납기", value
             End If
             Update_Record_Column shtOrder, Range("B" & cRow).value, "납기", value
         Case 20     '입고
             If Range("G" & cRow).value = "수주" Then
-                target.value = ""       '수주에서는 입고 일자가 의미 없음
+                Target.value = ""       '수주에서는 입고 일자가 의미 없음
             Else
-                value = ConvertDateFormat(target.value)
+                value = ConvertDateFormat(Target.value)
                 Update_Record_Column shtOrder, Range("B" & cRow).value, "입고", value
             End If
         Case 21     '납품
             If Range("G" & cRow).value = "수주" Then
-                value = ConvertDateFormat(target.value)
+                value = ConvertDateFormat(Target.value)
                 Update_Record_Column shtEstimate, Range("D" & cRow).value, "납품", value
                 Update_Record_Column shtOrder, Range("B" & cRow).value, "납품", value
             Else
-                target.value = ""       '발주에서는 납품 일자가 의미 없음
+                Target.value = ""       '발주에서는 납품 일자가 의미 없음
             End If
         Case 22     '명세서
-            value = ConvertDateFormat(target.value)
+            value = ConvertDateFormat(Target.value)
             If Range("G" & cRow).value = "수주" Then
                 '수주테이블에 업데이트
                 Update_Record_Column shtEstimate, Range("D" & cRow).value, "명세서", value
@@ -658,27 +767,33 @@ Private Sub Worksheet_Change(ByVal target As Range)
             End If
             Update_Record_Column shtOrder, Range("B" & cRow).value, "명세서", value
         Case 23     '계산서
-            value = ConvertDateFormat(target.value)
+            value = ConvertDateFormat(Target.value)
             If Range("G" & cRow).value = "수주" Then
                 Update_Record_Column shtEstimate, Range("D" & cRow).value, "계산서", value
                 UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "계산서", value
             End If
             Update_Record_Column shtOrder, Range("B" & cRow).value, "계산서", value
         Case 24     '결제
-            value = ConvertDateFormat(target.value)
+            value = ConvertDateFormat(Target.value)
             If Range("G" & cRow).value = "수주" Then
                 Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제", value
                 UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제", value
             End If
             Update_Record_Column shtOrder, Range("B" & cRow).value, "결제", value
         Case 25     '결제월
-            value = ConvertDateFormat(target.value)
+            value = ConvertDateFormat(Target.value)
             If Range("G" & cRow).value = "수주" Then
                 Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제월", value
                 UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제월", value
             End If
             Update_Record_Column shtOrder, Range("B" & cRow).value, "결제월", value
         Case 26     '결제수단
+            value = Target.value
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제수단", value
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제수단", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제수단", value
     End Select
     
 End Sub
@@ -686,6 +801,11 @@ End Sub
 Sub UpdateLastPayment(estimateId, managementId, fieldName, value)
     Dim db As Variant
     Dim lastId As Variant
+    
+    '만약 EstimateUpdate 폼에서 결제이력을 삭제한 경우에는 아래 진행하지 않음
+    If bDeleteFlag = True Then
+        Exit Sub
+    End If
     
     db = Get_DB(shtPayment)
     db = Filtered_DB(db, estimateId, 2, True)
@@ -701,8 +821,8 @@ Sub UpdateLastPayment(estimateId, managementId, fieldName, value)
     Update_Record_Column shtPayment, lastId, fieldName, value
 End Sub
 
-Private Sub Worksheet_FollowHyperlink(ByVal target As HyperLink)
-    If target.Address = "" Then
+Private Sub Worksheet_FollowHyperlink(ByVal Target As HyperLink)
+    If Target.Address = "" Then
 
     End If
 End Sub

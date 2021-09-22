@@ -32,8 +32,17 @@ End Sub
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
-    Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+    Dim i As Long
+    Dim Y As Long
+    
+    Y = Year(Date)
+    
+    Me.cboSelectYear.List = Array("전체")
     Me.cboSelectMonth.List = Array("전체", "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
+    
+    For i = 0 To Y - 2005
+        Me.cboSelectYear.AddItem Y - i & "년"
+    Next
     
     Me.txtFromDate.Visible = False
     Me.txtToDate.Visible = False
@@ -95,7 +104,7 @@ End Sub
 Sub SetOperationList(db)
     Dim i As Long
     Dim li As ListItem
-    Dim income, expense As Long
+    Dim income, expense As Double
     
     With Me.ImageList1.ListImages
         .Add , , Me.Image1.Picture
@@ -124,7 +133,7 @@ Sub SetOperationList(db)
         .ColumnHeaders.Add , , "분류", 55, lvwColumnCenter
         .ColumnHeaders.Add , , "거래처", 100
         .ColumnHeaders.Add , , "품목", 250
-        .ColumnHeaders.Add , , "금액", 80, lvwColumnRight
+        .ColumnHeaders.Add , , "금액", 90, lvwColumnRight
         .ColumnHeaders.Add , , "명세서", 80, lvwColumnCenter
         .ColumnHeaders.Add , , "계산서", 80, lvwColumnCenter
         .ColumnHeaders.Add , , "결제", 80, lvwColumnCenter
@@ -151,10 +160,12 @@ Sub SetOperationList(db)
             li.ListSubItems.Add , , db(i, 4)
             li.ListSubItems.Add , , Format(db(i, 13), "#,##0")
             
-            If db(i, 3) = "수입" Then
-                income = income + db(i, 9)
-            ElseIf db(i, 3) = "지출" Then
-                expense = expense + db(i, 9)
+            If Not IsNull(db(i, 9)) Then
+                If db(i, 3) = "수입" Then
+                    income = income + db(i, 9)
+                ElseIf db(i, 3) = "지출" Then
+                    expense = expense + db(i, 9)
+                End If
             End If
         Next
         
@@ -445,8 +456,16 @@ Private Sub cboSelectMonth_DropButtonClick()
 End Sub
 
 Private Sub cboSelectYear_DropButtonClick()
+    Dim i As Long
+    Dim Y As Long
+    
     If Me.cboSelectYear.ListCount = 0 Then
-        Me.cboSelectYear.List = Array("전체", "2021년", "2020년", "2019년", "2018년", "2017년", "2016년", "2015년", "2014년", "2013년", "2012년", "2011년", "2010년", "2009년", "2008년", "2007년", "2006년", "2005년")
+        Me.cboSelectYear.List = Array("전체")
+        
+        Y = Year(Date)
+        For i = 0 To Y - 2005
+            Me.cboSelectYear.AddItem Y - i & "년"
+        Next
     End If
 End Sub
 
@@ -546,13 +565,15 @@ Private Sub cboSelectMonth_Change()
 End Sub
 
 
-Private Sub Worksheet_Change(ByVal target As Range)
-    If target.Address = "$L$20" Then
-        If target.value = "" Then
-            Range("O20").value = ""
+Private Sub Worksheet_Change(ByVal Target As Range)
+    If Target.Address = "$L$20" Or Target.Address = "$J$20" Then
+        If Target.value = "" Then
+            Range("O20").value = 0
         Else
-            If IsNumeric(Range("$J$20").value <> "") Then
-                Range("O20").value = Range("$J$20") * 0.1
+            If Range("$J$20").value <> "" And Range("$L$20").value <> "" Then
+                If IsNumeric(Range("$J$20")) Then
+                    Range("O20").value = Format(Range("$J$20") * 0.1, "#,##0")
+                End If
             End If
         End If
     End If
