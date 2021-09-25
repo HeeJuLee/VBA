@@ -13,13 +13,11 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-
 Option Explicit
 Dim bMatchedEstimateID As Boolean
 
 Private Sub UserForm_Activate()
-    '관리번호 입력창에 포커스
+    '관리번호에 포커스
     Me.txtManagementID.SetFocus
 End Sub
 
@@ -44,10 +42,14 @@ Private Sub UserForm_Initialize()
     InitializeOrderCategory
     InitializeLswCustomerAutoComplete
     InitializeOrderPayMethod
+    InitializeIncomeCategory
     
-    Me.txtOrderDate.value = Date
     Me.txtEstimateID.value = ""
     bMatchedEstimateID = False
+    
+    Me.cboCategory.value = "복후"
+    Me.cboIncomeCategory = "지출"
+    Me.cboOrderPayMethod = "3970"
     
 End Sub
 
@@ -82,6 +84,13 @@ Sub InitializeOrderPayMethod()
     Update_Cbo Me.cboOrderPayMethod, db
 End Sub
 
+Sub InitializeIncomeCategory()
+    Dim db As Variant
+    db = Get_DB(shtIncomeCategory, True)
+
+    Update_Cbo Me.cboIncomeCategory, db
+End Sub
+
 
 Sub InsertOrder()
     Dim db As Variant
@@ -108,7 +117,7 @@ Sub InsertOrder()
             , , , , _
             Me.cboOrderPayMethod.value, , _
             Date, , _
-            Me.txtEstimateID.value, , False
+            Me.txtEstimateID.value, , False, cboIncomeCategory.value
     
     orderId = Get_LastID(shtOrder)
             
@@ -370,6 +379,3 @@ Private Sub UserForm_Layout()
     orderInsertFormY = Me.top
 End Sub
 
-Private Sub 발주정보_Click()
-
-End Sub

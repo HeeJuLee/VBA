@@ -353,7 +353,7 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     
     If cCol = 8 Then
         '더블클릭해서 셀 편집 모드가 안되도록 선택 셀을 다른 곳으로 옮겨줌
-        Range("C" & cRow).Select
+        Range("D" & cRow).Select
         
         '수정 화면 띄움
         If isFormLoaded("frmEstimateUpdate") Then

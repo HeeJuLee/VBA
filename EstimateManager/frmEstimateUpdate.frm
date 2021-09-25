@@ -221,7 +221,8 @@ End Sub
 
 Sub InitializeLswOrderList()
     Dim db As Variant
-    Dim i, j, totalCost As Long
+    Dim i, j As Long
+    Dim totalCost As Double
     Dim li As ListItem
     
     '견적ID에 해당하는 발주 정보를 읽어옴
@@ -459,7 +460,7 @@ Sub InsertAccepted()
             , , , , _
             , , _
             Date, , _
-            CLng(Me.txtID.value), , False
+            CLng(Me.txtID.value), , False, "수입"
 
     '등록한 수주ID를 견적 테이블에 업데이트, 수주일자는 오늘
     Update_Record_Column shtEstimate, Me.txtID, "ID_수주", Get_LastID(shtOrder)
@@ -1015,7 +1016,7 @@ Sub CalculateEstimateUpdateCost_2()
 
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 수주금액의 10%
@@ -2111,7 +2112,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxinvoiceDate
+    GetCalendarDate Me.txtTaxInvoiceDate
 End Sub
 
 Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
@@ -2434,7 +2435,7 @@ End Sub
 
 
 Private Sub txtTaxinvoiceDate_AfterUpdate()
-    Me.txtTaxinvoiceDate.value = Trim(Me.txtTaxinvoiceDate.value)
+    Me.txtTaxInvoiceDate.value = Trim(Me.txtTaxInvoiceDate.value)
 End Sub
 
 Private Sub txtPaymentDate_AfterUpdate()

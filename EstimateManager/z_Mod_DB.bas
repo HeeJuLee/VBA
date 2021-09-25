@@ -610,11 +610,9 @@ Function Get_Receiving_DB(db) As Variant
                 vResult(i, k) = vArr(i, k)
             Next
         Next
-        Get_Receiving_DB = vResult
-    Else
-        Get_Receiving_DB = db
     End If
-
+    
+    Get_Receiving_DB = vResult
 End Function
 
 '########################
@@ -655,10 +653,9 @@ Function Get_Delivery_DB(db) As Variant
                 vResult(i, k) = vArr(i, k)
             Next
         Next
-        Get_Delivery_DB = vResult
-    Else
-        Get_Delivery_DB = db
     End If
+    
+    Get_Delivery_DB = vResult
 
 End Function
 
@@ -713,10 +710,8 @@ Function Get_Working_DB(db) As Variant
                 vResult(i, k) = vArr(i, k)
             Next
         Next
-        Get_Working_DB = vResult
-    Else
-        Get_Working_DB = db
     End If
+    Get_Working_DB = vResult
 
 End Function
 
