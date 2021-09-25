@@ -367,8 +367,8 @@ End Sub
 Sub EstimateDelete()
     Dim cRow As Long
     Dim yn As VbMsgBoxResult
-    Dim db As Variant
-    Dim count As Long
+    Dim db, paymentDB As Variant
+    Dim count, payCount As Long
     Dim estimateId As Variant
     Dim managementId As Variant
     Dim i As Long
@@ -393,20 +393,33 @@ Sub EstimateDelete()
         count = UBound(db, 1)
     End If
     
+    '결제이력이 있는지 확인
+    payCount = 0
+    paymentDB = Get_DB(shtPayment)
+    paymentDB = Filtered_DB(paymentDB, estimateId, 2, True)
+    If Not isEmpty(paymentDB) Then
+        payCount = UBound(paymentDB, 1)
+    End If
+    
     '안내 문구 출력
     If count = 0 Then
-        yn = MsgBox("선택한 '" & estimateId & "' 견적정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+        yn = MsgBox("선택한 '" & managementId & "' 견적정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     Else
-        yn = MsgBox("선택한 '" & estimateId & "' 견적정보와 " & count & "개의 수주/발주정보를 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
+        yn = MsgBox("선택한 '" & managementId & "' 견적정보와 " & count & "개의 발주정보와 " & payCount & "개의 결제이력을 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     End If
     If yn = vbNo Then Exit Sub
     
     '견적정보 삭제
     Delete_Record shtEstimate, estimateId
     
-    '수주발주 정보 삭제
+    '수주/발주 정보 삭제
     For i = 1 To count
         Delete_Record shtOrder, db(i, 1)
+    Next
+    
+    '결제이력 정보 삭제
+    For i = 1 To payCount
+        Delete_Record shtPayment, paymentDB(i, 1)
     Next
 
     EstimateSearch
