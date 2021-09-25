@@ -527,7 +527,7 @@ End Function
 '########################
 ' hjlee.2021.09.14 추가
 ' 특정 열 값이 공백인지 아닌지 체크해서 리턴
-' Array = Filtered_DB_Empty(Array, "검색값", 2, False)
+' Array = Filtered_DB_Empty(Array, 2, True)
 '########################
 Function Filtered_DB_Empty(db, filterCol, isEmpty As Boolean) As Variant
     Dim cRow As Long
@@ -565,10 +565,9 @@ Function Filtered_DB_Empty(db, filterCol, isEmpty As Boolean) As Variant
                 vResult(i, k) = vArr(i, k)
             Next
         Next
-        Filtered_DB_Empty = vResult
-    Else
-        Filtered_DB_Empty = db
     End If
+    
+    Filtered_DB_Empty = vResult
 
 End Function
 
