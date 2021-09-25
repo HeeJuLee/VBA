@@ -599,90 +599,6 @@ Sub SetChangeValue(cRow, cCol, Target)
     
 End Sub
 
-Private Sub Worksheet_Change_1(ByVal Target As Range)
-    Dim cRow, cCol As Long
-    Dim value As Variant
-    
-    If Target.Cells.count > 1 Then
-        If InStr(Target.Address, "$6") = 0 Then
-            MsgBox "여러 셀을 한번에 변경할 수 없습니다.", vbInformation, "작업 확인"
-            UndoLastAction
-        End If
-        Exit Sub
-    End If
-    
-    cRow = Target.row
-    cCol = Target.Column
-    
-    Select Case cCol
-        Case 18     '발주
-            If Range("G" & cRow).value = "수주" Then
-                Target.value = ""       '수주에서는 발주 일자가 의미 없음
-            Else
-                value = ConvertDateFormat(Target.value)
-                Update_Record_Column shtOrder, Range("B" & cRow).value, "발주", value
-            End If
-        Case 19     '납기
-            value = ConvertDateFormat(Target.value)
-            If Range("G" & cRow).value = "수주" Then
-                Update_Record_Column shtEstimate, Range("D" & cRow).value, "납기", value
-            End If
-            Update_Record_Column shtOrder, Range("B" & cRow).value, "납기", value
-        Case 20     '입고
-            If Range("G" & cRow).value = "수주" Then
-                Target.value = ""       '수주에서는 입고 일자가 의미 없음
-            Else
-                value = ConvertDateFormat(Target.value)
-                Update_Record_Column shtOrder, Range("B" & cRow).value, "입고", value
-            End If
-        Case 21     '납품
-            If Range("G" & cRow).value = "수주" Then
-                value = ConvertDateFormat(Target.value)
-                Update_Record_Column shtEstimate, Range("D" & cRow).value, "납품", value
-                Update_Record_Column shtOrder, Range("B" & cRow).value, "납품", value
-            Else
-                Target.value = ""       '발주에서는 납품 일자가 의미 없음
-            End If
-        Case 22     '명세서
-            value = ConvertDateFormat(Target.value)
-            If Range("G" & cRow).value = "수주" Then
-                '수주테이블에 업데이트
-                Update_Record_Column shtEstimate, Range("D" & cRow).value, "명세서", value
-                '결제이력에도 업데이트
-                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "명세서", value
-            End If
-            Update_Record_Column shtOrder, Range("B" & cRow).value, "명세서", value
-        Case 23     '계산서
-            value = ConvertDateFormat(Target.value)
-            If Range("G" & cRow).value = "수주" Then
-                Update_Record_Column shtEstimate, Range("D" & cRow).value, "계산서", value
-                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "계산서", value
-            End If
-            Update_Record_Column shtOrder, Range("B" & cRow).value, "계산서", value
-        Case 24     '결제
-            value = ConvertDateFormat(Target.value)
-            If Range("G" & cRow).value = "수주" Then
-                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제", value
-                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제", value
-            End If
-            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제", value
-        Case 25     '결제월
-            value = ConvertDateFormat(Target.value)
-            If Range("G" & cRow).value = "수주" Then
-                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제월", value
-                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제월", value
-            End If
-            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제월", value
-        Case 26     '결제수단
-            value = Target.value
-            If Range("G" & cRow).value = "수주" Then
-                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제수단", value
-                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제수단", value
-            End If
-            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제수단", value
-    End Select
-    
-End Sub
 
 Sub UpdateLastPayment(estimateId, managementId, fieldName, value)
     Dim db As Variant
@@ -764,20 +680,4 @@ Sub AppendShtOrder(orderId)
 safe_exit_appendShtOrder:
     Application.EnableEvents = True
     
-End Sub
-
-Sub ClearWorkingOption()
-    bEnableEvent = False
-        btnWorking.value = False
-        btnReceiving.value = False
-        btnDelivery.value = False
-        optDueDateAll.value = True
-    bEnableEvent = True
-End Sub
-
-Sub ClearCardOption()
-    bEnableEvent = False
-        btn3970.value = False
-        btn8358.value = False
-    bEnableEvent = True
 End Sub
