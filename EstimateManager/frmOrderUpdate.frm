@@ -182,8 +182,6 @@ Sub UpdateOrder()
     
     Unload Me
     
-    shtOrderAdmin.Activate
-    shtOrderAdmin.OrderSearch
 End Sub
 
 Sub UpdateShtOrder()
@@ -212,6 +210,8 @@ Sub UpdateShtOrder()
         shtOrderAdmin.Cells(findRow, 26).value = Me.cboOrderPayMethod.value
         shtOrderAdmin.Cells(findRow, 27).value = Me.txtVAT.value
         shtOrderAdmin.Cells(findRow, 29).value = Date
+        
+        shtOrderAdmin.Cells(findRow, 9).Select
     End If
 End Sub
 

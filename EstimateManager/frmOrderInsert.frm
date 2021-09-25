@@ -86,6 +86,7 @@ End Sub
 Sub InsertOrder()
     Dim db As Variant
     Dim blnUnique As Boolean
+    Dim orderId As Variant
     
     '입력 데이터 체크
     If CheckOrderInsertValidation = False Then
@@ -108,12 +109,12 @@ Sub InsertOrder()
             Me.cboOrderPayMethod.value, , _
             Date, , _
             Me.txtEstimateID.value, , False
+    
+    orderId = Get_LastID(shtOrder)
             
-    Unload Me
-    
     shtOrderAdmin.Activate
-    shtOrderAdmin.OrderSearch
-    
+    shtOrderAdmin.AppendShtOrder orderId
+
 End Sub
 
 
