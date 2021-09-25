@@ -6,10 +6,6 @@ Dim isEnd As Boolean
 Dim isListInit As Boolean
 Dim mouseX As Integer
 
-Private Sub btnClear_Click()
-    ClearOperationInput
-End Sub
-
 Private Sub btnInsert_Click()
     InsertOperation
 End Sub
@@ -46,16 +42,11 @@ Private Sub Worksheet_Activate()
     
     Me.txtFromDate.Visible = False
     Me.txtToDate.Visible = False
-    Me.Image1.Visible = False
-    Me.ImageList1.Visible = False
     Me.txtOperationID.Visible = False
     
     isKeyworldSearch = False
     isEnd = False
     
-    If isListInit = False Then
-        OperationSearch
-    End If
 End Sub
 
 '운영비 데이터를 검색해서 시트에 출력
@@ -86,8 +77,17 @@ Sub OperationSearch()
         '검색결과 건수를 저장
         searchResultCount = UBound(db, 1)
         
-        '검색결과 리스트뷰에 출력
-        SetOperationList (db)
+        '검색결과 라인 서식 적용
+        SetContentsLine shtOperationAdmin.Range("B7"), "P", searchResultCount
+        
+        '순번 출력
+        SequenceToRng shtOperationAdmin.Range("C7"), UBound(db, 1)
+        
+        '검색결과 출력
+        ArrayToRng shtOperationAdmin.Range("B7"), db, "1, ,14,15,3,5,7,8,9,10,11,12,4,13,16"
+        
+        '수입 지출 출력
+        SetIncome db
     End If
     
     '검색 결과 건수 출력
@@ -98,153 +98,68 @@ Sub OperationSearch()
     End If
     
     isEnd = False
-    isListInit = True
+    GoToEnd
+    
+    Application.EnableEvents = True
 End Sub
 
-Sub SetOperationList(db)
+Sub SetIncome(db)
     Dim i As Long
-    Dim li As ListItem
     Dim income, expense As Double
     
-    With Me.ImageList1.ListImages
-        .Add , , Me.Image1.Picture
-    End With
+    income = 0
+    expense = 0
     
-     '리스트뷰 값 설정
-    With Me.lswOperationList
-        .View = lvwReport
-        .Gridlines = True
-        .FullRowSelect = True
-        .HideColumnHeaders = False
-        .HideSelection = True
-        .FullRowSelect = True
-        .MultiSelect = True
-        .LabelEdit = lvwManual
-        .SmallIcons = Me.ImageList1
-        .Sorted = False
-        
-        .ColumnHeaders.Clear
-
-        .ColumnHeaders.Add , , "ID", 0
-        .ColumnHeaders.Add , , "No", 40, lvwColumnCenter
-        .ColumnHeaders.Add , , "등록일자", 80, lvwColumnCenter
-        .ColumnHeaders.Add , , "고정비", 60, lvwColumnCenter
-        .ColumnHeaders.Add , , "수입지출", 70, lvwColumnCenter
-        .ColumnHeaders.Add , , "분류", 55, lvwColumnCenter
-        .ColumnHeaders.Add , , "거래처", 100
-        .ColumnHeaders.Add , , "품목", 250
-        .ColumnHeaders.Add , , "금액", 90, lvwColumnRight
-        .ColumnHeaders.Add , , "명세서", 80, lvwColumnCenter
-        .ColumnHeaders.Add , , "계산서", 80, lvwColumnCenter
-        .ColumnHeaders.Add , , "결제", 80, lvwColumnCenter
-        .ColumnHeaders.Add , , "결제수단", 66, lvwColumnCenter
-        .ColumnHeaders.Add , , "부가세", 80, lvwColumnRight
-    
-        income = 0
-        expense = 0
-        
-        For i = 1 To UBound(db)
-           
-            Set li = .ListItems.Add(, , db(i, 1))
-            li.ListSubItems.Add , , i
-            li.ListSubItems.Add , , db(i, 14)
-            li.ListSubItems.Add , , db(i, 15)
-            li.ListSubItems.Add , , db(i, 3)
-            li.ListSubItems.Add , , db(i, 5)
-            li.ListSubItems.Add , , db(i, 7)
-            li.ListSubItems.Add , , db(i, 8)
-            li.ListSubItems.Add , , Format(db(i, 9), "#,##0")
-            li.ListSubItems.Add , , db(i, 10)
-            li.ListSubItems.Add , , db(i, 11)
-            li.ListSubItems.Add , , db(i, 12)
-            li.ListSubItems.Add , , db(i, 4)
-            li.ListSubItems.Add , , Format(db(i, 13), "#,##0")
-            
-            If Not IsNull(db(i, 9)) Then
-                If db(i, 3) = "수입" Then
-                    income = income + db(i, 9)
-                ElseIf db(i, 3) = "지출" Then
-                    expense = expense + db(i, 9)
-                End If
+    For i = 1 To UBound(db)
+        If Not IsNull(db(i, 9)) And db(i, 9) <> "" Then
+            If db(i, 3) = "수입" Then
+                income = income + db(i, 9)
+            ElseIf db(i, 3) = "지출" Then
+                expense = expense + db(i, 9)
             End If
-        Next
-        
-    End With
+        End If
+    Next
     
-    shtOperationAdmin.Range("R6").value = income
-    shtOperationAdmin.Range("U6").value = expense
+    Range("S6").value = income
+    Range("V6").value = expense
     
 End Sub
 
 '발주 검색결과를 화면에서 지움
 Sub ClearOperationSearchResult()
     
-    '리스트뷰 내용 삭제
-    Me.lswOperationList.ListItems.Clear
+    '아래쪽 라인 서식 지움
+    ClearContentsLine shtOperationAdmin.Range("B7"), "P"
     
-    '입력 셀 내용 지움
-    'ClearOperationInput
+    '6번 순번 열을 기준으로 지움
+    ClearContentsBelow shtOperationAdmin.Range("B7"), "P"
     
 End Sub
 
-
-Sub SelectItemLswOperation(selectedID As Variant)
-    Dim i As Long
-    
-    With Me.lswOperationList
-        If Not IsMissing(selectedID) Then
-            For i = 1 To .ListItems.count
-                If selectedID = .ListItems(i).Text Then
-                    .selectedItem = .ListItems(i)
-                    .selectedItem.EnsureVisible
-                Else
-                    .ListItems(i).Selected = False
-                End If
-            Next
-            .Activate
-        End If
-    End With
-End Sub
-
-Sub ClearOperationInput()
-    Range("D20:O20") = ""
-    Range("D20").value = Date
-End Sub
-
-'운영비 등록
+'운영비 추가
 Sub InsertOperation()
-    Dim yn As VbMsgBoxResult
-    Dim count As Long
-    Dim li As ListItem
-
-    count = 0
-    For Each li In Me.lswOperationList.ListItems
-        If li.Selected = True Then count = count + 1
-    Next
-    If count <= 1 Then
-        If Range("I20").value = "" Then MsgBox "품목을 입력하세요.": Exit Sub
-        If Range("D20") = "" Then MsgBox "날짜를 입력하세요.": Exit Sub
-        
-        '운영비에 저장
-        Insert_Record shtOperation, , Range("F20").value, Range("N20"), Range("G20"), , Range("H20"), Range("I20"), Range("J20"), Range("K20"), Range("L20"), Range("M20"), Range("O20"), Range("D20"), Range("E20")
-    Else
-        '여러개 선택 후 등록 시 대량 등록 진행
-        yn = MsgBox("선택한 " & count & "개 항목을 등록합니다.", vbYesNo)
-        If yn = vbNo Then Exit Sub
-        
-        For Each li In Me.lswOperationList.ListItems
-            If li.Selected = True Then
-                Insert_Record shtOperation, , li.SubItems(4), li.SubItems(12), li.SubItems(5), , li.SubItems(6), li.SubItems(7), li.SubItems(8), li.SubItems(9), li.SubItems(10), li.SubItems(11), li.SubItems(13), Date, li.SubItems(3)
-            End If
-        Next
-    End If
+    Dim id, lastRow, row, num As Long
     
-    OperationSearch
+    '운영비에 빈 레코드 하나 추가
+    Insert_Record shtOperation, , , , , , , , , , , , 0, Date
     
-    '등록한 아이템 선택
-    Me.txtOperationID.value = Get_LastID(shtOperation)
-    SelectItemLswOperation Me.txtOperationID.value
-
+    '시트 맨 아래에 라인 추가
+    id = Get_LastID(shtOperation)
+    lastRow = Range("B7").End(xlDown).row
+    row = lastRow + 1
+    num = Cells(lastRow, 3).value + 1
+     
+    '검색결과 라인 서식 적용
+    SetContentsLine Range("B" & row), "P", 1
+    
+    Cells(row, 2).value = id
+    Cells(row, 3).value = num
+    Cells(row, 4).value = Date
+    Application.EnableEvents = False
+    Cells(row, 15).value = 0
+    Application.EnableEvents = True
+    
+    Cells(row, 6).Select
 End Sub
 
 '고정비 복사
@@ -278,22 +193,24 @@ Sub CopyFixedCost()
         db = Filtered_DB(db, "<" & toDate, 14)
     End If
     
-    count = UBound(db)
-    If count = 0 Then
+    If isEmpty(db) Then
         MsgBox Y & "년 " & M & "월에 고정비 항목이 없습니다.", vbInformation, "작업확인"
     Else
+        count = UBound(db)
         yn = MsgBox(Y & "년 " & M & "월에서 " & count & "개의 고정비 항목을 복사합니다.", vbYesNo, "작업확인")
         If yn = vbNo Then Exit Sub
         
+        Application.ScreenUpdating = False
+        Application.Calculation = xlCalculationManual
         For i = 1 To count
-            Insert_Record shtOperation, , db(i, 3), db(i, 4), db(i, 5), db(i, 6), db(i, 7), db(i, 8), db(i, 9), db(i, 10), db(i, 11), db(i, 12), db(i, 13), toDate, db(i, 15)
+            Insert_Record shtOperation, , db(i, 3), db(i, 4), db(i, 5), db(i, 6), db(i, 7), db(i, 8), db(i, 9), db(i, 10), db(i, 11), db(i, 12), db(i, 13), toDate, db(i, 15), db(i, 16)
         Next
+        Application.ScreenUpdating = True
+        Application.Calculation = xlCalculationAutomatic
+        
+        OperationSearch
     End If
     
-    OperationSearch
-
-    isEnd = False
-    GoToEnd
 End Sub
 
 '운영비 수정
@@ -316,27 +233,25 @@ End Sub
 
 '운영비 삭제
 Sub DeleteOperation()
+    Dim cRow As Long
     Dim yn As VbMsgBoxResult
-    Dim count As Long
-    Dim li As ListItem
-
-    count = 0
-    For Each li In Me.lswOperationList.ListItems
-        If li.Selected = True Then count = count + 1
-    Next
-    If count = 0 Then MsgBox "삭제할 항목을 선택하세요.": Exit Sub
     
-    yn = MsgBox("선택한 " & count & "개 항목을 삭제합니다.", vbYesNo)
+    '선택한 행 번호
+    cRow = Selection.row
+
+    '데이터가 있는 행이 아닐 경우는 중지
+    If cRow < 7 Or Range("B" & cRow).value = "" Then
+        MsgBox "삭제할 행을 선택하신 후 '삭제' 버튼을 클릭하세요."
+        End
+    End If
+
+    '안내 문구 출력
+    yn = MsgBox("선택한 운영비 항목을 정말로 삭제하시겠습니까?" & vbCrLf & "삭제한 정보는 복구가 불가능합니다.", vbYesNo)
     If yn = vbNo Then Exit Sub
-
-    For Each li In Me.lswOperationList.ListItems
-        If li.Selected = True Then
-            Delete_Record shtOperation, li.Text
-        End If
-    Next
     
-    Me.txtOperationID.value = ""
-    ClearOperationInput
+    'DB에서 운영비 정보 삭제
+    Delete_Record shtOperation, Range("B" & cRow).value
+
     OperationSearch
 End Sub
 
@@ -344,25 +259,21 @@ Sub EmptyProcedure()
 
 End Sub
 
-
 Sub GoToEnd()
-    With Me.lswOperationList
-        If .ListItems.count > 0 Then
-            .selectedItem.Selected = False
-            If isEnd = False Then
-                .selectedItem = .ListItems(.ListItems.count)
-                .selectedItem.EnsureVisible
-                isEnd = True
-                ClearOperationInput
-            Else
-                .selectedItem = .ListItems(1)
-                .selectedItem.EnsureVisible
-                isEnd = False
-            End If
+    Dim endRow As Long
+    
+    With shtOperationAdmin
+        .Activate
+        If isEnd = False Then
+            .Range("H" & .Range("C7").End(xlDown).row).Select
+            isEnd = True
+        Else
+            .Range("H7").Select
+            isEnd = False
         End If
     End With
-    
 End Sub
+
 
 '전체 선택 시 '월'만 전체로 바꿈
 Private Sub optAll_Click()
@@ -565,7 +476,7 @@ Private Sub cboSelectMonth_Change()
 End Sub
 
 
-Private Sub Worksheet_Change(ByVal Target As Range)
+Private Sub Worksheet_Change2(ByVal Target As Range)
     If Target.Address = "$L$20" Or Target.Address = "$J$20" Then
         If Target.value = "" Then
             Range("O20").value = 0
@@ -587,4 +498,115 @@ End Sub
 Sub DeleteKeyword2()
     Me.txtKeyword2.value = ""
     OperationSearch
+End Sub
+
+Private Sub Worksheet_Change(ByVal Target As Range)
+    Dim cRow, cCol, VAT As Long
+    Dim value As Variant
+    
+    If Target.Cells.count > 1 Then
+        If InStr(Target.Address, "$7") = 0 Then
+            MsgBox "여러 셀을 한번에 변경할 수 없습니다.", vbInformation, "작업 확인"
+            UndoLastAction
+        End If
+        Exit Sub
+    End If
+    
+    cRow = Target.row
+    cCol = Target.Column
+    
+    If cRow < 7 Or cCol < 4 Or cCol > 16 Or Range("B" & cRow).value = "" Then
+        Exit Sub
+    End If
+    
+    Select Case cCol
+        Case 4  '등록일자
+            If Not IsDate(Target.value) Then
+                MsgBox "날짜를 입력하세요.", vbInformation, "작업 확인"
+                UndoLastAction
+                Exit Sub
+            End If
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "등록일자", Target.value
+        Case 5  '고정비
+            If Target.value <> "고정비" And Target.value <> "" Then
+                MsgBox "고정비는 공백이나 고정비 문자열만 가능합니다.", vbInformation, "작업 확인"
+                UndoLastAction
+                Exit Sub
+            End If
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "고정비", Target.value
+        Case 6  '수입지출
+            If Target.value <> "수입" And Target.value <> "지출" And Target.value <> "" Then
+                MsgBox "수입지출은 수입/지출 문자열만 가능합니다.", vbInformation, "작업 확인"
+                UndoLastAction
+                Exit Sub
+            End If
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "수입지출", Target.value
+        Case 7  '분류
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "분류2", Target.value
+        Case 8  '거래처
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "거래처", Target.value
+        Case 9  '품목
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "품목", Target.value
+        Case 10  '금액
+            If Target.value <> "" And Not IsNumeric(Target.value) Then
+                MsgBox "금액은 숫자만 가능합니다.", vbInformation, "작업 확인"
+                UndoLastAction
+                Exit Sub
+            End If
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "금액", Target.value
+        Case 11  '명세서
+            If Target.value <> "" And Not IsDate(Target.value) Then
+                MsgBox "날짜를 입력하세요.", vbInformation, "작업 확인"
+                UndoLastAction
+                Exit Sub
+            End If
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "명세서", Target.value
+        Case 12  '계산서
+            If Target.value <> "" And Not IsDate(Target.value) Then
+                MsgBox "날짜를 입력하세요.", vbInformation, "작업 확인"
+                UndoLastAction
+                Exit Sub
+            End If
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "계산서", Target.value
+        Case 13  '결제
+            If Target.value <> "" And Not IsDate(Target.value) Then
+                MsgBox "날짜를 입력하세요.", vbInformation, "작업 확인"
+                UndoLastAction
+                Exit Sub
+            End If
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "결제", Target.value
+        Case 14  '결제수단
+            If Target.value <> "현금" And Target.value <> "3970" And Target.value <> "8358" And Target.value <> "" Then
+                MsgBox "결제수단은 현금/3970/8358만 가능합니다.", vbInformation, "작업 확인"
+                UndoLastAction
+                Exit Sub
+            End If
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "결제수단", Target.value
+        Case 15  '부가세
+            MsgBox "부가세는 변경할 수 없습니다.", vbInformation, "작업 확인"
+            UndoLastAction
+            Exit Sub
+        Case 16  '체크
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "체크", Target.value
+    End Select
+
+    Select Case cCol
+        Case 10, 12
+            '금액, 계산서 입력 시 부가세 등록
+            If Range("J" & cRow).value = "" Or Range("L" & cRow).value = "" Then
+                VAT = 0
+            Else
+                If IsNumeric(Range("J" & cRow).value) Then
+                    VAT = Format(Range("J" & cRow).value * 0.1, "#,##0")
+                Else
+                    VAT = 0
+                End If
+            End If
+            
+            Application.EnableEvents = False
+            Range("O" & cRow).value = VAT
+            Application.EnableEvents = True
+            Update_Record_Column shtOperation, Range("B" & cRow).value, "부가세", VAT
+    End Select
+    
 End Sub

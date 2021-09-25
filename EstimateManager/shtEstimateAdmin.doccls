@@ -4,7 +4,6 @@ Dim isKeyworldSearch As Boolean
 Dim isKeyworldSearch2 As Boolean
 Dim searchResultCount As Long
 Dim isEnd As Boolean
-Dim dueDate As String
 Dim isFilterOn As Boolean
 Dim bEnableEvent As Boolean
 
@@ -52,9 +51,6 @@ Sub EstimateSearch()
         If txtToDate.value <> "" Then db = Filtered_DB(db, "<=" & txtToDate.value, 23)
     End If
     If Not isEmpty(db) Then
-        If dueDate <> "" Then db = Filtered_DB(db, dueDate, 26, True)
-    End If
-    If Not isEmpty(db) Then
         'If Me.txtKeyword.Value <> "" Then DB = Filtered_DB(DB, Me.txtKeyword.Value, 5)
         If Me.txtKeyword.value <> "" Then db = Filtered_DB(db, Me.txtKeyword.value)
         If Me.txtKeyword2.value <> "" Then db = Filtered_DB(db, Me.txtKeyword2.value)
@@ -63,12 +59,18 @@ Sub EstimateSearch()
     '시트 보호 해제
     'ActiveSheet.Unprotect
     
+    '화면 변경 전에 Event 끄기  (sheet change event로 안들어가도록 함)
+    Application.EnableEvents = False
+    
     '기존 검색결과를 화면에서 지움
     ClearEstimateSearchResult
     
     '검색결과를 화면에 출력
     If isEmpty(db) Then
         searchResultCount = 0     '검색결과 건수는 0
+        
+        isEnd = False
+        Range("H6").Select
     Else
         '검색결과 건수를 저장
         searchResultCount = UBound(db, 1)
@@ -82,16 +84,11 @@ Sub EstimateSearch()
         ArrayToRng shtEstimateAdmin.Range("B6"), db, ", 1, 2, 4, 5, 25, 6, 7, 8, 9, 10, 11, 12, 13, 14, 26, 15, 16, 17, 18, 19, 20, 21, 22, 27, 28, 29, 30, 31, 23, 24"
         '메모 출력
         SetComment db, 32, shtEstimateAdmin.Range("I6")
+        
+        isEnd = False
+        GoToEnd
     End If
 
-    If dueDate <> "" Then
-        shtEstimateAdmin.Range("Q6").Select
-        shtEstimateAdmin.Range("Q4").Select
-    Else
-        '첫 행으로 이동
-        shtEstimateAdmin.Range("H6").Select
-    End If
-    
     '검색 결과 건수 출력
     Me.lblSearchResult.Caption = "(" & searchResultCount & "건)"
     
@@ -101,14 +98,15 @@ Sub EstimateSearch()
         Me.txtKeyword2.Activate
     End If
     
-    isEnd = False
-    bEnableEvent = True
-
     '시트 보호
     'ActiveSheet.Protect DrawingObjects:=False, Contents:=True, Scenarios:= _
         True, AllowFormattingCells:=True, AllowFormattingColumns:=True, _
         AllowFormattingRows:=True, AllowFiltering:=True
         
+safe_exit:
+    bEnableEvent = True
+    Application.EnableEvents = True
+    
 End Sub
 
 '견적 검색결과를 화면에서 지움
@@ -321,15 +319,6 @@ Private Sub cboSelectMonth_Change()
 End Sub
 
 
-Private Sub Worksheet_Change(ByVal Target As Range)
-'    If Target.Address = "$Q$4" Then
-'        dueDate = Target.value
-'
-'        EstimateSearch
-'    End If
-End Sub
-
-
 ''조회 기간', '검색어' 등 일반 텍스트 박스 클릭 시 Object 선택이 안되도록 클릭이벤트를 빈 매크로로 연결
 Sub EmptyProcedure()
 
@@ -416,9 +405,9 @@ Sub EstimateDelete()
     Delete_Record shtEstimate, estimateId
     
     '수주발주 정보 삭제
-'    For i = 1 To count
-'        Delete_Record shtOrder, db(i, 1)
-'    Next
+    For i = 1 To count
+        Delete_Record shtOrder, db(i, 1)
+    Next
 
     EstimateSearch
 End Sub

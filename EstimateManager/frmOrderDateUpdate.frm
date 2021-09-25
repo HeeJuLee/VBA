@@ -110,7 +110,7 @@ Private Sub btnOrderDateSave_Click()
         OrderDateUpdate "명세서", Me.txtSpecificationDate.value
     End If
     If chkTaxinvoiceDate Then
-        OrderDateUpdate "계산서", Me.txtTaxInvoiceDate.value
+        OrderDateUpdate "계산서", Me.txtTaxinvoiceDate.value
     End If
     If chkPaymentDate Then
         OrderDateUpdate "결제", Me.txtPaymentDate.value
@@ -189,7 +189,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
+    GetCalendarDate Me.txtTaxinvoiceDate
     chkTaxinvoiceDate_Change
 End Sub
 
@@ -219,7 +219,7 @@ Private Sub txtSpecificationDate_AfterUpdate()
 End Sub
 
 Private Sub txtTaxinvoiceDate_AfterUpdate()
-    Me.txtTaxInvoiceDate.value = ConvertDateFormat(Me.txtTaxInvoiceDate.value)
+    Me.txtTaxinvoiceDate.value = ConvertDateFormat(Me.txtTaxinvoiceDate.value)
 End Sub
 
 
@@ -315,7 +315,7 @@ Private Sub chkTaxinvoiceDate_Change()
     With Me.lswOrderList
         If chkTaxinvoiceDate.value = True Then
             For i = 1 To .ListItems.count
-                .ListItems(i).ListSubItems(7).Text = Me.txtTaxInvoiceDate.value
+                .ListItems(i).ListSubItems(7).Text = Me.txtTaxinvoiceDate.value
             Next
         Else
             i = 1

@@ -103,7 +103,11 @@ Private Sub UserForm_Initialize()
     Me.txtAcceptedMargin.value = Format(estimate(22), "#,##0")   '수주차액
     If IsNumeric(Me.txtAcceptedPrice.value) And IsNumeric(Me.txtAcceptedMargin.value) And Me.txtAcceptedPrice <> "" Then
         If CLng(Me.txtAcceptedMargin.value) <> 0 Then
-            Me.txtAcceptedMarginRate = Format(CLng(Me.txtAcceptedMargin) / CLng(Me.txtAcceptedPrice.value), "0.0%")
+            If CLng(Me.txtAcceptedPrice.value) = 0 Then
+                Me.txtAcceptedMarginRate = "0%"
+            Else
+                Me.txtAcceptedMarginRate = Format(CLng(Me.txtAcceptedMargin) / CLng(Me.txtAcceptedPrice.value), "0.0%")
+            End If
         End If
     End If
     
@@ -403,7 +407,7 @@ Sub InitializeLswPaymentList()
 
 End Sub
 
-Sub UpdateEstimateValue(fieldName, fieldValue)
+Sub UpdateEstimateOrderValue(fieldName, fieldValue)
         
     '견적DB 변경
     Update_Record_Column shtEstimate, currentEstimateId, fieldName, fieldValue
@@ -411,6 +415,24 @@ Sub UpdateEstimateValue(fieldName, fieldValue)
     '견적시트 변경
     UpdateShtEstimateField currentEstimateId, fieldName, fieldValue
     
+    '수주DB 변경
+    Update_Record_Column shtOrder, currentAcceptedId, fieldName, fieldValue
+    
+    '수주시트 변경
+    UpdateShtOrderField currentAcceptedId, fieldName, fieldValue
+    
+End Sub
+
+Sub UpdateEstimateValue(fieldName, fieldValue)
+        
+    '견적DB 변경
+    Update_Record_Column shtEstimate, currentEstimateId, fieldName, fieldValue
+    
+    '견적시트 변경
+    UpdateShtEstimateField currentEstimateId, fieldName, fieldValue
+End Sub
+
+Sub UpdateOrderValue(fieldName, fieldValue)
     '수주DB 변경
     Update_Record_Column shtOrder, currentAcceptedId, fieldName, fieldValue
     
@@ -430,8 +452,8 @@ Sub InsertAccepted()
             Me.txtSize.value, _
             Me.txtAmount.value, _
             Me.cboUnit.value, _
-            Me.txtUnitPrice.value, _
-            Me.txtEstimatePrice.value, _
+            , _
+            , _
             , _
             Date, , , , , _
             , , , , _
@@ -445,6 +467,8 @@ Sub InsertAccepted()
     
     '폼을 새로 띄움
     Unload frmEstimateUpdate
+    
+    clickEstimateId = Me.txtID
     frmEstimateUpdate.Show (False)
     
 End Sub
@@ -527,7 +551,7 @@ Sub UpdatePaymentListValue(id, headerIndex, value)
         Case 4, 5, 6, 7, 10, 12
             '만약 현재 선택한 행이 맨 마지막행이면 명세서/계산서/결제/결제월 데이터를 견적DB/발주DB/견적관리시트/발주관리시트에 저장
             If lswPaymentList.ListItems(lswPaymentList.ListItems.count).Selected = True Then
-                UpdateEstimateValue fieldName, value
+                UpdateEstimateOrderValue fieldName, value
             End If
     End Select
 
@@ -991,7 +1015,7 @@ Sub CalculateEstimateUpdateCost_2()
 
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 수주금액의 10%
@@ -1092,7 +1116,7 @@ End Function
 
 Function CalculatePaymentListVAT(selectedItem As ListItem) As Long
     Dim paid As Variant
-    Dim vat As Long
+    Dim VAT As Long
 
     '계산서 값이 없으면 0
     If selectedItem.ListSubItems(4).Text = "" Then
@@ -1109,12 +1133,12 @@ Function CalculatePaymentListVAT(selectedItem As ListItem) As Long
     End If
     
     If IsNumeric(paid) Then
-        vat = paid * 0.1
+        VAT = paid * 0.1
     Else
-        vat = 0
+        VAT = 0
     End If
     
-    CalculatePaymentListVAT = vat
+    CalculatePaymentListVAT = VAT
 End Function
 
 Function GetProductionTotalCost()
@@ -1279,11 +1303,11 @@ Private Sub btnPaymentListInsert_Click()
     End With
     
     'DB와 시트의 명세서/계산서/결제/결제월 값 변경
-    UpdateEstimateValue "명세서", Date
-    UpdateEstimateValue "계산서", ""
-    UpdateEstimateValue "결제", ""
-    UpdateEstimateValue "결제월", ""
-    UpdateEstimateValue "결제수단", ""
+    UpdateEstimateOrderValue "명세서", Date
+    UpdateEstimateOrderValue "계산서", ""
+    UpdateEstimateOrderValue "결제", ""
+    UpdateEstimateOrderValue "결제월", ""
+    UpdateEstimateOrderValue "결제수단", ""
     
 End Sub
 
@@ -1333,11 +1357,11 @@ Private Sub btnPaymentListDelete_Click()
             month = .ListItems(.ListItems.count).SubItems(6)
             method = .ListItems(.ListItems.count).SubItems(8)
         End If
-        UpdateEstimateValue "명세서", spec
-        UpdateEstimateValue "계산서", tax
-        UpdateEstimateValue "결제", paid
-        UpdateEstimateValue "결제월", month
-        UpdateEstimateValue "결제수단", method
+        UpdateEstimateOrderValue "명세서", spec
+        UpdateEstimateOrderValue "계산서", tax
+        UpdateEstimateOrderValue "결제", paid
+        UpdateEstimateOrderValue "결제월", month
+        UpdateEstimateOrderValue "결제수단", method
     End With
     
     bDeleteFlag = False
@@ -1900,7 +1924,7 @@ Sub OrderListUpdate(headerIndex)
 End Sub
 
 Sub PaymentListUpdate(headerIndex)
-    Dim vat As Variant
+    Dim VAT As Variant
     
     With Me.lswPaymentList
         If .selectedItem Is Nothing Then
@@ -1926,12 +1950,12 @@ Sub PaymentListUpdate(headerIndex)
                 If headerIndex = 7 Then
                     '결제월인 경우에 화면에 '10월' 이런식으로 보여줌
                     .selectedItem.ListSubItems(6).Text = Format(Me.txtPaymentEdit.value, "mm" & "월")
-                    .selectedItem.ListSubItems(11).Text = Me.txtPaymentEdit.value
+                    .selectedItem.ListSubItems(12).Text = Me.txtPaymentEdit.value
                 ElseIf headerIndex = 5 Or headerIndex = 8 Or headerIndex = 9 Then
                     '입금액 변경한 경우에는 부가세도 변경해야 함
-                    vat = CalculatePaymentListVAT(.selectedItem)
-                    .selectedItem.ListSubItems(11).Text = Format(vat, "#,##0")
-                    UpdatePaymentListValue .selectedItem.Text, 12, vat
+                    VAT = CalculatePaymentListVAT(.selectedItem)
+                    .selectedItem.ListSubItems(11).Text = Format(VAT, "#,##0")
+                    UpdatePaymentListValue .selectedItem.Text, 12, VAT
                 End If
                 '합계
                 Me.txtPaid.value = Format(CalculatePaymentListTotalCost, "#,##0")
@@ -2087,7 +2111,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
+    GetCalendarDate Me.txtTaxinvoiceDate
 End Sub
 
 Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
@@ -2116,7 +2140,7 @@ Private Sub txtManagementID_AfterUpdate()
     If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbInformation, "작업 확인": Exit Sub
     
     '변경할 때마다 견적 DB에 저장
-    UpdateEstimateValue "관리번호", Me.txtManagementID.value
+    UpdateEstimateOrderValue "관리번호", Me.txtManagementID.value
     
     '관리번호는 발주나간 건들도 DB에서 변경
     For Each li In lswOrderList.ListItems
@@ -2133,7 +2157,7 @@ Private Sub txtEstimateName_AfterUpdate()
     
     Me.txtEstimateName.value = Trim(Me.txtEstimateName.value)
     
-    UpdateEstimateValue "견적명", Me.txtEstimateName.value
+    UpdateEstimateOrderValue "견적명", Me.txtEstimateName.value
 End Sub
 
 Private Sub txtMemo_AfterUpdate()
@@ -2141,7 +2165,7 @@ Private Sub txtMemo_AfterUpdate()
     
      Me.txtMemo.value = Trim(Me.txtMemo.value)
     
-    UpdateEstimateValue "메모", Me.txtMemo.value
+    UpdateEstimateOrderValue "메모", Me.txtMemo.value
 End Sub
 
 Private Sub txtAmount_AfterUpdate()
@@ -2161,7 +2185,7 @@ Private Sub txtAmount_AfterUpdate()
     CalculateEstimatePrice
     
     'DB 적용
-    UpdateEstimateValue "수량", Me.txtAmount.value
+    UpdateEstimateOrderValue "수량", Me.txtAmount.value
     
 End Sub
 
@@ -2182,12 +2206,14 @@ Private Sub txtUnitPrice_AfterUpdate()
     CalculateEstimatePrice
     
     'DB 적용
+    '단가는 견적DB에만 저장
     UpdateEstimateValue "단가", Me.txtUnitPrice.value
 End Sub
 
 Private Sub txtEstimatePrice_Change()
     If bInitialIzed = False Then Exit Sub
     
+    '견적금액은 견적DB만 변경함
      UpdateEstimateValue "금액", Me.txtEstimatePrice.value
 End Sub
 
@@ -2220,13 +2246,17 @@ Private Sub txtAcceptedPrice_AfterUpdate()
             MsgBox "숫자를 입력하세요."
         Else
             Me.txtAcceptedPrice.value = Format(Me.txtAcceptedPrice.value, "#,##0")
+            
+            CalculateAcceptedMargin
+            CalculatePayment
+            
+            UpdateEstimateValue "수주금액", Me.txtAcceptedPrice.value
+            UpdateOrderValue "금액", Me.txtAcceptedPrice.value
+            If IsNumeric(Me.txtAmount.value) Then
+                UpdateOrderValue "단가", CLng(Me.txtAcceptedPrice.value) / CLng(Me.txtAmount.value)
+            End If
         End If
     End If
-    
-    CalculateAcceptedMargin
-    CalculatePayment
-    
-    UpdateEstimateValue "수주금액", Me.txtAcceptedPrice.value
 End Sub
 
 Sub UpdateProductionTotalCost(fieldValue)
@@ -2241,7 +2271,7 @@ Private Sub txtProductionTotalCost_Change()
     CalculateBidMargin
             
     'DB 반영
-    UpdateEstimateValue "실행가(예상)", Me.txtProductionTotalCost.value
+    UpdateEstimateOrderValue "실행가(예상)", Me.txtProductionTotalCost.value
 End Sub
 
 'Enable=False 인 텍스트박스는 AfterUpdate로 변경이 안되는 경우 있음. 이벤트를 Change로 바꿈
@@ -2250,7 +2280,7 @@ Private Sub txtExecutionCost_Change()
     
      CalculateAcceptedMargin
     
-    UpdateEstimateValue "실행가", Me.txtExecutionCost.value
+    UpdateEstimateOrderValue "실행가", Me.txtExecutionCost.value
 End Sub
 
 Private Sub txtPaid_Change()
@@ -2258,19 +2288,19 @@ Private Sub txtPaid_Change()
     
     CalculatePayment
     
-    UpdateEstimateValue "입금액", Me.txtPaid.value
+    UpdateEstimateOrderValue "입금액", Me.txtPaid.value
 End Sub
 
 Private Sub txtRemaining_Change()
     If bInitialIzed = False Then Exit Sub
     
-    UpdateEstimateValue "미입금액", Me.txtRemaining.value
+    UpdateEstimateOrderValue "미입금액", Me.txtRemaining.value
 End Sub
 
 Private Sub txtVAT_Change()
     If bInitialIzed = False Then Exit Sub
     
-    UpdateEstimateValue "부가세", Me.txtVAT.value
+    UpdateEstimateOrderValue "부가세", Me.txtVAT.value
 End Sub
 
 Private Sub chkVAT_AfterUpdate()
@@ -2282,7 +2312,7 @@ Private Sub chkVAT_AfterUpdate()
         CalculatePayment
     End If
     
-    UpdateEstimateValue "부가세제외", Me.chkVAT.value
+    UpdateEstimateOrderValue "부가세제외", Me.chkVAT.value
 End Sub
 
 Private Sub txtAcceptedDate_AfterUpdate()
@@ -2290,50 +2320,50 @@ Private Sub txtAcceptedDate_AfterUpdate()
     
      Me.txtAcceptedDate.value = ConvertDateFormat(Me.txtAcceptedDate.value)
     
-    UpdateEstimateValue "수주", Me.txtAcceptedDate.value
+    UpdateEstimateOrderValue "수주", Me.txtAcceptedDate.value
 End Sub
 
 Private Sub cboCategory_Change()
     If bInitialIzed = False Then Exit Sub
     
-     UpdateEstimateValue "분류1", Me.cboCategory.value
+     UpdateEstimateOrderValue "분류1", Me.cboCategory.value
 End Sub
 
 Private Sub txtAcceptedMargin_Change()
     If bInitialIzed = False Then Exit Sub
     
-     UpdateEstimateValue "수주차액", Me.txtAcceptedMargin.value
+     UpdateEstimateOrderValue "수주차액", Me.txtAcceptedMargin.value
 End Sub
 
 Private Sub txtAcceptedMarginRate_Change()
     If bInitialIzed = False Then Exit Sub
     
-     UpdateEstimateValue "마진율", Me.txtAcceptedMarginRate.value
+     UpdateEstimateOrderValue "마진율", Me.txtAcceptedMarginRate.value
 End Sub
 
 Private Sub txtBidMargin_Change()
     If bInitialIzed = False Then Exit Sub
     
-     UpdateEstimateValue "차액(예상)", Me.txtBidMargin.value
+     UpdateEstimateOrderValue "차액(예상)", Me.txtBidMargin.value
 End Sub
 
 Private Sub txtBidMarginRate_Change()
     If bInitialIzed = False Then Exit Sub
     
-     UpdateEstimateValue "마진율(예상)", Me.txtBidMarginRate.value
+     UpdateEstimateOrderValue "마진율(예상)", Me.txtBidMarginRate.value
 End Sub
 
 Private Sub txtLinkedID_Change()
     If bInitialIzed = False Then Exit Sub
     
-     UpdateEstimateValue "연관번호", Me.txtLinkedID.value
+     UpdateEstimateOrderValue "연관번호", Me.txtLinkedID.value
 End Sub
 Private Sub cboUnit_AfterUpdate()
     If bInitialIzed = False Then Exit Sub
     
     Me.cboUnit.value = Trim(Me.cboUnit.value)
     
-    UpdateEstimateValue "단위", Me.cboUnit.value
+    UpdateEstimateOrderValue "단위", Me.cboUnit.value
 End Sub
 
 Private Sub txtBidDate_AfterUpdate()
@@ -2341,7 +2371,7 @@ Private Sub txtBidDate_AfterUpdate()
     
      Me.txtBidDate.value = ConvertDateFormat(Me.txtBidDate.value)
     
-    UpdateEstimateValue "입찰", Me.txtBidDate.value
+    UpdateEstimateOrderValue "입찰", Me.txtBidDate.value
 End Sub
 
 Private Sub txtCustomer_AfterUpdate()
@@ -2349,7 +2379,7 @@ Private Sub txtCustomer_AfterUpdate()
     
     Me.txtCustomer.value = Trim(Me.txtCustomer.value)
     
-    UpdateEstimateValue "거래처", Me.txtCustomer.value
+    UpdateEstimateOrderValue "거래처", Me.txtCustomer.value
 End Sub
 
 
@@ -2358,7 +2388,7 @@ Private Sub txtDeliveryDate_AfterUpdate()
     
      Me.txtDeliveryDate.value = ConvertDateFormat(Me.txtDeliveryDate.value)
     
-    UpdateEstimateValue "납품", Me.txtDeliveryDate.value
+    UpdateEstimateOrderValue "납품", Me.txtDeliveryDate.value
 End Sub
 
 Private Sub txtDueDate_AfterUpdate()
@@ -2366,7 +2396,7 @@ Private Sub txtDueDate_AfterUpdate()
     
      Me.txtDueDate.value = ConvertDateFormat(Me.txtDueDate.value)
     
-    UpdateEstimateValue "납기", Me.txtDueDate.value
+    UpdateEstimateOrderValue "납기", Me.txtDueDate.value
 End Sub
 
 Private Sub txtEstimateDate_AfterUpdate()
@@ -2374,7 +2404,7 @@ Private Sub txtEstimateDate_AfterUpdate()
     
      Me.txtEstimateDate.value = ConvertDateFormat(Me.txtEstimateDate.value)
     
-    UpdateEstimateValue "견적", Me.txtEstimateDate.value
+    UpdateEstimateOrderValue "견적", Me.txtEstimateDate.value
 End Sub
 
 Private Sub txtInsuranceDate_AfterUpdate()
@@ -2382,7 +2412,7 @@ Private Sub txtInsuranceDate_AfterUpdate()
     
      Me.txtInsuranceDate.value = ConvertDateFormat(Me.txtInsuranceDate.value)
     
-    UpdateEstimateValue "증권", Me.txtInsuranceDate.value
+    UpdateEstimateOrderValue "증권", Me.txtInsuranceDate.value
 End Sub
 
 Private Sub txtManager_AfterUpdate()
@@ -2390,7 +2420,7 @@ Private Sub txtManager_AfterUpdate()
     
     Me.txtManager.value = Trim(Me.txtManager.value)
     
-    UpdateEstimateValue "담당자", Me.txtManager.value
+    UpdateEstimateOrderValue "담당자", Me.txtManager.value
 End Sub
 
 Private Sub txtSize_AfterUpdate()
@@ -2398,13 +2428,13 @@ Private Sub txtSize_AfterUpdate()
     
     Me.txtSize.value = Trim(Me.txtSize.value)
     
-    UpdateEstimateValue "규격", Me.txtSize.value
+    UpdateEstimateOrderValue "규격", Me.txtSize.value
 End Sub
 
 
 
 Private Sub txtTaxinvoiceDate_AfterUpdate()
-    Me.txtTaxInvoiceDate.value = Trim(Me.txtTaxInvoiceDate.value)
+    Me.txtTaxinvoiceDate.value = Trim(Me.txtTaxinvoiceDate.value)
 End Sub
 
 Private Sub txtPaymentDate_AfterUpdate()

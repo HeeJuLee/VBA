@@ -2,7 +2,7 @@ Attribute VB_Name = "Utility"
 Option Explicit
 
 Public clickOrderId, currentOrderId As Variant
-Public clickEstimateId, currentEstimateId, currentManagementId, currentAcceptedId As Variant
+Public doubleClickFlag, clickEstimateId, currentEstimateId, currentManagementId, currentAcceptedId As Variant
 Public estimateUpdateFormX, estimateUpdateFormY As Long
 Public orderUpdateFormX, orderUpdateFormY As Long
 Public estimateInsertFormX, estimateInsertFormY As Long

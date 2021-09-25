@@ -43,10 +43,11 @@ Private Sub UserForm_Initialize()
     InitializeCboUnit
     InitializeOrderCategory
     InitializeLswCustomerAutoComplete
+    InitializeOrderPayMethod
     
     Me.txtOrderDate.value = Date
+    Me.txtEstimateID.value = ""
     bMatchedEstimateID = False
-    
     
 End Sub
 
@@ -74,6 +75,13 @@ Sub InitializeLswCustomerAutoComplete()
     End With
 End Sub
 
+Sub InitializeOrderPayMethod()
+    Dim db As Variant
+    db = Get_DB(shtOrderPayMethod, True)
+
+    Update_Cbo Me.cboOrderPayMethod, db
+End Sub
+
 
 Sub InsertOrder()
     Dim db As Variant
@@ -97,7 +105,7 @@ Sub InsertOrder()
             Me.txtWeight.value, _
             , Me.txtOrderDate.value, , , , _
             , , , , _
-            , , _
+            Me.cboOrderPayMethod.value, , _
             Date, , _
             Me.txtEstimateID.value, , False
             
@@ -105,7 +113,6 @@ Sub InsertOrder()
     
     shtOrderAdmin.Activate
     shtOrderAdmin.OrderSearch
-    shtOrderAdmin.GoToEnd
     
 End Sub
 
@@ -121,12 +128,7 @@ Function CheckOrderInsertValidation()
     End If
     
     '관리번호가 입력되었고 유효한 관리번호인지 체크
-    If Trim(Me.txtManagementID.value) = "" Then
-        MsgBox "관리번호를 입력하세요.", vbInformation, "작업 확인"
-        Exit Function
-    End If
-    
-    If bMatchedEstimateID = False Then
+    If Me.txtManagementID.value <> "" And bMatchedEstimateID = False Then
         MsgBox "관리번호가 유효하지 않습니다.", vbInformation, "작업 확인"
         Exit Function
     End If

@@ -4,7 +4,6 @@ Dim isKeyworldSearch As Boolean
 Dim isKeyworldSearch2 As Boolean
 Dim searchResultCount As Long
 Dim isEnd As Boolean
-Dim dueDate As String
 Dim isFilterOn As Boolean
 Dim bDelivery, bReceiving, bWorking As Boolean
 Dim bEnableEvent As Boolean
@@ -41,6 +40,8 @@ Sub OrderSearch()
     Dim startTime As Single
     Dim endTime As Single
     
+    On Error GoTo safe_exit
+    
 '    startTime = Timer
     
     '필터가 걸려있으면 지움
@@ -63,10 +64,6 @@ Sub OrderSearch()
     If Not isEmpty(db) Then
         If txtToDueDate.value <> "" Then db = Filtered_DB(db, "<=" & txtToDueDate.value, 17)    '납기일자 필드와 날짜 비교
     End If
-'    If Not IsEmpty(db) Then
-'        dueDate = shtOrderAdmin.Range("S4").value
-'        If dueDate <> "" Then db = Filtered_DB(db, dueDate, 17, True)
-'    End If
     If Not isEmpty(db) Then
         If bDelivery = True Then
             db = Get_Delivery_DB(db)   '수주값이 있고 납품값이 없는 경우
@@ -102,12 +99,18 @@ Sub OrderSearch()
     '시트 보호 해제
     'ActiveSheet.Unprotect
         
+    '화면 변경 전에 Event 끄기  (sheet change event로 안들어가도록 함)
+    Application.EnableEvents = False
+    
     '기존 검색결과를 화면에서 지움
     ClearOrderSearchResult
     
     '검색결과를 화면에 출력
     If isEmpty(db) Then
         searchResultCount = 0     '검색결과 건수는 0
+        
+        isEnd = False
+        Range("I6").Select
     Else
         '검색결과 건수를 저장
         searchResultCount = UBound(db, 1)
@@ -131,16 +134,10 @@ Sub OrderSearch()
         If bWorking = True Or bReceiving = True Then
             SetReceivingColor shtOrderAdmin.Range("T6"), db, 16, 18, shtOrderAdmin.Range("B4").Interior.color
         End If
+        
+        isEnd = False
+        GoToEnd
     End If
-    
-    If dueDate <> "" Then
-        shtOrderAdmin.Range("S6").Select
-        shtOrderAdmin.Range("S4").Select
-    Else
-        '첫 행으로 이동
-        shtOrderAdmin.Range("I6").Select
-    End If
-    
     
      '검색 결과 건수 출력
     Me.lblSearchResult.Caption = "(" & searchResultCount & "건)"
@@ -151,13 +148,15 @@ Sub OrderSearch()
         Me.txtKeyword2.Activate
     End If
     
-    isEnd = False
-    bEnableEvent = True
-    
     '시트 보호
     'ActiveSheet.Protect DrawingObjects:=False, Contents:=True, Scenarios:= _
         True, AllowFormattingCells:=True, AllowFormattingColumns:=True, _
         AllowFormattingRows:=True, AllowFiltering:=True
+        
+safe_exit:
+    bEnableEvent = True
+    Application.EnableEvents = True
+    
 End Sub
 
 '발주 검색결과를 화면에서 지움
@@ -698,12 +697,22 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
         
         '수주 데이터를 클릭한 경우에는 EstimateUpdate 폼을 띄움, 그렇지 않은 경우는 발주 수정 화면 띄움
         If shtOrderAdmin.Range("G" & cRow).value = "수주" Then
-            clickEstimateId = shtOrderAdmin.Range("D" & cRow).value
             
-            If isFormLoaded("frmEstimateUpdate") Then
-                Unload frmEstimateUpdate
+            If shtOrderAdmin.Range("D" & cRow).value = "" Then
+                MsgBox "견적ID가 없습니다. 수주 데이터가 맞는지 확인이 필요합니다.", vbInformation, "작업 확인"
+                
+                If isFormLoaded("frmOrderUpdate") Then
+                    Unload frmOrderUpdate
+                End If
+                frmOrderUpdate.Show (False)
+            Else
+                clickEstimateId = shtOrderAdmin.Range("D" & cRow).value
+                
+                If isFormLoaded("frmEstimateUpdate") Then
+                    Unload frmEstimateUpdate
+                End If
+                frmEstimateUpdate.Show (False)
             End If
-            frmEstimateUpdate.Show (False)
         Else
             If isFormLoaded("frmOrderUpdate") Then
                 Unload frmOrderUpdate
@@ -714,6 +723,97 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
 End Sub
 
 Private Sub Worksheet_Change(ByVal Target As Range)
+    Dim cRow, cCol As Long
+    Dim t As Range
+    Dim lastRow As Long
+    
+    If Target.Cells.count > 1 Then
+        If Range("AB5").value <> "등록일자" Then
+            MsgBox "시트 구조를 바꿀 수 없습니다.", vbInformation, "작업 확인"
+            UndoLastAction
+            Exit Sub
+        End If
+        
+        If InStr(Target.Address, "$6") = 0 Then
+            MsgBox "여러 셀을 한번에 변경할 수 없습니다.", vbInformation, "작업 확인"
+            UndoLastAction
+            Exit Sub
+        End If
+'        lastRow = Range("B6").End(xlDown).row
+'        For Each t In Intersect(Target, Range(Cells(18, 6), Cells(26, lastRow)))
+'            t.Address
+'        Next
+    End If
+        
+    cRow = Target.row
+    cCol = Target.Column
+    
+    SetChangeValue cRow, cCol, Target
+    
+End Sub
+
+Sub SetChangeValue(cRow, cCol, Target)
+    Dim value As Variant
+    
+    Select Case cCol
+        Case 18     '발주
+            value = ConvertDateFormat(Target.value)
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "발주", value
+        Case 19     '납기
+            value = ConvertDateFormat(Target.value)
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "납기", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "납기", value
+        Case 20     '입고
+            value = ConvertDateFormat(Target.value)
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "입고", value
+        Case 21     '납품
+            value = ConvertDateFormat(Target.value)
+            Update_Record_Column shtEstimate, Range("D" & cRow).value, "납품", value
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "납품", value
+        Case 22     '명세서
+            value = ConvertDateFormat(Target.value)
+            If Range("G" & cRow).value = "수주" Then
+                '수주테이블에 업데이트
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "명세서", value
+                '결제이력에도 업데이트
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "명세서", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "명세서", value
+        Case 23     '계산서
+            value = ConvertDateFormat(Target.value)
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "계산서", value
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "계산서", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "계산서", value
+        Case 24     '결제
+            value = ConvertDateFormat(Target.value)
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제", value
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제", value
+        Case 25     '결제월
+            value = ConvertDateFormat(Target.value)
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제월", value
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제월", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제월", value
+        Case 26     '결제수단
+            value = Target.value
+            If Range("G" & cRow).value = "수주" Then
+                Update_Record_Column shtEstimate, Range("D" & cRow).value, "결제수단", value
+                UpdateLastPayment Range("D" & cRow).value, Range("E" & cRow).value, "결제수단", value
+            End If
+            Update_Record_Column shtOrder, Range("B" & cRow).value, "결제수단", value
+    End Select
+    
+End Sub
+
+Private Sub Worksheet_Change_1(ByVal Target As Range)
     Dim cRow, cCol As Long
     Dim value As Variant
     
@@ -819,10 +919,4 @@ Sub UpdateLastPayment(estimateId, managementId, fieldName, value)
     End If
     
     Update_Record_Column shtPayment, lastId, fieldName, value
-End Sub
-
-Private Sub Worksheet_FollowHyperlink(ByVal Target As HyperLink)
-    If Target.Address = "" Then
-
-    End If
 End Sub

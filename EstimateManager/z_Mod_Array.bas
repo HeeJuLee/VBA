@@ -119,7 +119,7 @@ Sub RunningSumRng(startRng As Range, count As Long, _
 'RunningSumRng Range("C1"), 10,   '<- C1:C10 범위에 B1:B10을 참조하여 누계를 계산합니다.
 '##############################################################
 
-Dim T As Double
+Dim t As Double
 Dim vArr As Variant
 Dim fR As Single: Dim fS As Long: Dim fE As Long
 
@@ -131,13 +131,13 @@ ReDim vArr(1 To count, 1 To 1)
     
     If Offset_Deduct <> 0 Then
         For i = 1 To count
-            T = T + startRng.Offset((i - 1) * fR, Offset_Add).value - startRng.Offset((i - 1) * fR, Offset_Deduct).value
-            vArr(i, 1) = T
+            t = t + startRng.Offset((i - 1) * fR, Offset_Add).value - startRng.Offset((i - 1) * fR, Offset_Deduct).value
+            vArr(i, 1) = t
         Next
     Else
         For i = 1 To count
-            T = T + startRng.Offset((i - 1) * fR, Offset_Add).value
-            vArr(i, 1) = T
+            t = t + startRng.Offset((i - 1) * fR, Offset_Add).value
+            vArr(i, 1) = t
         Next
     End If
 
@@ -147,9 +147,9 @@ Else
     fE = UBound(vArr, 1)
     fS = LBound(vArr, 1)
     For i = fS To (fE - fS) \ 2 + fS
-        T = vArr(fE, 1)
+        t = vArr(fE, 1)
         vArr(fE, 1) = vArr(i, 1)
-        vArr(i, 1) = T
+        vArr(i, 1) = t
         fE = fE - 1
     Next
     startRng.Offset(-count + 1).Resize(count) = vArr

@@ -62,9 +62,18 @@ Sub FinanceSearch()
         '부가세
         Range("L7").value = "='비용검색-이번달'!L154"
         Range("L8").value = "='비용검색-이번달'!L161"
+        Range("L9").value = "=L7+L11-L8-L10"
         
+        '통장잔액
+        Range("O7").value = "=F12+O12-O8-I16"
+        '전자어음 세팅 - 어음관리대장에서 가져옴
+        Range("O8").value = "=어음!L3"
         '수입-지출총액
         Range("O9").value = "=O11-O10-L9-I17"
+        '차입금 세팅 - 차입금에서 가져옴
+        Range("O10").value = "=차입금!E11"
+        '현금+어음_차월
+        Range("O11").value = "=F9+F10+F11+O7+O8"
         
         '카드내역
         Range("R8").value = "='비용검색-이번달'!L121"
@@ -113,9 +122,18 @@ Sub FinanceSearch()
         '부가세
         Range("L7").value = "='비용검색-지난달'!L154"
         Range("L8").value = "='비용검색-지난달'!L161"
+        Range("L9").value = "=L7+L11-L8-L10"
         
+        '통장잔액
+        Range("O7").value = "=F12+O12-O8-I16"
+        '전자어음 세팅 - DB 입력값
+        Range("O8").value = SetElectronicBill
         '수입-지출총액
         Range("O9").value = ""
+        '차입금 세팅
+        Range("O10").value = SetBorrowedMoney
+        '현금+어음_차월
+        Range("O11").value = "=F9+F10+F11+O7+O8"
         
         '카드내역
         Range("R8").value = "='비용검색-지난달'!L121"
@@ -126,20 +144,16 @@ Sub FinanceSearch()
         Range("T9").value = "='비용검색-지난달'!L104"
     End If
 
-    '이월부가세 세팅
+    '이월부가세 세팅 - 이월부가세값이 없으면 지난달 납부할 부가세에서 가져옴
     Range("L11").value = SetLastVAT
     '납부할 부가세 저장
     SaveDueVAT Range("L9").value
-    '납부한 부가세 세팅
+    '납부한 부가세 세팅 - DB 입력값
     Range("L10").value = SetPaidVAT
-    '전자어음 세팅
-    Range("O8").value = SetElectronicBill
-    '이월금액 세팅
+    '이월금액 세팅 - 이월금액이 없으면 지난달 통장잔액+전자어음에서 가져옴
     Range("O12").value = SetCarriedOver
     '통장잔액 저장
     SaveBalance Range("O7").value
-    '차입금 세팅
-    Range("O10").value = SetBorrowedMoney
         
     Range("J3").value = Format(Me.txtFromDate, "yyyy년 mm월 관리대장")
     
@@ -148,6 +162,7 @@ Sub FinanceSearch()
     bEnableEvent = True
 End Sub
 
+'이월부가세값이 없으면 지난달 납부할 부가세에서 가져옴
 Function SetLastVAT()
     Dim db As Variant
     Dim id As Long
@@ -165,7 +180,6 @@ Function SetLastVAT()
     End If
     
     If lastVAT = "" Then
-        '만약 이월부가세값이 없으면 지난달 납부할 부가세에서 가져옴
         If id > 1 Then
             id = id - 1
             db = Get_Record_Array(shtFinanceData, id)
@@ -256,6 +270,7 @@ Function SetBorrowedMoney()
     SetBorrowedMoney = db(1, 9)
 End Function
 
+'만약 이월금액이 없으면 지난달 통장잔액+전자어음에서 가져옴
 Function SetCarriedOver()
     Dim db As Variant
     Dim id As Long
@@ -273,7 +288,6 @@ Function SetCarriedOver()
     End If
     
     If balance = "" Then
-        '만약 이월금액이 없으면 지난달 통장잔액+전자어음에서 가져옴
         If id > 1 Then
             id = id - 1
             db = Get_Record_Array(shtFinanceData, id)

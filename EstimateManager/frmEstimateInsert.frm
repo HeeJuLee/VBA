@@ -110,7 +110,6 @@ Sub InsertEstimate()
     
     shtEstimateAdmin.Activate
     shtEstimateAdmin.EstimateSearch
-    shtEstimateAdmin.GoToEnd
     
 End Sub
 
