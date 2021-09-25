@@ -2,7 +2,7 @@
 
 Sub SetSearchDate(fromDate, toDate)
 
-    Range("H3").value = fromDate
-    Range("I3").value = toDate
+    Range("G3").value = fromDate
+    Range("H3").value = toDate
     
 End Sub

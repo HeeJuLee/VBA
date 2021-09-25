@@ -104,7 +104,7 @@ Private Sub UserForm_Initialize()
     Me.txtDueDate.value = order(17)         '납기일자
     Me.txtReceivingDate.value = order(18)       '입고일자
     Me.txtSpecificationDate.value = order(20)   '명세서
-    Me.txtTaxInvoiceDate.value = order(21)      '계산서
+    Me.txtTaxinvoiceDate.value = order(21)      '계산서
     Me.txtPaymentDate.value = order(22)     '결제일자
     Me.txtPaymentMonth.value = Format(order(23), "mm" & "월")   '결제월
     paymentMonth = order(23)
@@ -177,7 +177,7 @@ Sub UpdateOrder()
         Me.txtOrderPrice.value, Me.txtWeight.value, _
         , Me.txtOrderDate.value, Me.txtDueDate.value, _
         Me.txtReceivingDate.value, , _
-        Me.txtSpecificationDate.value, Me.txtTaxInvoiceDate.value, Me.txtPaymentDate.value, paymentMonth, _
+        Me.txtSpecificationDate.value, Me.txtTaxinvoiceDate.value, Me.txtPaymentDate.value, paymentMonth, _
         Me.cboOrderPayMethod.value, Me.txtVAT.value, _
         Me.txtInsertDate, Date, _
         Me.txtEstimateID.value, Me.txtMemo.value, Me.chkVAT.value, Me.cboIncomeCategory.value
@@ -214,7 +214,7 @@ Sub UpdateShtOrder()
         shtOrderAdmin.Cells(findRow, 19).value = Me.txtDueDate.value
         shtOrderAdmin.Cells(findRow, 20).value = Me.txtReceivingDate.value
         shtOrderAdmin.Cells(findRow, 22).value = Me.txtSpecificationDate.value
-        shtOrderAdmin.Cells(findRow, 23).value = Me.txtTaxInvoiceDate.value
+        shtOrderAdmin.Cells(findRow, 23).value = Me.txtTaxinvoiceDate.value
         shtOrderAdmin.Cells(findRow, 24).value = Me.txtPaymentDate.value
         shtOrderAdmin.Cells(findRow, 25).value = Me.txtPaymentMonth.value
         shtOrderAdmin.Cells(findRow, 26).value = Me.cboOrderPayMethod.value
@@ -261,7 +261,7 @@ Sub CalculateOrderUpdateCost()
     
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxInvoiceDate.value = "" Or chkVAT.value = True Then
+    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 금액의 10%
@@ -400,7 +400,7 @@ Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift 
 End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
-    GetCalendarDate Me.txtTaxInvoiceDate
+    GetCalendarDate Me.txtTaxinvoiceDate
     CalculateOrderUpdateCost
 End Sub
 
@@ -533,7 +533,7 @@ Private Sub txtSpecificationDate_AfterUpdate()
 End Sub
 
 Private Sub txtTaxinvoiceDate_AfterUpdate()
-    Me.txtTaxInvoiceDate.value = ConvertDateFormat(Me.txtTaxInvoiceDate.value)
+    Me.txtTaxinvoiceDate.value = ConvertDateFormat(Me.txtTaxinvoiceDate.value)
    CalculateOrderUpdateCost
 End Sub
 

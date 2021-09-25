@@ -14,12 +14,26 @@ Private Sub Worksheet_Activate()
 End Sub
 
 Sub FinanceSearch()
+    Dim pos, Y, M As Long
     Dim thisMonth As Date
     
-    If Me.txtFromDate.value = "" Then
-        Me.txtFromDate.value = Date
-        Me.txtToDate.value = DateAdd("d", 1, Date)
+    '기간 체크
+    pos = InStr(Me.cboSelectYear.value, "년")
+    If pos <> 0 Then
+        Y = Left(Me.cboSelectYear.value, pos - 1)
+    Else
+        Y = Year(Date)
     End If
+    
+    pos = InStr(Me.cboSelectMonth.value, "월")
+    If pos <> 0 Then
+        M = Left(Me.cboSelectMonth.value, pos - 1)
+    Else
+        M = month(Date)
+    End If
+    
+    txtFromDate.value = DateSerial(Y, M, 1)
+    txtToDate.value = DateSerial(Y, M + 1, 1)
 
     thisMonth = DateSerial(Year(Date), month(Date), 1)
 
@@ -35,33 +49,33 @@ Sub FinanceSearch()
         Range("E10").value = Format(DateAdd("m", 2, Me.txtFromDate.value), "mm" & "월")
         Range("F8").value = "='비용검색-이번달'!L18"
         Range("F9").value = "='비용검색-이번달'!L27"
-        Range("F10").value = "='비용검색-이번달'!L34"
+        Range("F10").value = "='비용검색-이번달'!L36"
         '미입금액
-        Range("F11").value = "='비용검색-이번달'!L51"
+        Range("F11").value = "='비용검색-이번달'!L55"
         '입금액
-        Range("F12").value = "='비용검색-이번달'!L50"
+        Range("F12").value = "='비용검색-이번달'!L54"
         
         '지출
         '정기결제
-        Range("I7").value = "='비용검색-이번달'!L71"
-        Range("I8").value = "='비용검색-이번달'!L63"
+        Range("I7").value = "='비용검색-이번달'!L67"
+        Range("I8").value = "='비용검색-이번달'!L61"
         '현금결제
-        Range("I9").value = "='비용검색-이번달'!L90"
-        Range("I10").value = "='비용검색-이번달'!L80"
+        Range("I9").value = "='비용검색-이번달'!L86"
+        Range("I10").value = "='비용검색-이번달'!L76"
         '카드결제
-        Range("I11").value = "='비용검색-이번달'!L123"
-        Range("I12").value = "='비용검색-이번달'!L105"
+        Range("I11").value = "='비용검색-이번달'!L119"
+        Range("I12").value = "='비용검색-이번달'!L101"
         '결제총액
-        Range("I13").value = "='비용검색-이번달'!L125"
-        Range("I14").value = "='비용검색-이번달'!L126"
+        Range("I13").value = "='비용검색-이번달'!L121"
+        Range("I14").value = "='비용검색-이번달'!L122"
         '당월 결제액 (AX3)
-        Range("I16").value = "='비용검색-이번달'!L136"
+        Range("I16").value = "='비용검색-이번달'!L132"
         '총 지출 예상액 (AO3)
-        Range("I17").value = "='비용검색-이번달'!L145"
+        Range("I17").value = "='비용검색-이번달'!L141"
         
         '부가세
-        Range("L7").value = "='비용검색-이번달'!L154"
-        Range("L8").value = "='비용검색-이번달'!L161"
+        Range("L7").value = "='비용검색-이번달'!L150"
+        Range("L8").value = "='비용검색-이번달'!L157"
         Range("L9").value = "=L7+L11-L8-L10"
         
         '통장잔액
@@ -76,12 +90,12 @@ Sub FinanceSearch()
         Range("O11").value = "=F9+F10+F11+O7+O8"
         
         '카드내역
-        Range("R8").value = "='비용검색-이번달'!L121"
-        Range("S8").value = "='비용검색-이번달'!L118"
-        Range("T8").value = "='비용검색-이번달'!L103"
-        Range("R9").value = "='비용검색-이번달'!L122"
-        Range("S9").value = "='비용검색-이번달'!L119"
-        Range("T9").value = "='비용검색-이번달'!L104"
+        Range("R8").value = "='비용검색-이번달'!L117"
+        Range("S8").value = "='비용검색-이번달'!L114"
+        Range("T8").value = "='비용검색-이번달'!L99"
+        Range("R9").value = "='비용검색-이번달'!L118"
+        Range("S9").value = "='비용검색-이번달'!L115"
+        Range("T9").value = "='비용검색-이번달'!L100"
         
     Else
         shtFinanceSearchBefore.SetSearchDate Me.txtFromDate.value, Me.txtToDate.value
@@ -95,11 +109,11 @@ Sub FinanceSearch()
         Range("E10").value = Format(DateAdd("m", 2, Me.txtFromDate.value), "mm" & "월")
         Range("F8").value = "='비용검색-지난달'!L18"
         Range("F9").value = "='비용검색-지난달'!L27"
-        Range("F10").value = "='비용검색-지난달'!L34"
+        Range("F10").value = "='비용검색-지난달'!L36"
         '미입금액
-        Range("F11").value = "='비용검색-지난달'!L51"
+        Range("F11").value = "='비용검색-지난달'!L55"
         '입금액
-        Range("F12").value = "='비용검색-지난달'!L50"
+        Range("F12").value = "='비용검색-지난달'!L54"
         
         '지출
         '정기결제
@@ -115,13 +129,13 @@ Sub FinanceSearch()
         Range("I13").value = ""
         Range("I14").value = ""
         '당월 결제 총액 (AX3)
-        Range("I16").value = "='비용검색-지난달'!L136"
+        Range("I16").value = "='비용검색-지난달'!L132"
         '총 지출 예상액 (AO3)
         Range("I17").value = ""
         
         '부가세
-        Range("L7").value = "='비용검색-지난달'!L154"
-        Range("L8").value = "='비용검색-지난달'!L161"
+        Range("L7").value = "='비용검색-지난달'!L150"
+        Range("L8").value = "='비용검색-지난달'!L157"
         Range("L9").value = "=L7+L11-L8-L10"
         
         '통장잔액
@@ -136,12 +150,12 @@ Sub FinanceSearch()
         Range("O11").value = "=F9+F10+F11+O7+O8"
         
         '카드내역
-        Range("R8").value = "='비용검색-지난달'!L121"
-        Range("S8").value = "='비용검색-지난달'!L118"
-        Range("T8").value = "='비용검색-지난달'!L103"
-        Range("R9").value = "='비용검색-지난달'!L122"
-        Range("S9").value = "='비용검색-지난달'!L119"
-        Range("T9").value = "='비용검색-지난달'!L104"
+        Range("R8").value = "='비용검색-지난달'!L117"
+        Range("S8").value = "='비용검색-지난달'!L114"
+        Range("T8").value = "='비용검색-지난달'!L99"
+        Range("R9").value = "='비용검색-지난달'!L118"
+        Range("S9").value = "='비용검색-지난달'!L115"
+        Range("T9").value = "='비용검색-지난달'!L100"
     End If
 
     '이월부가세 세팅 - 이월부가세값이 없으면 지난달 납부할 부가세에서 가져옴
@@ -304,25 +318,10 @@ Private Sub cboSelectYear_Change()
     Dim M As Long: M = month(Date)
     Dim pos As Long
     
-    If bEnableEvent = False Then
-        Exit Sub
+    If Me.cboSelectYear.value = "전체" Then
+        Me.cboSelectMonth.value = "전체"
+        Me.optAll.value = True
     End If
-    
-    '년도를 선택한 경우
-    pos = InStr(Me.cboSelectYear.value, "년")
-    If pos <> 0 Then
-        Y = Left(Me.cboSelectYear.value, pos - 1)
-    End If
-
-    pos = InStr(Me.cboSelectMonth.value, "월")
-    If pos <> 0 Then
-        M = Left(Me.cboSelectMonth.value, pos - 1)
-
-        txtFromDate.value = DateSerial(Y, M, 1)
-        txtToDate.value = DateSerial(Y, M + 1, 1)
-    End If
-    
-    FinanceSearch
 End Sub
 
 '월 선택
@@ -330,30 +329,10 @@ Private Sub cboSelectMonth_Change()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = month(Date)
     Dim pos As Long
-
-    If bEnableEvent = False Then
-        Exit Sub
-    End If
     
-    pos = InStr(Me.cboSelectYear.value, "년")
-    If pos <> 0 Then
-        Y = Left(Me.cboSelectYear.value, pos - 1)
+    If Me.cboSelectYear.value = "전체" Then
+        Me.cboSelectMonth.value = "전체"
     End If
-
-    pos = InStr(Me.cboSelectMonth.value, "월")
-    If pos <> 0 Then
-        M = Left(Me.cboSelectMonth.value, pos - 1)
-        
-        txtFromDate.value = DateSerial(Y, M, 1)
-        txtToDate.value = DateSerial(Y, M + 1, 1)
-    End If
-    
-    bEnableEvent = False
-    Me.optThisMonth = False
-    Me.optLastMonth = False
-    bEnableEvent = True
-    
-    FinanceSearch
 End Sub
 
 
@@ -362,30 +341,14 @@ Private Sub optThisMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = month(Date)
     
-    If bEnableEvent = False Then
-        Exit Sub
-    End If
-    
-    txtFromDate.value = DateSerial(Y, M, 1)
-    txtToDate.value = DateSerial(Y, M + 1, 1)
-    
-    bEnableEvent = False
     Me.cboSelectYear.value = Y & "년"
     Me.cboSelectMonth.value = M & "월"
-    bEnableEvent = True
-    
-    FinanceSearch
 End Sub
 
 '조회기간 - 지난달
 Private Sub optLastMonth_Click()
     Dim Y As Long: Y = Year(Date)
     Dim M As Long: M = month(Date)
-    
-    txtFromDate.value = DateSerial(Y, M - 1, 1)
-    txtToDate.value = DateSerial(Y, M, 1)
-
-    bEnableEvent = False
     
     If M = 1 Then
         Me.cboSelectYear.value = Y - 1 & "년"
@@ -394,9 +357,6 @@ Private Sub optLastMonth_Click()
         Me.cboSelectYear.value = Y & "년"
         Me.cboSelectMonth.value = M - 1 & "월"
     End If
-    bEnableEvent = True
-    
-    FinanceSearch
 End Sub
 
 Private Sub Worksheet_Change(ByVal Target As Range)
