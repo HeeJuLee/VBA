@@ -261,7 +261,7 @@ Sub CalculateOrderUpdateCost()
     
     '부가세 계산
     '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
+    If chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
         '부가세는 금액의 10%
@@ -401,7 +401,6 @@ End Sub
 
 Private Sub imgTaxinvoiceDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
     GetCalendarDate Me.txtTaxinvoiceDate
-    CalculateOrderUpdateCost
 End Sub
 
 Private Sub imgPaymentDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
@@ -534,7 +533,6 @@ End Sub
 
 Private Sub txtTaxinvoiceDate_AfterUpdate()
     Me.txtTaxinvoiceDate.value = ConvertDateFormat(Me.txtTaxinvoiceDate.value)
-   CalculateOrderUpdateCost
 End Sub
 
 Private Sub chkVAT_AfterUpdate()

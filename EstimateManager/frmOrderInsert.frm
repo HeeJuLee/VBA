@@ -16,6 +16,9 @@ Attribute VB_Exposed = False
 Option Explicit
 Dim bMatchedEstimateID As Boolean
 
+
+
+
 Private Sub UserForm_Activate()
     '관리번호에 포커스
     Me.txtManagementID.SetFocus
@@ -96,10 +99,15 @@ Sub InsertOrder()
     Dim db As Variant
     Dim blnUnique As Boolean
     Dim orderId As Variant
+    Dim VAT As Long
     
     '입력 데이터 체크
     If CheckOrderInsertValidation = False Then
         Exit Sub
+    End If
+    
+    If Me.txtOrderPrice.value <> "" And IsNumeric(Me.txtOrderPrice.value) Then
+        VAT = CLng(Me.txtOrderPrice.value) * 0.1
     End If
 
     Insert_Record shtOrder, _
@@ -114,12 +122,14 @@ Sub InsertOrder()
             Me.txtOrderPrice.value, _
             Me.txtWeight.value, _
             , Me.txtOrderDate.value, , , , _
-            , , , , _
-            Me.cboOrderPayMethod.value, , _
+            Me.txtSpecificationDate.value, , , , _
+            Me.cboOrderPayMethod.value, VAT, _
             Date, , _
             Me.txtEstimateID.value, , False, cboIncomeCategory.value
     
     orderId = Get_LastID(shtOrder)
+    
+    Me.cboIncomeCategory.SetFocus
             
     shtOrderAdmin.Activate
     shtOrderAdmin.AppendShtOrder orderId
@@ -265,6 +275,9 @@ Private Sub imgOrderDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integ
     GetCalendarDate Me.txtOrderDate
 End Sub
 
+Private Sub imgSpecificationDate_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal x As Single, ByVal Y As Single)
+    GetCalendarDate Me.txtSpecificationDate
+End Sub
 
 Private Sub txtOrderName_Enter()
     '자동완성 리스트에서 탭해서 넘어오는 경우
@@ -371,6 +384,11 @@ End Sub
 
 Private Sub txtWeight_AfterUpdate()
     Me.txtWeight.value = Trim(Me.txtWeight.value)
+End Sub
+
+
+Private Sub txtSpecificationDate_AfterUpdate()
+    Me.txtSpecificationDate.value = ConvertDateFormat(Me.txtSpecificationDate.value)
 End Sub
 
 

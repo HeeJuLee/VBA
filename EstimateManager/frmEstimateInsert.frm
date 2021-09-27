@@ -88,17 +88,17 @@ Sub InsertEstimate()
     If blnUnique = False Then MsgBox "동일한 관리번호가 존재합니다. 다시 확인해주세요.", vbExclamation, "작업 확인": Exit Sub
     
     Insert_Record shtEstimate, _
-                  Trim(Me.txtManagementID.value), _
+                  Me.txtManagementID.value, _
                   , _
-                  Trim(Me.txtCustomer.value), _
-                  Trim(Me.txtManager.value), _
-                  Trim(Me.txtEstimateName.value), _
-                  Trim(Me.txtSize.value), _
-                  Trim(Me.txtAmount.value), _
-                  Trim(Me.cboUnit.value), _
-                  Trim(Me.txtUnitPrice.value), _
-                  Trim(Me.txtEstimatePrice.value), _
-                  Trim(Me.txtEstimateDate.value), _
+                  Me.txtCustomer.value, _
+                  Me.txtManager.value, _
+                  Me.txtEstimateName.value, _
+                  Me.txtSize.value, _
+                  Me.txtAmount.value, _
+                  Me.cboUnit.value, _
+                  Me.txtUnitPrice.value, _
+                  Me.txtEstimatePrice.value, _
+                  Me.txtEstimateDate.value, _
                   , , , , _
                   , , , , , , _
                   Date, , _

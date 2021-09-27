@@ -509,7 +509,7 @@ If value <> "" Then
     If Dict.count > 0 Then
         ReDim vResult(1 To Dict.count, 1 To cCol)
         i = 1
-        For Each dictKey In Dict.Keys
+        For Each dictKey In Dict.keys
             For j = 1 To cCol
                 vResult(i, j) = Dict(dictKey)(j - 1)
             Next
@@ -875,9 +875,9 @@ Dim vTest As Variant
 i = 1
 
 If Dict.count > 0 Then
-    If IsObject(Dict(Dict.Keys()(0))) Then cCol = UBound(Dict(Dict.Keys()(0))) Else cCol = 1
+    If IsObject(Dict(Dict.keys()(0))) Then cCol = UBound(Dict(Dict.keys()(0))) Else cCol = 1
     ReDim vResult(1 To Dict.count, 1 To cCol + 1)
-    For Each dictKey In Dict.Keys
+    For Each dictKey In Dict.keys
         vResult(i, 1) = dictKey
         If cCol = 1 Then
             vResult(i, 2) = Dict(dictKey)

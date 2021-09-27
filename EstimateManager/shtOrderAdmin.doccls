@@ -508,40 +508,102 @@ Private Sub Worksheet_BeforeDoubleClick(ByVal Target As Range, Cancel As Boolean
     End If
 End Sub
 
-Private Sub Worksheet_Change(ByVal Target As Range)
-    Dim cRow, cCol As Long
-    Dim t As Range
-    Dim lastRow As Long
+
+
+Sub UpdateLastPayment(estimateId, managementId, fieldName, value)
+    Dim db As Variant
+    Dim lastId As Variant
     
-    If Target.Cells.count > 1 Then
-        If Range("AB5").value <> "등록일자" Then
-            MsgBox "시트 구조를 바꿀 수 없습니다.", vbInformation, "작업 확인"
-            UndoLastAction
-            Exit Sub
-        End If
-        
-        If InStr(Target.Address, "$6") = 0 Then
-            MsgBox "여러 셀을 한번에 변경할 수 없습니다.", vbInformation, "작업 확인"
-            UndoLastAction
-            Exit Sub
-        End If
-'        lastRow = Range("B6").End(xlDown).row
-'        For Each t In Intersect(Target, Range(Cells(18, 6), Cells(26, lastRow)))
-'            t.Address
-'        Next
+    '만약 EstimateUpdate 폼에서 결제이력을 삭제한 경우에는 아래 진행하지 않음
+    If bDeleteFlag = True Then
+        Exit Sub
     End If
-        
-    cRow = Target.row
-    cCol = Target.Column
     
-    SetChangeValue cRow, cCol, Target
+    db = Get_DB(shtPayment)
+    db = Filtered_DB(db, estimateId, 2, True)
+    If isEmpty(db) Then
+        '기존 결제이력이 없으면 결제이력을 하나 추가함
+        Insert_Record shtPayment, estimateId, managementId, , , , , , , , , Date
+        lastId = Get_LastID(shtPayment)
+    Else
+        '결제이력이 있으면 맨 마지막 결제이력에 값을 업데이트함
+        lastId = db(UBound(db), 1)
+    End If
+    
+    Update_Record_Column shtPayment, lastId, fieldName, value
+End Sub
+
+Sub AppendShtOrder(orderId)
+    Dim order As Variant
+    Dim id, lastRow, row, num As Long
+    
+    On Error GoTo safe_exit_appendShtOrder
+    
+    order = Get_Record_Array(shtOrder, orderId)
+    If isEmpty(order) Then
+        MsgBox orderId & "에 해당하는 발주 데이터가 없습니다.", vbInformation, "작업 확인"
+        Exit Sub
+    End If
+    
+    '시트 맨 아래에 라인 추가
+    lastRow = Range("B7").End(xlDown).row
+    row = lastRow + 1
+    num = Cells(lastRow, 3).value + 1
+     
+    Application.EnableEvents = False
+     
+    '검색결과 라인 서식 적용
+    SetContentsLine Range("B" & row), "AC", 1
+    
+    '데이터 출력
+    Cells(row, 2).value = orderId
+    Cells(row, 3).value = num
+    Cells(row, 4).value = order(28)
+    Cells(row, 5).value = order(5)
+    Cells(row, 6).value = order(3)
+    Cells(row, 7).value = order(4)
+    Cells(row, 8).value = order(6)
+    Cells(row, 9).value = order(7)
+    Cells(row, 10).value = order(8)
+    Cells(row, 11).value = order(9)
+    Cells(row, 12).value = order(10)
+    Cells(row, 13).value = order(11)
+    Cells(row, 14).value = order(12)
+    Cells(row, 15).value = order(13)
+    Cells(row, 16).value = order(14)
+    Cells(row, 17).value = order(15)
+    Cells(row, 18).value = order(16)
+    Cells(row, 19).value = order(17)
+    Cells(row, 20).value = order(18)
+    Cells(row, 21).value = order(19)
+    Cells(row, 22).value = order(20)
+    Cells(row, 23).value = order(21)
+    Cells(row, 24).value = order(22)
+    Cells(row, 25).value = order(23)
+    Cells(row, 26).value = order(24)
+    Cells(row, 27).value = order(25)
+    Cells(row, 28).value = order(31)
+    Cells(row, 29).value = order(26)
+    Cells(row, 30).value = order(27)
+    Cells(row, 9).Select
+    
+safe_exit_appendShtOrder:
+    Application.EnableEvents = True
     
 End Sub
+
+
+
 
 Sub SetChangeValue(cRow, cCol, Target)
     Dim value As Variant
     
     Select Case cCol
+        Case 16     '중량
+            value = Target.value
+            If Range("G" & cRow).value <> "수주" Then
+                Update_Record_Column shtOrder, Range("B" & cRow).value, "중량", value
+            End If
         Case 18     '발주
             value = ConvertDateFormat(Target.value)
             Update_Record_Column shtOrder, Range("B" & cRow).value, "발주", value
@@ -599,85 +661,47 @@ Sub SetChangeValue(cRow, cCol, Target)
     
 End Sub
 
-
-Sub UpdateLastPayment(estimateId, managementId, fieldName, value)
-    Dim db As Variant
-    Dim lastId As Variant
+Private Sub Worksheet_Change(ByVal Target As Range)
+    Dim cRow, cCol As Long
+    Dim t As Range
+    Dim lastRow As Long
     
-    '만약 EstimateUpdate 폼에서 결제이력을 삭제한 경우에는 아래 진행하지 않음
-    If bDeleteFlag = True Then
-        Exit Sub
-    End If
+    If Target.Cells.count = 1 Then
+        cRow = Target.row
+        cCol = Target.Column
     
-    db = Get_DB(shtPayment)
-    db = Filtered_DB(db, estimateId, 2, True)
-    If isEmpty(db) Then
-        '기존 결제이력이 없으면 결제이력을 하나 추가함
-        Insert_Record shtPayment, estimateId, managementId, , , , , , , , , Date
-        lastId = Get_LastID(shtPayment)
+        SetChangeValue cRow, cCol, Target
     Else
-        '결제이력이 있으면 맨 마지막 결제이력에 값을 업데이트함
-        lastId = db(UBound(db), 1)
+        If Range("AC5").value <> "등록일자" Then
+            MsgBox "시트 구조를 바꿀 수 없습니다.", vbInformation, "작업 확인"
+            UndoLastAction
+            Exit Sub
+        End If
+        
+'        If InStr(Target.Address, "$6") = 0 Then
+'            MsgBox "여러 셀을 한번에 변경할 수 없습니다.", vbInformation, "작업 확인"
+'            UndoLastAction
+'            Exit Sub
+'        End If
+        
+        lastRow = Range("B7").End(xlDown).row
+        
+        If Not Intersect(Target, Range("R6", "Z" & lastRow)) Is Nothing Then
+            For Each t In Intersect(Target, Range("R6", "Z" & lastRow))
+                cRow = t.row
+                cCol = t.Column
+            
+                SetChangeValue cRow, cCol, t
+            Next
+        End If
+        If Not Intersect(Target, Range("P6", "P" & lastRow)) Is Nothing Then
+            For Each t In Intersect(Target, Range("P6", "P" & lastRow))
+                cRow = t.row
+                cCol = t.Column
+            
+                SetChangeValue cRow, cCol, t
+            Next
+        End If
     End If
-    
-    Update_Record_Column shtPayment, lastId, fieldName, value
-End Sub
-
-Sub AppendShtOrder(orderId)
-    Dim order As Variant
-    Dim id, lastRow, row, num As Long
-    
-    On Error GoTo safe_exit_appendShtOrder
-    
-    order = Get_Record_Array(shtOrder, orderId)
-    If isEmpty(order) Then
-        MsgBox orderId & "에 해당하는 발주 데이터가 없습니다.", vbInformation, "작업 확인"
-        Exit Sub
-    End If
-    
-    '시트 맨 아래에 라인 추가
-    lastRow = Range("B7").End(xlDown).row
-    row = lastRow + 1
-    num = Cells(lastRow, 3).value + 1
-     
-    Application.EnableEvents = False
-     
-    '검색결과 라인 서식 적용
-    SetContentsLine Range("B" & row), "AB", 1
-    
-    '데이터 출력
-    Cells(row, 2).value = orderId
-    Cells(row, 3).value = num
-    Cells(row, 4).value = order(28)
-    Cells(row, 5).value = order(5)
-    Cells(row, 6).value = order(3)
-    Cells(row, 7).value = order(4)
-    Cells(row, 8).value = order(6)
-    Cells(row, 9).value = order(7)
-    Cells(row, 10).value = order(8)
-    Cells(row, 11).value = order(9)
-    Cells(row, 12).value = order(10)
-    Cells(row, 13).value = order(11)
-    Cells(row, 14).value = order(12)
-    Cells(row, 15).value = order(13)
-    Cells(row, 16).value = order(14)
-    Cells(row, 17).value = order(15)
-    Cells(row, 18).value = order(16)
-    Cells(row, 19).value = order(17)
-    Cells(row, 20).value = order(18)
-    Cells(row, 21).value = order(19)
-    Cells(row, 22).value = order(20)
-    Cells(row, 23).value = order(21)
-    Cells(row, 24).value = order(22)
-    Cells(row, 25).value = order(23)
-    Cells(row, 26).value = order(24)
-    Cells(row, 27).value = order(25)
-    Cells(row, 28).value = order(31)
-    Cells(row, 29).value = order(26)
-    Cells(row, 30).value = order(27)
-    Cells(row, 9).Select
-    
-safe_exit_appendShtOrder:
-    Application.EnableEvents = True
-    
+        
 End Sub

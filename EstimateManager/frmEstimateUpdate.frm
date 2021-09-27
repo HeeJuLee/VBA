@@ -2214,8 +2214,9 @@ End Sub
 Private Sub txtEstimatePrice_Change()
     If bInitialIzed = False Then Exit Sub
     
-    '견적금액은 견적DB만 변경함
-     UpdateEstimateValue "금액", Me.txtEstimatePrice.value
+    '견적금액은 견적DB에 변경함
+    UpdateEstimateValue "금액", Me.txtEstimatePrice.value
+    
 End Sub
 
 Private Sub txtBidPrice_AfterUpdate()
@@ -2239,6 +2240,8 @@ Private Sub txtBidPrice_AfterUpdate()
 End Sub
 
 Private Sub txtAcceptedPrice_AfterUpdate()
+    Dim VAT As Long
+    
     If bInitialIzed = False Then Exit Sub
     
      If Me.txtAcceptedPrice.value <> "" Then
@@ -2256,6 +2259,11 @@ Private Sub txtAcceptedPrice_AfterUpdate()
             If IsNumeric(Me.txtAmount.value) Then
                 UpdateOrderValue "단가", CLng(Me.txtAcceptedPrice.value) / CLng(Me.txtAmount.value)
             End If
+            
+            '부가세 변경
+            VAT = CLng(Me.txtAcceptedPrice.value) * 0.1
+            UpdateEstimateValue "부가세", VAT
+            UpdateOrderValue "부가세", VAT
         End If
     End If
 End Sub

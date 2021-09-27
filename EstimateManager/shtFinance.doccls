@@ -1,15 +1,23 @@
 ﻿Option Explicit
 
 Dim bEnableEvent As Boolean
+Dim 수주액, 입금예상액, 입금예상액2, 입금예상액3, 입금액, 미입금액 As Double
+Dim 정기결제안한금액, 정기결제한금액, 정기결제대상금액 As Double
+Dim 현금결제안한금액, 현금결제한금액, 현금결제대상금액 As Double
+Dim 카드3970결제안한금액, 카드3970결제한금액, 카드3970결제대상금액 As Double
+Dim 카드8358결제안한금액, 카드8358결제한금액, 카드8358결제대상금액 As Double
+Dim 카드결제안한금액, 카드결제한금액, 카드결제대상금액 As Double
+Dim 정기현금카드총액, 정기현금카드잔액 As Double
+Dim 당월결제액, 총지출예상액, 수입부가세, 지출부가세 As Double
+Dim beforeDate, fromDate, toDate, toDate2, toDate3 As Variant
+Dim 금액, 부가세, 결제한금액 As Object
+Dim 금액합계, 계산서합계, 결제한금액합계, 잔액합계 As Double
 
 '최초 로드 시
 Private Sub Worksheet_Activate()
     Me.cboSelectYear.List = Array("2021년")
     Me.cboSelectMonth.List = Array("1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월")
 
-    Me.txtFromDate.Visible = False
-    Me.txtToDate.Visible = False
-    
     bEnableEvent = True
 End Sub
 
@@ -32,50 +40,54 @@ Sub FinanceSearch()
         M = month(Date)
     End If
     
-    txtFromDate.value = DateSerial(Y, M, 1)
-    txtToDate.value = DateSerial(Y, M + 1, 1)
+    beforeDate = DateSerial(Y, M - 1, 1)
+    fromDate = DateSerial(Y, M, 1)
+    toDate = DateSerial(Y, M + 1, 1)
+    toDate2 = DateSerial(Y, M + 2, 1)
+    toDate3 = DateSerial(Y, M + 3, 1)
 
     thisMonth = DateSerial(Year(Date), month(Date), 1)
 
-    If Me.txtFromDate.value = thisMonth Then
-        shtFinanceSearchCurrent.SetSearchDate Me.txtFromDate.value, Me.txtToDate.value
+    AnalysisFinanceData
+
+    If fromDate = thisMonth Then
         
         '수입
         '수주액
-        Range("F7").value = "='비용검색-이번달'!L9"
+        Range("F7").value = 수주액
         '입금예상액
-        Range("E8").value = Format(Me.txtFromDate.value, "mm" & "월")
-        Range("E9").value = Format(DateAdd("m", 1, Me.txtFromDate.value), "mm" & "월")
-        Range("E10").value = Format(DateAdd("m", 2, Me.txtFromDate.value), "mm" & "월")
-        Range("F8").value = "='비용검색-이번달'!L18"
-        Range("F9").value = "='비용검색-이번달'!L27"
-        Range("F10").value = "='비용검색-이번달'!L36"
+        Range("E8").value = Format(fromDate, "mm" & "월")
+        Range("E9").value = Format(DateAdd("m", 1, fromDate), "mm" & "월")
+        Range("E10").value = Format(DateAdd("m", 2, fromDate), "mm" & "월")
+        Range("F8").value = 입금예상액
+        Range("F9").value = 입금예상액2
+        Range("F10").value = 입금예상액3
         '미입금액
-        Range("F11").value = "='비용검색-이번달'!L55"
+        Range("F11").value = 미입금액
         '입금액
-        Range("F12").value = "='비용검색-이번달'!L54"
+        Range("F12").value = 입금액
         
         '지출
         '정기결제
-        Range("I7").value = "='비용검색-이번달'!L67"
-        Range("I8").value = "='비용검색-이번달'!L61"
+        Range("I7").value = 정기결제대상금액
+        Range("I8").value = 정기결제안한금액
         '현금결제
-        Range("I9").value = "='비용검색-이번달'!L86"
-        Range("I10").value = "='비용검색-이번달'!L76"
+        Range("I9").value = 현금결제대상금액
+        Range("I10").value = 현금결제안한금액
         '카드결제
-        Range("I11").value = "='비용검색-이번달'!L119"
-        Range("I12").value = "='비용검색-이번달'!L101"
+        Range("I11").value = 카드결제대상금액
+        Range("I12").value = 카드결제안한금액
         '결제총액
-        Range("I13").value = "='비용검색-이번달'!L121"
-        Range("I14").value = "='비용검색-이번달'!L122"
+        Range("I13").value = 정기현금카드총액
+        Range("I14").value = 정기현금카드잔액
         '당월 결제액 (AX3)
-        Range("I16").value = "='비용검색-이번달'!L132"
+        Range("I16").value = 당월결제액
         '총 지출 예상액 (AO3)
-        Range("I17").value = "='비용검색-이번달'!L141"
+        Range("I17").value = 총지출예상액
         
         '부가세
-        Range("L7").value = "='비용검색-이번달'!L150"
-        Range("L8").value = "='비용검색-이번달'!L157"
+        Range("L7").value = 수입부가세
+        Range("L8").value = 지출부가세
         Range("L9").value = "=L7+L11-L8-L10"
         
         '통장잔액
@@ -90,30 +102,29 @@ Sub FinanceSearch()
         Range("O11").value = "=F9+F10+F11+O7+O8"
         
         '카드내역
-        Range("R8").value = "='비용검색-이번달'!L117"
-        Range("S8").value = "='비용검색-이번달'!L114"
-        Range("T8").value = "='비용검색-이번달'!L99"
-        Range("R9").value = "='비용검색-이번달'!L118"
-        Range("S9").value = "='비용검색-이번달'!L115"
-        Range("T9").value = "='비용검색-이번달'!L100"
+        Range("R8").value = 카드3970결제대상금액
+        Range("S8").value = 카드3970결제한금액
+        Range("T8").value = 카드3970결제안한금액
+        Range("R9").value = 카드8358결제대상금액
+        Range("S9").value = 카드8358결제한금액
+        Range("T9").value = 카드8358결제안한금액
         
     Else
-        shtFinanceSearchBefore.SetSearchDate Me.txtFromDate.value, Me.txtToDate.value
         
         '수입
         '수주액
-        Range("F7").value = "='비용검색-지난달'!L9"
+        Range("F7").value = 수주액
         '입금예상액
-        Range("E8").value = Format(Me.txtFromDate.value, "mm" & "월")
-        Range("E9").value = Format(DateAdd("m", 1, Me.txtFromDate.value), "mm" & "월")
-        Range("E10").value = Format(DateAdd("m", 2, Me.txtFromDate.value), "mm" & "월")
-        Range("F8").value = "='비용검색-지난달'!L18"
-        Range("F9").value = "='비용검색-지난달'!L27"
-        Range("F10").value = "='비용검색-지난달'!L36"
+        Range("E8").value = Format(fromDate, "mm" & "월")
+        Range("E9").value = Format(DateAdd("m", 1, fromDate), "mm" & "월")
+        Range("E10").value = Format(DateAdd("m", 2, fromDate), "mm" & "월")
+        Range("F8").value = 입금예상액
+        Range("F9").value = 입금예상액2
+        Range("F10").value = 입금예상액3
         '미입금액
-        Range("F11").value = "='비용검색-지난달'!L55"
+        Range("F11").value = 미입금액
         '입금액
-        Range("F12").value = "='비용검색-지난달'!L54"
+        Range("F12").value = 입금액
         
         '지출
         '정기결제
@@ -129,13 +140,13 @@ Sub FinanceSearch()
         Range("I13").value = ""
         Range("I14").value = ""
         '당월 결제 총액 (AX3)
-        Range("I16").value = "='비용검색-지난달'!L132"
+        Range("I16").value = 당월결제액
         '총 지출 예상액 (AO3)
         Range("I17").value = ""
         
         '부가세
-        Range("L7").value = "='비용검색-지난달'!L150"
-        Range("L8").value = "='비용검색-지난달'!L157"
+        Range("L7").value = 수입부가세
+        Range("L8").value = 지출부가세
         Range("L9").value = "=L7+L11-L8-L10"
         
         '통장잔액
@@ -150,12 +161,12 @@ Sub FinanceSearch()
         Range("O11").value = "=F9+F10+F11+O7+O8"
         
         '카드내역
-        Range("R8").value = "='비용검색-지난달'!L117"
-        Range("S8").value = "='비용검색-지난달'!L114"
-        Range("T8").value = "='비용검색-지난달'!L99"
-        Range("R9").value = "='비용검색-지난달'!L118"
-        Range("S9").value = "='비용검색-지난달'!L115"
-        Range("T9").value = "='비용검색-지난달'!L100"
+        Range("R8").value = ""
+        Range("S8").value = 카드3970결제한금액
+        Range("T8").value = ""
+        Range("R9").value = ""
+        Range("S9").value = 카드8358결제한금액
+        Range("T9").value = ""
     End If
 
     '이월부가세 세팅 - 이월부가세값이 없으면 지난달 납부할 부가세에서 가져옴
@@ -169,9 +180,9 @@ Sub FinanceSearch()
     '통장잔액 저장
     SaveBalance Range("O7").value
         
-    Range("J3").value = Format(Me.txtFromDate, "yyyy년 mm월 관리대장")
+    Range("J3").value = Format(fromDate, "yyyy년 mm월 관리대장")
     
-    ActiveCell.Activate
+    SetCompanyData
     
     bEnableEvent = True
 End Sub
@@ -183,9 +194,9 @@ Function SetLastVAT()
     Dim lastVAT, dueVAT As Variant
         
     db = Get_DB(shtFinanceData)
-    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    db = Filtered_DB(db, fromDate, 2)
     If isEmpty(db) Then
-        Insert_Record shtFinanceData, Me.txtFromDate.value
+        Insert_Record shtFinanceData, fromDate
         id = Get_LastID(shtFinanceData)
         lastVAT = ""
     Else
@@ -209,9 +220,9 @@ Sub SaveDueVAT(dueVAT)
     Dim id As Long
     
     db = Get_DB(shtFinanceData)
-    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    db = Filtered_DB(db, fromDate, 2)
     If isEmpty(db) Then
-        Insert_Record shtFinanceData, Me.txtFromDate.value
+        Insert_Record shtFinanceData, fromDate
         id = Get_LastID(shtFinanceData)
     Else
         id = CLng(db(1, 1))
@@ -225,9 +236,9 @@ Function SetPaidVAT()
     Dim id As Long
         
     db = Get_DB(shtFinanceData)
-    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    db = Filtered_DB(db, fromDate, 2)
     If isEmpty(db) Then
-        Insert_Record shtFinanceData, Me.txtFromDate.value
+        Insert_Record shtFinanceData, fromDate
         id = Get_LastID(shtFinanceData)
     Else
         id = CLng(db(1, 1))
@@ -241,9 +252,9 @@ Function SetElectronicBill()
     Dim id As Long
         
     db = Get_DB(shtFinanceData)
-    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    db = Filtered_DB(db, fromDate, 2)
     If isEmpty(db) Then
-        Insert_Record shtFinanceData, Me.txtFromDate.value
+        Insert_Record shtFinanceData, fromDate
         id = Get_LastID(shtFinanceData)
     Else
         id = CLng(db(1, 1))
@@ -257,9 +268,9 @@ Sub SaveBalance(balance)
     Dim id As Long
     
     db = Get_DB(shtFinanceData)
-    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    db = Filtered_DB(db, fromDate, 2)
     If isEmpty(db) Then
-        Insert_Record shtFinanceData, Me.txtFromDate.value
+        Insert_Record shtFinanceData, fromDate
         id = Get_LastID(shtFinanceData)
     Else
         id = CLng(db(1, 1))
@@ -273,9 +284,9 @@ Function SetBorrowedMoney()
     Dim id As Long
         
     db = Get_DB(shtFinanceData)
-    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    db = Filtered_DB(db, fromDate, 2)
     If isEmpty(db) Then
-        Insert_Record shtFinanceData, Me.txtFromDate.value
+        Insert_Record shtFinanceData, fromDate
         id = Get_LastID(shtFinanceData)
     Else
         id = CLng(db(1, 1))
@@ -291,9 +302,9 @@ Function SetCarriedOver()
     Dim balance As Variant
         
     db = Get_DB(shtFinanceData)
-    db = Filtered_DB(db, Me.txtFromDate.value, 2)
+    db = Filtered_DB(db, fromDate, 2)
     If isEmpty(db) Then
-        Insert_Record shtFinanceData, Me.txtFromDate.value
+        Insert_Record shtFinanceData, fromDate
         id = Get_LastID(shtFinanceData)
         balance = ""
     Else
@@ -305,7 +316,7 @@ Function SetCarriedOver()
         If id > 1 Then
             id = id - 1
             db = Get_Record_Array(shtFinanceData, id)
-            balance = CLng(db(7)) + CLng(db(8))
+            balance = CDbl(db(7)) + CDbl(db(8))
         End If
     End If
     
@@ -370,9 +381,9 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     '이월부가세
     If Target.Address = "$L$11" Then
         db = Get_DB(shtFinanceData)
-        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        db = Filtered_DB(db, fromDate, 2)
         If isEmpty(db) Then
-            Insert_Record shtFinanceData, Me.txtFromDate.value
+            Insert_Record shtFinanceData, fromDate.value
             id = Get_LastID(shtFinanceData)
         Else
             id = CLng(db(1, 1))
@@ -384,9 +395,9 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     '납부한부가세
     If Target.Address = "$L$10" Then
         db = Get_DB(shtFinanceData)
-        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        db = Filtered_DB(db, fromDate, 2)
         If isEmpty(db) Then
-            Insert_Record shtFinanceData, Me.txtFromDate.value
+            Insert_Record shtFinanceData, fromDate
             id = Get_LastID(shtFinanceData)
         Else
             id = CLng(db(1, 1))
@@ -399,9 +410,9 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     '이월금액
     If Target.Address = "$O$12" Then
         db = Get_DB(shtFinanceData)
-        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        db = Filtered_DB(db, fromDate, 2)
         If isEmpty(db) Then
-            Insert_Record shtFinanceData, Me.txtFromDate.value
+            Insert_Record shtFinanceData, fromDate
             id = Get_LastID(shtFinanceData)
         Else
             id = CLng(db(1, 1))
@@ -413,9 +424,9 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     '전자어음
     If Target.Address = "$O$8" Then
         db = Get_DB(shtFinanceData)
-        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        db = Filtered_DB(db, fromDate, 2)
         If isEmpty(db) Then
-            Insert_Record shtFinanceData, Me.txtFromDate.value
+            Insert_Record shtFinanceData, fromDate
             id = Get_LastID(shtFinanceData)
         Else
             id = CLng(db(1, 1))
@@ -427,9 +438,9 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     '차입금
     If Target.Address = "$O$10" Then
         db = Get_DB(shtFinanceData)
-        db = Filtered_DB(db, Me.txtFromDate.value, 2)
+        db = Filtered_DB(db, fromDate, 2)
         If isEmpty(db) Then
-            Insert_Record shtFinanceData, Me.txtFromDate.value
+            Insert_Record shtFinanceData, fromDate
             id = Get_LastID(shtFinanceData)
         Else
             id = CLng(db(1, 1))
@@ -437,4 +448,399 @@ Private Sub Worksheet_Change(ByVal Target As Range)
         
         Update_Record_Column shtFinanceData, id, "차입금", Target.value
     End If
+End Sub
+
+Sub AnalysisFinanceData()
+    Dim estimate, order, payment As Variant
+    Dim i As Long
+    Dim 업체명 As Variant
+    Dim sum As Double
+    
+    InitializeFinanceValue
+    
+    Set 금액 = CreateObject("Scripting.Dictionary")
+    Set 부가세 = CreateObject("Scripting.Dictionary")
+    Set 결제한금액 = CreateObject("Scripting.Dictionary")
+    
+    estimate = Get_DB(shtEstimate)
+    For i = 1 To UBound(estimate)
+        '수주액 - 견적DB, 수주금액 합계, 수주일자 from~to
+        If estimate(i, 14) >= fromDate And estimate(i, 14) < toDate Then
+            If IsNumeric(estimate(i, 21)) Then
+                수주액 = 수주액 + CDbl(estimate(i, 21))
+            End If
+        End If
+    Next
+    
+    order = Get_DB(shtOrder)
+    For i = 1 To UBound(order)
+        '입금예상액 - 발주DB, 금액 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 결제월 from~to
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 23) >= fromDate And order(i, 23) < toDate Then
+            If IsNumeric(order(i, 13)) Then
+                입금예상액 = 입금예상액 + CDbl(order(i, 13))
+            End If
+        End If
+        '입금예상액 - 발주DB, 부가세 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 결제월 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 23) >= fromDate And order(i, 23) < toDate And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                입금예상액 = 입금예상액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        '입금예상액2 - 발주DB, 금액 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 결제월 from~to
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 23) >= toDate And order(i, 23) < toDate2 Then
+            If IsNumeric(order(i, 13)) Then
+                입금예상액2 = 입금예상액2 + CDbl(order(i, 13))
+            End If
+        End If
+        '입금예상액2 - 발주DB, 부가세 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 결제월 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 23) >= toDate And order(i, 23) < toDate2 And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                입금예상액2 = 입금예상액2 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        '입금예상액3 - 발주DB, 금액 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 결제월 from~to
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 23) >= toDate2 And order(i, 23) < toDate3 Then
+            If IsNumeric(order(i, 13)) Then
+                입금예상액3 = 입금예상액3 + CDbl(order(i, 13))
+            End If
+        End If
+        '입금예상액3 - 발주DB, 부가세 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 결제월 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 23) >= toDate2 And order(i, 23) < toDate3 And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                입금예상액3 = 입금예상액3 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        
+        '입금액 - 발주DB, 금액 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 결제 from~to
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 22) >= fromDate And order(i, 22) < toDate Then
+            If IsNumeric(order(i, 13)) Then
+                입금액 = 입금액 + CDbl(order(i, 13))
+            End If
+        End If
+        '입금액 - 발주DB, 부가세 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 결제 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 22) >= toDate2 And order(i, 22) < toDate3 And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                입금액 = 입금액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        
+        '정기결제 안한 금액 - 발주DB, 금액 합계, 수입지출이 지출, 결제수단이 정기, 결제값이 공백인 것
+        If order(i, 31) = "지출" And order(i, 24) = "정기" And order(i, 22) = "" Then
+            If IsNumeric(order(i, 13)) Then
+                정기결제안한금액 = 정기결제안한금액 + CDbl(order(i, 13))
+            End If
+        End If
+        '정기결제 안한 금액 - 발주DB, 부가세 합계, 수입지출이 지출, 결제수단이 정기, 결제값이 공백인 것, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "지출" And order(i, 24) = "정기" And order(i, 22) = "" And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                정기결제안한금액 = 정기결제안한금액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        '정기결제 한 금액 - 발주DB, 금액 합계, 수입지출이 지출, 결제수단이 정기, 결제 from~to
+        If order(i, 31) = "지출" And order(i, 24) = "정기" And order(i, 22) >= fromDate And order(i, 22) < toDate Then
+            If IsNumeric(order(i, 13)) Then
+                정기결제한금액 = 정기결제한금액 + CDbl(order(i, 13))
+            End If
+        End If
+        '정기결제 한 금액 - 발주DB, 부가세 합계, 수입지출이 지출, 결제수단이 정기, 결제 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "지출" And order(i, 24) = "정기" And order(i, 22) >= fromDate And order(i, 22) < toDate And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                정기결제한금액 = 정기결제한금액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        
+        '현금결제 안한 금액 - 발주DB, 금액 합계, 수입지출이 지출, 결제수단이 현금, 결제값이 공백인 것
+        If order(i, 31) = "지출" And order(i, 24) = "현금" And order(i, 22) = "" Then
+            If IsNumeric(order(i, 13)) Then
+                현금결제안한금액 = 현금결제안한금액 + CDbl(order(i, 13))
+            End If
+        End If
+        '현금결제 안한 금액 - 발주DB, 부가세 합계, 수입지출이 지출, 결제수단이 현금, 결제값이 공백인 것, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "지출" And order(i, 24) = "현금" And order(i, 22) = "" And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                현금결제안한금액 = 현금결제안한금액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        '현금결제 한 금액 - 발주DB, 금액 합계, 수입지출이 지출, 결제수단이 현금, 결제 from~to
+        If order(i, 31) = "지출" And order(i, 24) = "현금" And order(i, 22) >= fromDate And order(i, 22) < toDate Then
+            If IsNumeric(order(i, 13)) Then
+                현금결제한금액 = 현금결제한금액 + CDbl(order(i, 13))
+            End If
+        End If
+        '현금결제 한 금액 - 발주DB, 부가세 합계, 수입지출이 지출, 결제수단이 현금, 결제 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "지출" And order(i, 24) = "현금" And order(i, 22) >= fromDate And order(i, 22) < toDate And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                현금결제한금액 = 현금결제한금액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        
+        '카드결제 안한 금액 - 발주DB, 금액 합계, 수입지출이 지출, 결제수단이 3970 또는 8358, 결제값이 공백인 것
+        If order(i, 31) = "지출" And order(i, 24) = "3970" And order(i, 22) = "" Then
+            If IsNumeric(order(i, 13)) Then
+                카드3970결제안한금액 = 카드3970결제안한금액 + CDbl(order(i, 13))
+            End If
+        End If
+        If order(i, 31) = "지출" And order(i, 24) = "8358" And order(i, 22) = "" Then
+            If IsNumeric(order(i, 13)) Then
+                카드8358결제안한금액 = 카드8358결제안한금액 + CDbl(order(i, 13))
+            End If
+        End If
+        '카드결제 안한 금액 - 발주DB, 부가세 합계, 수입지출이 지출, 결제수단이 3970 또는 8358, 결제값이 공백인 것, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "지출" And order(i, 24) = "3970" And order(i, 22) = "" And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                카드3970결제안한금액 = 카드3970결제안한금액 + CDbl(order(i, 25))
+            End If
+        End If
+        If order(i, 31) = "지출" And order(i, 24) = "8358" And order(i, 22) = "" And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                카드8358결제안한금액 = 카드8358결제안한금액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        '카드결제 한 금액 - 발주DB, 금액 합계, 수입지출이 지출, 결제수단이 3970 또는 8358, 결제 from~to
+        If order(i, 31) = "지출" And order(i, 24) = "3970" And order(i, 22) >= fromDate And order(i, 22) < toDate Then
+            If IsNumeric(order(i, 13)) Then
+                카드3970결제한금액 = 카드3970결제한금액 + CDbl(order(i, 13))
+            End If
+        End If
+        If order(i, 31) = "지출" And order(i, 24) = "8358" And order(i, 22) >= fromDate And order(i, 22) < toDate Then
+            If IsNumeric(order(i, 13)) Then
+                카드8358결제한금액 = 카드8358결제한금액 + CDbl(order(i, 13))
+            End If
+        End If
+        '카드결제 한 금액 - 발주DB, 부가세 합계, 수입지출이 지출, 결제수단이 3970 또는 8358, 결제 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "지출" And order(i, 24) = "3970" And order(i, 22) >= fromDate And order(i, 22) < toDate And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                카드3970결제한금액 = 카드3970결제한금액 + CDbl(order(i, 25))
+            End If
+        End If
+        If order(i, 31) = "지출" And order(i, 24) = "8358" And order(i, 22) >= fromDate And order(i, 22) < toDate And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                카드8358결제한금액 = 카드8358결제한금액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        
+        '당월 결제액 - 발주DB, 금액 합계, 수입지출이 지출, 결제 from~to
+        If order(i, 31) = "지출" And order(i, 22) >= fromDate And order(i, 22) < toDate Then
+            If IsNumeric(order(i, 13)) Then
+                당월결제액 = 당월결제액 + CDbl(order(i, 13))
+            End If
+        End If
+        '당월 결제액 - 발주DB, 부가세 합계, 수입지출이 지출, 결제 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "지출" And order(i, 22) >= fromDate And order(i, 22) < toDate And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                당월결제액 = 당월결제액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        
+        '총 지출 예상액 - 발주DB, 금액 합계, 수입지출이 지출, 결제가 공백인 것
+        If order(i, 31) = "지출" And order(i, 22) = "" Then
+            If IsNumeric(order(i, 13)) Then
+                총지출예상액 = 총지출예상액 + CDbl(order(i, 13))
+            End If
+        End If
+        '총 지출 예상액 - 발주DB, 부가세 합계, 수입지출이 지출, 결제가 공백인 것, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If order(i, 31) = "지출" And order(i, 22) = "" And order(i, 21) <> "" And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                총지출예상액 = 총지출예상액 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        
+        '수입부가세 - 발주DB, 부가세 합계, 수입지출이 수입, 분류2가 수주가 아닌 것, 계산서 from~to, 부가세제외가 FALSE인 것 (from-1개월)
+        If order(i, 31) = "수입" And order(i, 4) <> "수주" And order(i, 21) >= beforeDate And order(i, 21) < fromDate And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                수입부가세 = 수입부가세 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        '지출부가세 - 발주DB, 부가세 합계, 수입지출이 지출, 계산서 from~to, 부가세제외가 FALSE인 것 (from-1개월)
+        If order(i, 31) = "지출" And order(i, 21) >= beforeDate And order(i, 21) < fromDate And order(i, 30) = False Then
+            If IsNumeric(order(i, 25)) Then
+                지출부가세 = 지출부가세 + CDbl(order(i, 25))
+            End If
+        End If
+        
+        '업체별 결제금액 체크
+        '결제할 금액
+        '금액 합계 - 발주DB, 금액 합계, 수입지출이 지출, 계산서 from~to (from-1개월)
+        '부가세 합계 - 발주DB, 부가세 합계, 수입지출이 지출, 계산서 from~to, 부가세제외가 FALSE인 것 (from-1개월)
+        '결제할 금액 = 금액 합계
+        '계산서 적용 금액 = 금액+부가세 합계
+        If order(i, 31) = "지출" And order(i, 21) >= beforeDate And order(i, 21) < fromDate Then
+            업체명 = order(i, 6)
+            If 금액.Exists(업체명) Then
+                금액.item(업체명) = order(i, 13) + 금액(업체명)
+            Else
+                금액.Add 업체명, order(i, 13)
+                부가세.Add 업체명, 0
+                결제한금액.Add 업체명, 0
+            End If
+            
+            If order(i, 30) = False Then
+                부가세.item(업체명) = order(i, 25) + 부가세(업체명)
+            End If
+            
+            If order(i, 22) <> "" Then
+                결제한금액.item(업체명) = order(i, 13) + 결제한금액(업체명)
+                If 부가세.Exists(업체명) Then
+                    결제한금액.item(업체명) = order(i, 25) + 결제한금액(업체명)
+                End If
+            End If
+        End If
+    Next
+    
+    
+    payment = Get_DB(shtPayment)
+    For i = 1 To UBound(payment)
+        '입금예상액 - 결제이력DB, 입금예정액 합계, 결제월 from~to
+        If payment(i, 7) >= fromDate And payment(i, 7) < toDate Then
+            If IsNumeric(payment(i, 9)) Then
+                입금예상액 = 입금예상액 + CDbl(payment(i, 9))
+            End If
+        End If
+        '입금예상액 - 결제이력DB, 부가세 합계, 결제월 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If payment(i, 7) >= fromDate And payment(i, 7) < toDate And payment(i, 5) <> "" And payment(i, 15) = False Then
+            If IsNumeric(payment(i, 12)) Then
+                입금예상액 = 입금예상액 + CDbl(payment(i, 12))
+            End If
+        End If
+        
+        '입금예상액2 - 결제이력DB, 입금예정액 합계, 결제월 from~to
+        If payment(i, 7) >= toDate And payment(i, 7) < toDate2 Then
+            If IsNumeric(payment(i, 9)) Then
+                입금예상액2 = 입금예상액2 + CDbl(payment(i, 9))
+            End If
+        End If
+        '입금예상액2 - 결제이력DB, 부가세 합계, 결제월 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If payment(i, 7) >= toDate And payment(i, 7) < toDate2 And payment(i, 5) <> "" And payment(i, 15) = False Then
+            If IsNumeric(payment(i, 12)) Then
+                입금예상액2 = 입금예상액2 + CDbl(payment(i, 12))
+            End If
+        End If
+        
+        '입금예상액3 - 결제이력DB, 입금예정액 합계, 결제월 from~to
+        If payment(i, 7) >= toDate2 And payment(i, 7) < toDate3 Then
+            If IsNumeric(payment(i, 9)) Then
+                입금예상액3 = 입금예상액3 + CDbl(payment(i, 9))
+            End If
+        End If
+        '입금예상액3 - 결제이력DB, 부가세 합계, 결제월 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If payment(i, 7) >= toDate2 And payment(i, 7) < toDate3 And payment(i, 5) <> "" And payment(i, 15) = False Then
+            If IsNumeric(payment(i, 12)) Then
+                입금예상액3 = 입금예상액3 + CDbl(payment(i, 12))
+            End If
+        End If
+        
+        
+        '입금액 - 결제이력DB, 입금액 합계, 결제 from~to
+        If payment(i, 6) >= fromDate And payment(i, 6) < toDate Then
+            입금액 = 입금액 + payment(i, 8)
+        End If
+        '입금액 - 결제이력DB, 부가세 합계, 결제 from~to, 계산서가 공백이 아닌  것, 부가세제외가 FALSE인 것
+        If payment(i, 6) >= fromDate And payment(i, 6) < toDate And payment(i, 5) <> "" And payment(i, 15) = False Then
+            입금액 = 입금액 + payment(i, 12)
+        End If
+        
+        
+        '수입부가세 - 결제이력DB, 부가세 합계, 계산서 from~to, 부가세제외가 FALSE인 것 (from-1개월)
+        If payment(i, 5) >= beforeDate And payment(i, 5) < fromDate And payment(i, 15) = False Then
+            수입부가세 = 수입부가세 + payment(i, 12)
+        End If
+    Next
+    
+    미입금액 = 입금예상액 - 입금액
+    
+    정기결제대상금액 = 정기결제안한금액 + 정기결제한금액
+    현금결제대상금액 = 현금결제안한금액 + 현금결제한금액
+    카드3970결제대상금액 = 카드3970결제안한금액 + 카드3970결제한금액
+    카드8358결제대상금액 = 카드8358결제안한금액 + 카드8358결제한금액
+    카드결제대상금액 = 카드3970결제대상금액 + 카드8358결제대상금액
+    카드결제안한금액 = 카드3970결제안한금액 + 카드8358결제안한금액
+        
+    정기현금카드총액 = 정기결제대상금액 + 현금결제대상금액 + 카드결제대상금액
+    정기현금카드잔액 = 정기결제안한금액 + 현금결제안한금액 + 카드결제안한금액
+    
+End Sub
+
+Sub InitializeFinanceValue()
+    수주액 = 0
+    입금예상액 = 0
+    입금예상액2 = 0
+    입금예상액3 = 0
+    입금액 = 0
+    미입금액 = 0
+    정기결제안한금액 = 0
+    정기결제한금액 = 0
+    정기결제대상금액 = 0
+    현금결제안한금액 = 0
+    현금결제한금액 = 0
+    현금결제대상금액 = 0
+    카드3970결제안한금액 = 0
+    카드3970결제한금액 = 0
+    카드3970결제대상금액 = 0
+    카드8358결제안한금액 = 0
+    카드8358결제한금액 = 0
+    카드8358결제대상금액 = 0
+    정기현금카드총액 = 0
+    정기현금카드잔액 = 0
+    당월결제액 = 0
+    총지출예상액 = 0
+    수입부가세 = 0
+    지출부가세 = 0
+    
+    금액합계 = 0
+    계산서합계 = 0
+    결제한금액합계 = 0
+    잔액합계 = 0
+
+End Sub
+
+Sub SetCompanyData()
+    Dim key As Variant
+    Dim row As Long
+    
+    ClearContentsLine Range("D22"), "H"
+    ClearContentsBelow Range("D22"), "H"
+    SetContentsLine Range("D22"), "H", 금액.count
+
+    row = 22
+    For Each key In 금액.keys()
+        Range("D" & row).value = key
+        Range("E" & row).value = 금액(key)
+        Range("F" & row).value = 부가세(key) + 금액(key)
+        Range("G" & row).value = 결제한금액(key)
+        Range("H" & row).value = Range("F" & row).value - Range("G" & row).value
+        
+        금액합계 = 금액합계 + Range("E" & row).value
+        계산서합계 = 계산서합계 + Range("F" & row).value
+        결제한금액합계 = 결제한금액합계 + Range("G" & row).value
+        잔액합계 = 계산서합계 - 결제한금액합계
+        
+        With Range("D" & row).Interior
+            .Pattern = xlSolid
+            .PatternColorIndex = xlAutomatic
+            '.ThemeColor = xlThemeColorAccent1
+            .color = RGB(255, 255, 153)
+            '.TintAndShade = 0.799981688894314
+            '.PatternTintAndShade = 0
+        End With
+        
+        row = row + 1
+    Next
+    
+    Range("E21").value = 금액합계
+    Range("F21").value = 계산서합계
+    Range("G21").value = 결제한금액합계
+    Range("H21").value = 잔액합계
 End Sub
