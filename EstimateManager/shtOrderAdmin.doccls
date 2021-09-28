@@ -665,7 +665,10 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     Dim cRow, cCol As Long
     Dim t As Range
     Dim lastRow As Long
+    Dim startTime As Single
+    Dim endTime As Single
     
+
     If Target.Cells.count = 1 Then
         cRow = Target.row
         cCol = Target.Column
@@ -677,12 +680,6 @@ Private Sub Worksheet_Change(ByVal Target As Range)
             UndoLastAction
             Exit Sub
         End If
-        
-'        If InStr(Target.Address, "$6") = 0 Then
-'            MsgBox "여러 셀을 한번에 변경할 수 없습니다.", vbInformation, "작업 확인"
-'            UndoLastAction
-'            Exit Sub
-'        End If
         
         lastRow = Range("B7").End(xlDown).row
         
@@ -702,6 +699,7 @@ Private Sub Worksheet_Change(ByVal Target As Range)
                 SetChangeValue cRow, cCol, t
             Next
         End If
+        
     End If
         
 End Sub

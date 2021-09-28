@@ -68,7 +68,7 @@ Public Function getLocalFullName$(ByVal fullPath$)
             ' "https://companyName-my.sharepoint.com/personal/userName_domain_com/Documents" & file.FullName)
             'Find "/Documents" in string and replace everything before the end with OneDrive local path
             iPos = InStr(1, fullPath, "/Documents") + Len("/Documents") 'find "/Documents" position in file URL
-            endFilePath = Mid(fullPath, iPos) 'Get the ending file path without pointer in OneDrive. Include leading "/"
+            endFilePath = mid(fullPath, iPos) 'Get the ending file path without pointer in OneDrive. Include leading "/"
         Else 'Personal OneDrive
             'For personal OneDrive, path looks like "https://d.docs.live.net/d7bbaa#######1/" & file.FullName
             'We can get local file path by replacing "https.." up to the 4th slash, with the OneDrive local path obtained from registry
@@ -76,7 +76,7 @@ Public Function getLocalFullName$(ByVal fullPath$)
             For ii = 1 To 2
                 iPos = InStr(iPos + 1, fullPath, "/") 'find 4th slash
             Next ii
-            endFilePath = Mid(fullPath, iPos) 'Get the ending file path without OneDrive root. Include leading "/"
+            endFilePath = mid(fullPath, iPos) 'Get the ending file path without OneDrive root. Include leading "/"
         End If
         endFilePath = Replace(endFilePath, "/", Application.PathSeparator) 'Replace forward slashes with back slashes (URL type to Windows type)
         
@@ -386,8 +386,8 @@ Function ConvertDateFormat(value)
         End If
         If Len(value) = pos Then
             D = 1
-        ElseIf IsNumeric(Mid(value, pos + 1)) Then
-            D = Mid(value, pos + 1)
+        ElseIf IsNumeric(mid(value, pos + 1)) Then
+            D = mid(value, pos + 1)
         End If
         ConvertDateFormat = DateSerial(Year(Date), M, D)
     ElseIf Len(value) = 4 And IsNumeric(value) Then

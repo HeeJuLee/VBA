@@ -49,7 +49,7 @@ End Function
 ' 시트에서 특정 ID 의 행 번호 반환 (-> 해당 행 번호 데이터 업데이트)
 ' i = get_UpdateRow(Sheet1, ID)
 '########################
-Function get_UpdateRow(WS As Worksheet, id)
+Function get_UpdateRow_org(WS As Worksheet, id)
 Dim i As Long
 Dim cRow As Long
 With WS
@@ -60,6 +60,48 @@ With WS
 End With
 End Function
 
+'########################
+' 시트에서 특정 ID 의 행 번호 반환 (-> 해당 행 번호 데이터 업데이트)
+' i = get_UpdateRow(Sheet1, ID)
+' hjlee 2021.09.28 수정 - Binary Search 적용
+'########################
+Function get_UpdateRow(WS As Worksheet, id)
+Dim low, high, mid As Long
+With WS
+    low = 1
+    high = Get_InsertRow(WS) - 1
+    Do While low <= high
+        mid = (low + high) / 2
+        If .Cells(mid, 1).value = id Then
+            get_UpdateRow = mid
+            Exit Function
+        ElseIf .Cells(mid, 1).value > id Then
+            high = mid - 1
+        Else
+            low = mid + 1
+        End If
+    Loop
+    get_UpdateRow = 0
+End With
+End Function
+'
+'int BSearch(int arr[], int target) {
+'    int low = 0;
+'    int high = arr.length - 1;
+'    int mid;
+'
+'    while(low <= high) {
+'        mid = (low + high) / 2;
+'
+'        if (arr[mid] == target)
+'            return mid;
+'        else if (arr[mid] > target)
+'            high = mid - 1;
+'        Else
+'            low = mid + 1;
+'    }
+'    return -1;
+'}
 
 '########################
 ' 특정 시트의 DB 정보를 배열로 반환 (이번 예제파일에서만 사용)

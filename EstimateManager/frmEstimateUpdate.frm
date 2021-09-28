@@ -367,6 +367,7 @@ Sub InitializeLswPaymentList()
         .ColumnHeaders.Add , , "메모", 110
         .ColumnHeaders.Add , , "부가세", 60, lvwColumnRight
         .ColumnHeaders.Add , , "결제예정일", 0
+        .ColumnHeaders.Add , , "부가세제외", 60, lvwColumnCenter
 
         .ListItems.Clear
         
@@ -392,6 +393,10 @@ Sub InitializeLswPaymentList()
                 li.ListSubItems.Add , , db(i, 11)       '메모
                 li.ListSubItems.Add , , Format(db(i, 12), "#,##0")       '부가세
                 li.ListSubItems.Add , , db(i, 7)       '결제예정일
+                If db(i, 15) = True Then
+                    li.ListSubItems.Add , , "제외"       '부가세제외
+                End If
+                
                 li.Selected = False
 
                 If IsNumeric(db(i, 8)) Then
@@ -957,100 +962,16 @@ Sub CalculateAcceptedMargin()
 End Sub
 
 Sub CalculatePayment()
-   '미입금액, 부가세 계산
+   '미입금액 계산
     If Me.txtAcceptedPrice.value = "" Then
         Me.txtRemaining.value = ""
-        Me.txtVAT.value = ""
     Else
         If IsNumeric(Me.txtAcceptedPrice.value) Then
             Me.txtRemaining.value = Format(CLng(Me.txtAcceptedPrice.value) - CLng(Me.txtPaid.value), "#,##0")
-            If Me.chkVAT.value = True Then
-                Me.txtVAT.value = 0
-            Else
-                Me.txtVAT = Format(CLng(Me.txtPaid.value) * 0.1, "#,##0")
-            End If
         End If
     End If
 End Sub
 
-Sub CalculateEstimateUpdateCost_2()
-
-    '금액 계산
-    '수량값이 공백이면 금액은 단가
-    If Me.txtUnitPrice = "" Then
-        Me.txtEstimatePrice.value = ""
-    Else
-        If Me.txtAmount.value = "" Then
-            Me.txtEstimatePrice.value = Me.txtUnitPrice.value
-        Else
-            Me.txtEstimatePrice.value = CLng(Me.txtUnitPrice.value) * CLng(Me.txtAmount.value)
-        End If
-    End If
-    Me.txtEstimatePrice.Text = Format(Me.txtEstimatePrice.value, "#,##0")
-
-    '예상차액과 예상마진율 계산
-    If Me.txtBidPrice.value <> "" And Me.txtProductionTotalCost.value <> "" Then
-        '예상차액 = 입찰가 - 예상실행가
-        Me.txtBidMargin.value = Format(CLng(Me.txtBidPrice.value) - CLng(Me.txtProductionTotalCost.value), "#,##0")
-        '예상마진율 = 예상차액 / 입찰가
-        If Me.txtBidPrice.value <> "0" Then
-            Me.txtBidMarginRate.value = Format(CLng(Me.txtBidMargin.value) / CLng(Me.txtBidPrice.value), "0.0%")
-        End If
-    Else
-        Me.txtBidMargin.value = ""
-        Me.txtBidMarginRate.value = ""
-    End If
-
-    '수주차액, 마진율 계산
-    If Me.txtAcceptedPrice.value <> "" And Me.txtExecutionCost.value <> "" Then
-        '수주차액 = 수주금액 - 실행가
-        Me.txtAcceptedMargin.value = Format(CLng(Me.txtAcceptedPrice.value) - CLng(Me.txtExecutionCost.value), "#,##0")
-        '마진율 = 수주차액 / 수주금액
-        If Me.txtAcceptedPrice.value <> "0" Then
-            Me.txtAcceptedMarginRate.value = Format(CLng(Me.txtAcceptedMargin.value) / CLng(Me.txtAcceptedPrice.value), "0.0%")
-        End If
-    Else
-        Me.txtAcceptedMargin.value = ""
-        Me.txtAcceptedMarginRate.value = ""
-    End If
-
-    '부가세 계산
-    '세금계산서 일자가 없는 경우, 부가세 제외인 경우 부가세는 0
-    If Me.txtTaxinvoiceDate.value = "" Or chkVAT.value = True Then
-        Me.txtVAT.value = 0
-    Else
-        '부가세는 수주금액의 10%
-        If Me.txtAcceptedPrice.value <> "" And Me.txtAcceptedPrice.value <> 0 Then
-            Me.txtVAT.value = CLng(Me.txtAcceptedPrice.value) * 0.1
-            Me.txtVAT.Text = Format(Me.txtVAT.value, "#,##0")
-        End If
-    End If
-
-'    '입금예상액 계산
-'    If Me.txtTaxInvoiceDate.Value = "" Then
-'        '세금계산서 일자가 없는 경우는 수주금액
-'        Me.txtExpectPay.Value = Me.txtAcceptedPrice
-'    Else
-'        '세금계산서 일자가 있는 경우는 수주금액+부가세
-'        If Me.txtAcceptedPrice.Value <> "" Then
-'            Me.txtExpectPay.Value = CLng(Me.txtAcceptedPrice.Value) + CLng(Me.txtVAT.Value)
-'        End If
-'    End If
-'    Me.txtExpectPay.Text = Format(Me.txtExpectPay.Value, "#,##0")
-'
-'    '입금액 계산
-'    If Me.txtPaymentDate.Value = "" Then
-'        Me.txtPaid.Value = 0
-'    Else
-'        Me.txtPaid.Value = Me.txtExpectPay.Value
-'        Me.txtPaid.Text = Format(Me.txtPaid.Value, "#,##0")
-'    End If
-'
-'    '미입금액 계산
-'    Me.txtUnpaid.Value = CLng(Me.txtExpectPay.Value) - CLng(Me.txtPaid.Value)
-'    Me.txtUnpaid.Text = Format(Me.txtUnpaid.Value, "#,##0")
-    
-End Sub
 
 Function CalculateOrderListTotalCost() As Long
     Dim i As Long
@@ -1094,6 +1015,28 @@ Function CalculatePaymentListTotalCost() As Long
     End With
     
     CalculatePaymentListTotalCost = totalCost
+End Function
+
+Function CalculatePaymentListTotalVAT() As Long
+    Dim i As Long
+    Dim cost, totalCost As Long
+    
+    With Me.lswPaymentList
+        For i = 1 To .ListItems.count
+
+            If Not IsNumeric(.ListItems(i).SubItems(11)) Then
+                If .ListItems(i).SubItems(11) <> "" Then
+                    MsgBox "금액 필드에 숫자가 아닌 값이 있어서 부가세 합계를 구할 수 없습니다.", vbExclamation
+                    CalculatePaymentListTotalVAT = 0
+                    Exit Function
+                End If
+            Else
+                totalCost = totalCost + .ListItems(i).SubItems(11)
+            End If
+        Next
+    End With
+    
+    CalculatePaymentListTotalVAT = totalCost
 End Function
 
 Function CalculateOrderListPrice(selectedItem As ListItem) As Long
@@ -1276,7 +1219,7 @@ Private Sub btnPaymentListInsert_Click()
     '결제이력에 발주 추가
     Insert_Record shtPayment, _
                         currentEstimateId, currentManagementId, _
-                        Date, , , , , , , , , Date, ""
+                        Date, , , , , , , , , Date, "", False
                         
     lastId = Get_LastID(shtPayment)
     
@@ -1957,6 +1900,7 @@ Sub PaymentListUpdate(headerIndex)
                     VAT = CalculatePaymentListVAT(.selectedItem)
                     .selectedItem.ListSubItems(11).Text = Format(VAT, "#,##0")
                     UpdatePaymentListValue .selectedItem.Text, 12, VAT
+                    Me.txtVAT.value = CalculatePaymentListTotalVAT
                 End If
                 '합계
                 Me.txtPaid.value = Format(CalculatePaymentListTotalCost, "#,##0")
@@ -2261,9 +2205,9 @@ Private Sub txtAcceptedPrice_AfterUpdate()
             End If
             
             '부가세 변경
-            VAT = CLng(Me.txtAcceptedPrice.value) * 0.1
-            UpdateEstimateValue "부가세", VAT
-            UpdateOrderValue "부가세", VAT
+'            VAT = CLng(Me.txtAcceptedPrice.value) * 0.1
+'            UpdateEstimateValue "부가세", VAT
+'            UpdateOrderValue "부가세", VAT
         End If
     End If
 End Sub
@@ -2313,15 +2257,26 @@ Private Sub txtVAT_Change()
 End Sub
 
 Private Sub chkVAT_AfterUpdate()
+    Dim i As Long
+    Dim li As ListItem
+    
     If bInitialIzed = False Then Exit Sub
 
+    '견적 업데이트
+    UpdateEstimateOrderValue "부가세제외", Me.chkVAT.value
+    
+    '결제이력 부가세제외 세팅
+    For Each li In Me.lswPaymentList.ListItems
+        Update_Record_Column shtPayment, li.Text, "부가세제외", Me.chkVAT.value
+    Next
+  
     If Me.chkVAT.value = True Then
         Me.txtVAT.value = 0
     Else
-        CalculatePayment
+        Me.txtVAT.value = CalculatePaymentListTotalVAT
     End If
     
-    UpdateEstimateOrderValue "부가세제외", Me.chkVAT.value
+    InitializeLswPaymentList
 End Sub
 
 Private Sub txtAcceptedDate_AfterUpdate()
